@@ -6,7 +6,7 @@ const components: Components = {
   h1: ({ children }) => <h1 className="text-base font-bold mt-3 mb-1.5">{children}</h1>,
   h2: ({ children }) => <h2 className="text-sm font-semibold mt-2.5 mb-1.5">{children}</h2>,
   h3: ({ children }) => <h3 className="text-sm font-semibold mt-2 mb-1">{children}</h3>,
-  p: ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed text-foreground/90">{children}</p>,
+  p: ({ children }) => <p className="mb-2 last:mb-0 leading-[1.625] text-foreground">{children}</p>,
   ul: ({ children }) => <ul className="mb-2 space-y-1.5 pl-1">{children}</ul>,
   ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-1.5">{children}</ol>,
   li: ({ children }) => (
@@ -53,7 +53,7 @@ interface MarkdownMessageProps {
 
 export function MarkdownMessage({ content }: MarkdownMessageProps) {
   return (
-    <div className="text-[13px]">
+    <div className="text-sm">
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
         {content}
       </ReactMarkdown>

@@ -120,7 +120,11 @@ export function StockDashboard() {
       <header className="border-b px-6 py-3 flex items-center justify-between bg-background shrink-0">
         <div>
           <h1 className="text-xl font-bold">Stock Overview</h1>
-          <p className="text-sm text-muted-foreground">BMW Switzerland Inventory</p>
+          <p className="text-sm text-muted-foreground">
+            BMW Switzerland Inventory
+            <span className="mx-1.5">·</span>
+            <a href="/api-explorer.html" className="text-primary/70 hover:text-primary hover:underline transition-colors">API Explorer</a>
+          </p>
         </div>
         <a href="/">
           <Button variant="outline" size="sm">

@@ -22,6 +22,7 @@ class VehicleResponse(BaseModel):
     price: Optional[str] = None
     price_offer: Optional[float] = None
     price_list: Optional[float] = None
+    monthly_installment: Optional[float] = None
     currency: str = "CHF"
     image: Optional[str] = None
     images: List[str] = []
@@ -63,6 +64,7 @@ class VehicleCardResponse(BaseModel):
     color: Optional[str] = None
     price: Optional[str] = None
     price_offer: Optional[float] = None
+    monthly_installment: Optional[float] = None
     currency: str = "CHF"
     image: Optional[str] = None
     images: List[str] = []

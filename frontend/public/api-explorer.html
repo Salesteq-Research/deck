@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMW Stock Locator API Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0f1419;
+            color: #e0e0e0;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: #1a1f2e;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #1386AA;
+        }
+
+        h1 {
+            color: #fff;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .base-url {
+            font-family: 'Courier New', monospace;
+            color: #1386AA;
+            font-size: 0.9em;
+            word-break: break-all;
+        }
+
+        h2 {
+            color: #fff;
+            margin: 40px 0 20px 0;
+            font-size: 1.5em;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #2a2f3e;
+        }
+
+        .endpoint-card {
+            background: #1a1f2e;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            border: 1px solid #2a2f3e;
+        }
+
+        .endpoint-header {
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: background 0.2s;
+        }
+
+        .endpoint-header:hover {
+            background: #1f2533;
+        }
+
+        .method-badge {
+            background: #1386AA;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.85em;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .endpoint-title {
+            flex: 1;
+            font-family: 'Courier New', monospace;
+            color: #fff;
+            font-size: 0.95em;
+        }
+
+        .expand-icon {
+            color: #666;
+            transition: transform 0.3s;
+        }
+
+        .expand-icon.expanded {
+            transform: rotate(90deg);
+        }
+
+        .endpoint-body {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+        }
+
+        .endpoint-body.expanded {
+            max-height: 2000px;
+            padding: 0 20px 20px 20px;
+        }
+
+        .description {
+            color: #b0b0b0;
+            margin-bottom: 20px;
+        }
+
+        .param-group {
+            margin-bottom: 20px;
+        }
+
+        .param-group h4 {
+            color: #1386AA;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .param-list {
+            background: #0f1419;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #2a2f3e;
+        }
+
+        .param-item {
+            margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .param-name {
+            color: #1386AA;
+            font-weight: bold;
+        }
+
+        .param-value {
+            color: #b0b0b0;
+        }
+
+        .code-block {
+            background: #0f1419;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #2a2f3e;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            margin: 10px 0;
+        }
+
+        .try-button {
+            background: #1386AA;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+            margin-top: 15px;
+        }
+
+        .try-button:hover {
+            background: #0f6a8a;
+        }
+
+        .try-button:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+
+        .response-container {
+            margin-top: 15px;
+            display: none;
+        }
+
+        .response-container.visible {
+            display: block;
+        }
+
+        .response-header {
+            background: #0f1419;
+            padding: 10px 15px;
+            border-radius: 4px 4px 0 0;
+            border: 1px solid #2a2f3e;
+            border-bottom: none;
+            font-weight: bold;
+            color: #1386AA;
+        }
+
+        .response-body {
+            background: #0f1419;
+            padding: 15px;
+            border-radius: 0 0 4px 4px;
+            border: 1px solid #2a2f3e;
+            max-height: 400px;
+            overflow: auto;
+        }
+
+        .schema-tree {
+            background: #1a1f2e;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #2a2f3e;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .tree-node {
+            margin-left: 20px;
+            position: relative;
+        }
+
+        .tree-node.root {
+            margin-left: 0;
+        }
+
+        .tree-item {
+            padding: 5px 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tree-item:hover .tree-key {
+            color: #1386AA;
+        }
+
+        .tree-toggle {
+            color: #666;
+            font-size: 0.8em;
+            min-width: 12px;
+            transition: transform 0.2s;
+        }
+
+        .tree-toggle.expanded {
+            transform: rotate(90deg);
+        }
+
+        .tree-toggle.leaf {
+            opacity: 0;
+        }
+
+        .tree-key {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .tree-type {
+            color: #888;
+            font-style: italic;
+        }
+
+        .tree-sample {
+            color: #1386AA;
+            margin-left: 10px;
+        }
+
+        .tree-children {
+            display: none;
+        }
+
+        .tree-children.expanded {
+            display: block;
+        }
+
+        .tree-line {
+            position: absolute;
+            left: -15px;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: #2a2f3e;
+        }
+
+        .api-console {
+            background: #1a1f2e;
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid #2a2f3e;
+            margin-top: 40px;
+        }
+
+        .console-input-group {
+            margin-bottom: 20px;
+        }
+
+        .console-input-group label {
+            display: block;
+            color: #1386AA;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .console-input-group input,
+        .console-input-group select,
+        .console-input-group textarea {
+            width: 100%;
+            background: #0f1419;
+            border: 1px solid #2a2f3e;
+            color: #e0e0e0;
+            padding: 12px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .console-input-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .console-input-group input:focus,
+        .console-input-group select:focus,
+        .console-input-group textarea:focus {
+            outline: none;
+            border-color: #1386AA;
+        }
+
+        .send-button {
+            background: #1386AA;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            transition: background 0.2s;
+        }
+
+        .send-button:hover {
+            background: #0f6a8a;
+        }
+
+        .send-button:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+
+        .json-key {
+            color: #9CDCFE;
+        }
+
+        .json-string {
+            color: #CE9178;
+        }
+
+        .json-number {
+            color: #B5CEA8;
+        }
+
+        .json-boolean {
+            color: #569CD6;
+        }
+
+        .json-null {
+            color: #569CD6;
+        }
+
+        .error-message {
+            background: #4a1f1f;
+            border: 1px solid #8a2f2f;
+            color: #ff6b6b;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #555;
+            border-top-color: #1386AA;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            header {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .endpoint-header {
+                flex-wrap: wrap;
+            }
+
+            .tree-node {
+                margin-left: 15px;
+            }
+        }
+
+        .inline-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .inline-controls input,
+        .inline-controls select {
+            flex: 1;
+            min-width: 150px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>BMW Stock Locator API</h1>
+            <div class="base-url">https://stolo-data-service.prod.stolo.eu-central-1.aws.bmw.cloud</div>
+        </header>
+
+        <section>
+            <h2>Endpoints</h2>
+
+            <!-- Aggregate Endpoint -->
+            <div class="endpoint-card">
+                <div class="endpoint-header" onclick="toggleEndpoint('aggregate')">
+                    <span class="method-badge">POST</span>
+                    <span class="endpoint-title">/vehiclesearch/aggregate/{locale}/stocklocator?brand={brand}</span>
+                    <span class="expand-icon" id="aggregate-icon">▶</span>
+                </div>
+                <div class="endpoint-body" id="aggregate-body">
+                    <div class="description">
+                        Get total count and aggregated filter values (series, drive types, models) for available vehicles.
+                    </div>
+
+                    <div class="param-group">
+                        <h4>Path Parameters</h4>
+                        <div class="param-list">
+                            <div class="param-item">
+                                <span class="param-name">locale</span>: <span class="param-value">e.g., de-ch, fr-ch, it-ch</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="param-group">
+                        <h4>Query Parameters</h4>
+                        <div class="param-list">
+                            <div class="param-item">
+                                <span class="param-name">brand</span>: <span class="param-value">BMW</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="param-group">
+                        <h4>Request Body</h4>
+                        <div class="code-block">{
+  "searchContext": [{}],
+  "resultsContext": {
+    "sort": [
+      {
+        "by": "PRICE",
+        "order": "ASC"
+      }
+    ]
+  }
+}</div>
+                    </div>
+
+                    <div class="param-group">
+                        <h4>Try it out</h4>
+                        <div class="inline-controls">
+                            <input type="text" id="aggregate-locale" placeholder="Locale (e.g., de-ch)" value="de-ch">
+                            <input type="text" id="aggregate-brand" placeholder="Brand" value="BMW">
+                        </div>
+                        <button class="try-button" onclick="tryAggregate()">
+                            Send Request
+                        </button>
+                    </div>
+
+                    <div class="response-container" id="aggregate-response">
+                        <div class="response-header">Response</div>
+                        <div class="response-body" id="aggregate-response-body"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Endpoint -->
+            <div class="endpoint-card">
+                <div class="endpoint-header" onclick="toggleEndpoint('search')">
+                    <span class="method-badge">POST</span>
+                    <span class="endpoint-title">/vehiclesearch/search/{locale}/stocklocator?maxResults={n}&startIndex={i}&brand={brand}&context=results-page</span>
+                    <span class="expand-icon" id="search-icon">▶</span>
+                </div>
+                <div class="endpoint-body" id="search-body">
+                    <div class="description">
+                        Search vehicles with pagination. Returns detailed vehicle information including pricing, specifications, and media.
+                    </div>
+
+                    <div class="param-group">
+                        <h4>Path Parameters</h4>
+                        <div class="param-list">
+                            <div class="param-item">
+                                <span class="param-name">locale</span>: <span class="param-value">e.g., de-ch, fr-ch, it-ch</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="param-group">
+                        <h4>Query Parameters</h4>
+                        <div class="param-list">
+                            <div class="param-item">
+                                <span class="param-name">brand</span>: <span class="param-value">BMW</span>
+                            </div>
+                            <div class="param-item">
+                                <span class="param-name">maxResults</span>: <span class="param-value">1-12 (max 12 per page)</span>
+                            </div>
+                            <div class="param-item">
+                                <span class="param-name">startIndex</span>: <span class="param-value">pagination offset (default: 0)</span>
+                            </div>
+                            <div class="param-item">
+                                <span class="param-name">context</span>: <span class="param-value">results-page</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="param-group">
+                        <h4>Request Body</h4>
+                        <div class="code-block">{
+  "searchContext": [{}],
+  "resultsContext": {
+    "sort": [
+      {
+        "by": "PRICE",
+        "order": "ASC"
+      }
+    ]
+  }
+}</div>
+                    </div>
+
+                    <div class="param-group">
+                        <h4>Try it out</h4>
+                        <div class="inline-controls">
+                            <input type="text" id="search-locale" placeholder="Locale" value="de-ch">
+                            <input type="text" id="search-brand" placeholder="Brand" value="BMW">
+                            <input type="number" id="search-maxResults" placeholder="Max Results" value="12" min="1" max="12">
+                            <input type="number" id="search-startIndex" placeholder="Start Index" value="0" min="0">
+                        </div>
+                        <button class="try-button" onclick="trySearch()">
+                            Send Request
+                        </button>
+                    </div>
+
+                    <div class="response-container" id="search-response">
+                        <div class="response-header">Response</div>
+                        <div class="response-body" id="search-response-body"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Vehicle Object Schema</h2>
+            <div class="description" style="margin-bottom: 20px;">
+                This is the complete schema tree for the vehicle object returned in search results. Click on any node to expand/collapse its children.
+            </div>
+            <div class="schema-tree" id="schema-tree"></div>
+        </section>
+
+        <section>
+            <h2>Live API Console</h2>
+            <div class="api-console">
+                <div class="console-input-group">
+                    <label>Endpoint</label>
+                    <select id="console-endpoint">
+                        <option value="aggregate">Aggregate - /vehiclesearch/aggregate/{locale}/stocklocator</option>
+                        <option value="search">Search - /vehiclesearch/search/{locale}/stocklocator</option>
+                    </select>
+                </div>
+
+                <div class="console-input-group">
+                    <label>Locale</label>
+                    <input type="text" id="console-locale" value="de-ch" placeholder="e.g., de-ch, fr-ch, it-ch">
+                </div>
+
+                <div class="console-input-group" id="search-params-group" style="display: none;">
+                    <label>Search Parameters</label>
+                    <div class="inline-controls">
+                        <input type="number" id="console-maxResults" placeholder="Max Results" value="12" min="1" max="12">
+                        <input type="number" id="console-startIndex" placeholder="Start Index" value="0" min="0">
+                    </div>
+                </div>
+
+                <div class="console-input-group">
+                    <label>Request Body (JSON)</label>
+                    <textarea id="console-body">{"searchContext":[{}],"resultsContext":{"sort":[{"by":"PRICE","order":"ASC"}]}}</textarea>
+                </div>
+
+                <button class="send-button" onclick="sendConsoleRequest()">
+                    Send Request
+                </button>
+
+                <div class="response-container" id="console-response">
+                    <div class="response-header">Response</div>
+                    <div class="response-body" id="console-response-body"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const BASE_URL = 'https://stolo-data-service.prod.stolo.eu-central-1.aws.bmw.cloud';
+
+        // Schema definition
+        const vehicleSchema = {
+            name: 'vehicle',
+            type: 'object',
+            children: [
+                { name: 'country', type: 'string', sample: '"CH"' },
+                { name: 'documentId', type: 'string', sample: '"..."' },
+                { name: 'vssId', type: 'string', sample: '"uuid"' },
+                { name: 'orderingUuid', type: 'string', sample: '"..."' },
+                {
+                    name: 'internal',
+                    type: 'object',
+                    children: [
+                        { name: 'documentId', type: 'string', sample: '"..."' },
+                        { name: 'enrichedAt', type: 'datetime', sample: '"2024-01-01T12:00:00Z"' },
+                        { name: 'updatedAt', type: 'datetime', sample: '"2024-01-01T12:00:00Z"' },
+                        { name: 'vssConfigId', type: 'string', sample: '"..."' },
+                        { name: 'isArchived', type: 'boolean', sample: 'false' }
+                    ]
+                },
+                {
+                    name: 'media',
+                    type: 'object',
+                    children: [
+                        {
+                            name: 'cosyImages',
+                            type: 'object',
+                            children: [
+                                { name: 'exteriorImage-null', type: 'string', sample: '"https://..."' },
+                                { name: 'interiorImage-null', type: 'string', sample: '"https://..."' },
+                                { name: 'dimensionImage-null', type: 'string', sample: '"https://..."' },
+                                { name: 'exterior360ViewImage-{0..350}', type: 'string', sample: '"https://..." (36 angles)' }
+                            ]
+                        },
+                        {
+                            name: 'eveCpMedia',
+                            type: 'object',
+                            children: [
+                                { name: 'configId', type: 'string', sample: '"..."' },
+                                { name: 'contentBaseUrl', type: 'string', sample: '"https://..."' },
+                                { name: 'expirationDate', type: 'string', sample: '"2024-12-31"' }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    name: 'offering',
+                    type: 'object',
+                    children: [
+                        {
+                            name: 'salesDestinations[]',
+                            type: 'array',
+                            children: [
+                                { name: 'name', type: 'string', sample: '"..."' },
+                                { name: 'onlineStatus', type: 'string', sample: '"..."' },
+                                { name: 'active', type: 'boolean', sample: 'true' },
+                                { name: 'marketingText', type: 'string', sample: '"..."' }
+                            ]
+                        },
+                        {
+                            name: 'offerPrices',
+                            type: 'object',
+                            children: [
+                                {
+                                    name: '{buNo}',
+                                    type: 'object',
+                                    children: [
+                                        { name: 'offerGrossPrice', type: 'number', sample: '50000' },
+                                        { name: 'offerGrossVehiclePrice', type: 'number', sample: '48000' },
+                                        { name: 'offerNetPrice', type: 'number', sample: '45000' },
+                                        { name: 'offerNetVehiclePrice', type: 'number', sample: '43000' },
+                                        { name: 'sfOfferIDs', type: 'string[]', sample: '["id1", "id2"]' },
+                                        { name: 'type', type: 'string', sample: '"MANUAL"' },
+                                        { name: 'offerPriceUpdatedAt', type: 'datetime', sample: '"2024-01-01T12:00:00Z"' },
+                                        { name: 'offerPriceCreatedAt', type: 'datetime', sample: '"2024-01-01T12:00:00Z"' },
+                                        { name: 'tokenUpdatedAt', type: 'datetime', sample: '"2024-01-01T12:00:00Z"' },
+                                        {
+                                            name: 'offerCharges[]',
+                                            type: 'array',
+                                            children: [
+                                                { name: 'chargeKey', type: 'string', sample: '"..."' },
+                                                { name: 'chargeLabel', type: 'string', sample: '"..."' },
+                                                { name: 'chargeName', type: 'string', sample: '"..."' },
+                                                { name: 'currencyCode', type: 'string', sample: '"CHF"' },
+                                                { name: 'grossPrice', type: 'number', sample: '1000' },
+                                                { name: 'netPrice', type: 'number', sample: '900' },
+                                                { name: 'type', type: 'string', sample: '"..."' }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            name: 'sfOffers[]',
+                            type: 'array',
+                            children: [
+                                { name: 'offerId', type: 'string', sample: '"..."' },
+                                { name: 'buNo', type: 'string', sample: '"..."' },
+                                { name: 'priceSource', type: 'string', sample: '"..."' },
+                                { name: 'customerType', type: 'string', sample: '"PRIVATE"' },
+                                { name: 'offerUpdatedAt', type: 'datetime', sample: '"2024-01-01T12:00:00Z"' },
+                                {
+                                    name: 'calculations[]',
+                                    type: 'array',
+                                    children: [
+                                        { name: 'calculationId', type: 'string', sample: '"..."' },
+                                        { name: 'financialProductType', type: 'string', sample: '"LEASE"' },
+                                        { name: 'productCategoryType', type: 'string', sample: '"LEASE"' },
+                                        { name: 'productId', type: 'string', sample: '"..."' },
+                                        { name: 'calculationUpdatedAt', type: 'datetime', sample: '"2024-01-01T12:00:00Z"' },
+                                        {
+                                            name: 'financialProductParameters',
+                                            type: 'object',
+                                            children: [
+                                                { name: 'annualMileage', type: 'number', sample: '10000' },
+                                                { name: 'downPaymentAmount', type: 'object', sample: '{ amount: 5000, currency: "CHF" }' },
+                                                { name: 'financeAmount', type: 'object', sample: '{ amount: 45000, currency: "CHF" }' },
+                                                { name: 'interestEffective', type: 'number', sample: '3.5' },
+                                                { name: 'annualPercentageRate', type: 'number', sample: '3.6' },
+                                                { name: 'downPaymentPercent', type: 'number', sample: '10' },
+                                                { name: 'term', type: 'number', sample: '48 (months)' },
+                                                { name: 'totalInstallment', type: 'object', sample: '{ amount: 277.90, currency: "CHF" }' },
+                                                { name: 'offerEndDate', type: 'date', sample: '"2024-12-31"' }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    name: 'ordering',
+                    type: 'object',
+                    children: [
+                        {
+                            name: 'distributionData',
+                            type: 'object',
+                            children: [
+                                { name: 'destinationLocationDomesticDealerName', type: 'string', sample: '"..."' },
+                                { name: 'destinationLocationDomesticDealerBuno', type: 'string', sample: '"..."' },
+                                { name: 'destinationLocationDomesticDealerClass', type: 'string', sample: '"..."' },
+                                { name: 'dealerLocation', type: 'object', sample: '{ latitude: 47.3769, longitude: 8.5417 }' },
+                                { name: 'arrivalDate', type: 'date', sample: '"2024-01-15"' },
+                                { name: 'expectedDeliveryDate', type: 'date', sample: '"2024-01-20"' },
+                                { name: 'leaveDays', type: 'number', sample: '5' },
+                                { name: 'shippingDealerName', type: 'string', sample: '"..."' },
+                                { name: 'transportFlag', type: 'string', sample: '"..."' },
+                                { name: 'typeApprovalNo', type: 'string', sample: '"..."' }
+                            ]
+                        },
+                        {
+                            name: 'orderData',
+                            type: 'object',
+                            children: [
+                                { name: 'orderEntryDate', type: 'date', sample: '"2023-12-01"' },
+                                { name: 'orderType', type: 'string', sample: '"..."' },
+                                { name: 'stockType', type: 'string', sample: '"DEALER_PREFERRED"' },
+                                { name: 'usageState', type: 'string', sample: '"NEW"' },
+                                { name: 'usageStateOnline', type: 'string', sample: '"NEW"' },
+                                { name: 'orderingCountry', type: 'string', sample: '"CH"' }
+                            ]
+                        },
+                        {
+                            name: 'productionData',
+                            type: 'object',
+                            children: [
+                                { name: 'vin17', type: 'string', sample: '"WBA..." (primary identifier)' },
+                                { name: 'vin10', type: 'string', sample: '"..."' },
+                                { name: 'vin7', type: 'string', sample: '"..."' },
+                                { name: 'factoryCode', type: 'string', sample: '"..."' },
+                                { name: 'orderNumber', type: 'string', sample: '"..."' },
+                                { name: 'orderStatus', type: 'number', sample: '100' },
+                                { name: 'productionDate', type: 'date', sample: '"2023-12-15"' },
+                                { name: 'endOfProduction', type: 'date', sample: '"2023-12-20"' },
+                                { name: 'engineNumber', type: 'string', sample: '"..."' },
+                                { name: 'productType', type: 'string', sample: '"CAR"' },
+                                { name: 'connectStatus', type: 'string', sample: '"..."' }
+                            ]
+                        },
+                        {
+                            name: 'retailData',
+                            type: 'object',
+                            children: [
+                                { name: 'buNo', type: 'string', sample: '"..."' },
+                                { name: 'dealerClass', type: 'string', sample: '"..."' },
+                                { name: 'locationOutletName', type: 'string', sample: '"..."' },
+                                { name: 'locationOutletAddress', type: 'object', sample: '{ state: "ZH", postalCode: "8000" }' }
+                            ]
+                        },
+                        {
+                            name: 'wholesaleData',
+                            type: 'object',
+                            children: [
+                                { name: 'businessType', type: 'string', sample: '"..."' },
+                                { name: 'region', type: 'string', sample: '"..."' },
+                                { name: 'transportFlag', type: 'string', sample: '"..."' },
+                                { name: 'wholesaler', type: 'string', sample: '"..."' }
+                            ]
+                        },
+                        {
+                            name: 'availability',
+                            type: 'object',
+                            children: [
+                                {
+                                    name: 'outlets[]',
+                                    type: 'array',
+                                    children: [
+                                        { name: 'buNo', type: 'string', sample: '"..."' }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    name: 'price',
+                    type: 'object',
+                    children: [
+                        { name: 'listPriceCurrency', type: 'string', sample: '"CHF"' },
+                        { name: 'grossListPrice', type: 'number', sample: '50000' },
+                        { name: 'netListPrice', type: 'number', sample: '45000' },
+                        { name: 'grossModelPrice', type: 'number', sample: '48000' },
+                        { name: 'netModelPrice', type: 'number', sample: '43000' },
+                        { name: 'grossSalesPrice', type: 'number', sample: '47000' },
+                        { name: 'netSalesPrice', type: 'number', sample: '42000' },
+                        { name: 'equipmentsTotalPrice', type: 'number', sample: '5000' },
+                        { name: 'equipmentsTotalGrossPrice', type: 'number', sample: '5500' },
+                        {
+                            name: 'taxes',
+                            type: 'object',
+                            children: [
+                                { name: 'totalTaxes', type: 'number', sample: '5000' },
+                                {
+                                    name: 'taxes[]',
+                                    type: 'array',
+                                    children: [
+                                        { name: 'key', type: 'string', sample: '"VAT"' },
+                                        { name: 'category', type: 'string', sample: '"..."' },
+                                        { name: 'amount', type: 'number', sample: '5000' },
+                                        { name: 'percentage', type: 'number', sample: '7.7' }
+                                    ]
+                                }
+                            ]
+                        },
+                        { name: 'priceUpdatedAt', type: 'datetime', sample: '"2024-01-01T12:00:00Z"' }
+                    ]
+                },
+                {
+                    name: 'pricing',
+                    type: 'object',
+                    children: [
+                        {
+                            name: 'price',
+                            type: 'object',
+                            children: [
+                                { name: 'label', type: 'string', sample: '"..."' },
+                                { name: 'formattedPrice', type: 'string', sample: '"CHF 50\'000"' },
+                                { name: 'disclaimer', type: 'string', sample: '"..."' }
+                            ]
+                        },
+                        {
+                            name: 'priceBreakdown[]',
+                            type: 'array',
+                            children: [
+                                { name: 'label', type: 'string', sample: '"..."' },
+                                { name: 'value', type: 'number', sample: '5000' },
+                                { name: 'formattedValue', type: 'string', sample: '"CHF 5\'000"' },
+                                { name: 'highlightPrice', type: 'boolean', sample: 'true' }
+                            ]
+                        },
+                        {
+                            name: 'monthlyInstallment',
+                            type: 'object',
+                            children: [
+                                { name: 'value', type: 'string', sample: '"CHF 277.90 monatlich"' },
+                                { name: 'rateInfo', type: 'string', sample: '"Leasing Laufzeit: 48 Monate..."' },
+                                { name: 'showMonthlyRate', type: 'boolean', sample: 'true' },
+                                { name: 'label', type: 'string', sample: '"..."' },
+                                { name: 'selectedSfCalculation', type: 'object', sample: '(same as offering.sfOffers[].calculations[])' },
+                                { name: 'sfOfferIds', type: 'string[]', sample: '["..."]' }
+                            ]
+                        },
+                        { name: 'status', type: 'string', sample: '"..."' },
+                        { name: 'priceSource', type: 'string', sample: '"..."' },
+                        { name: 'buNo', type: 'string', sample: '"..."' }
+                    ]
+                },
+                {
+                    name: 'salesProcess',
+                    type: 'object',
+                    children: [
+                        { name: 'type', type: 'string', sample: '"AVAILABLE"' },
+                        { name: 'reason', type: 'string', sample: '"..."' },
+                        { name: 'modifiedAt', type: 'datetime', sample: '"2024-01-01T12:00:00Z"' }
+                    ]
+                },
+                {
+                    name: 'vehicleSpecification',
+                    type: 'object',
+                    children: [
+                        {
+                            name: 'modelAndOption',
+                            type: 'object',
+                            children: [
+                                { name: 'brand', type: 'string', sample: '"BMW"' },
+                                { name: 'series', type: 'object', sample: '{ name: "1" }' },
+                                { name: 'configuratorSeries', type: 'string', sample: '"1"' },
+                                { name: 'bodyType', type: 'string', sample: '"SEDAN | TOURING | COUPE | CONVERTIBLE | SPORT_ACTIVITY_VEHICLE | SPORT_ACTIVITY_COUPE | GRAN_COUPE | SPORTS_HATCH | SC"' },
+                                { name: 'rawBodyType', type: 'string', sample: '"..."' },
+                                { name: 'baseFuelType', type: 'string', sample: '"GASOLINE | DIESEL | ELECTRIC"' },
+                                { name: 'driveType', type: 'string', sample: '"FRONT | REAR | AWD_THROUGH"' },
+                                { name: 'marketingDriveType', type: 'string', sample: '"XDRIVE | SDRIVE | EDRIVE"' },
+                                { name: 'transmission', type: 'string', sample: '"AUTOMATIC | MANUAL"' },
+                                {
+                                    name: 'model',
+                                    type: 'object',
+                                    children: [
+                                        { name: 'agModelCode', type: 'string', sample: '"..."' },
+                                        { name: 'derivative', type: 'string', sample: '"..."' },
+                                        { name: 'modelDescription', type: 'object', sample: '{ de_CH: "...", default_CH: "...", en_GB: "...", fr_CH: "...", it_CH: "..." }' },
+                                        { name: 'modelName', type: 'string', sample: '"..."' },
+                                        { name: 'steering', type: 'string', sample: '"..."' }
+                                    ]
+                                },
+                                {
+                                    name: 'modelRange',
+                                    type: 'object',
+                                    children: [
+                                        { name: 'name', type: 'string', sample: '"..."' },
+                                        { name: 'description', type: 'object', sample: '{ de_CH: "...", ... }' }
+                                    ]
+                                },
+                                { name: 'marketingModelRange', type: 'string', sample: '"..."' },
+                                {
+                                    name: 'color',
+                                    type: 'object',
+                                    children: [
+                                        { name: 'hexColorCode', type: 'string', sample: '"#000000"' },
+                                        { name: 'clusterFine', type: 'string', sample: '"BLACK | WHITE | GRAY | GRAY_DARK | BLUE | RED | GREEN | ..."' },
+                                        { name: 'clusterRough', type: 'string', sample: '"..."' }
+                                    ]
+                                },
+                                {
+                                    name: 'upholsteryColor',
+                                    type: 'object',
+                                    children: [
+                                        { name: 'upholsteryColorCluster', type: 'string', sample: '"..."' }
+                                    ]
+                                },
+                                { name: 'upholsteryType', type: 'string', sample: '"..."' },
+                                { name: 'paintType', type: 'string', sample: '"UNI | MET"' },
+                                { name: 'numberOfColors', type: 'number', sample: '1' },
+                                { name: 'numberOfGears', type: 'number', sample: '8' },
+                                { name: 'is48Volt', type: 'boolean', sample: 'false' },
+                                {
+                                    name: 'equipments',
+                                    type: 'object',
+                                    children: [
+                                        {
+                                            name: '{code}',
+                                            type: 'object',
+                                            children: [
+                                                { name: 'name', type: 'string', sample: '"..."' },
+                                                { name: 'descriptions', type: 'object', sample: '{ ... }' },
+                                                { name: 'category', type: 'string', sample: '"..."' },
+                                                { name: 'type', type: 'string', sample: '"..."' },
+                                                { name: 'packageContent', type: 'object', sample: '{ ... }' }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            name: 'technicalAndEmission',
+                            type: 'object',
+                            children: [
+                                {
+                                    name: 'technicalData',
+                                    type: 'object',
+                                    children: [
+                                        { name: 'doorCount', type: 'number', sample: '4' },
+                                        { name: 'seatCount', type: 'number', sample: '5' },
+                                        { name: 'cylinderCount', type: 'number', sample: '4' },
+                                        { name: 'cylinderCapacity', type: 'object', sample: '{ value: 1998, unit: "ccm" }' },
+                                        { name: 'power', type: 'object', sample: '{ kW: 135, hp: 184, ps: 184 }' },
+                                        { name: 'torque', type: 'object', sample: '{ nm: 300 }' },
+                                        { name: 'topSpeed', type: 'object', sample: '{ kmh: 235 }' },
+                                        { name: 'timeFrom0To100Kmh', type: 'object', sample: '{ seconds: 7.1 }' },
+                                        { name: 'tankCapacity', type: 'object', sample: '{ liters: 50 }' },
+                                        { name: 'curbWeightDIN', type: 'number', sample: '1500' },
+                                        { name: 'curbWeightEU', type: 'number', sample: '1575' },
+                                        { name: 'maxTotalWeight', type: 'object', sample: '{ kg: 2000 }' },
+                                        { name: 'vehicleLength', type: 'object', sample: '{ mm: 4500 }' },
+                                        { name: 'vehicleWidth', type: 'object', sample: '{ mm: 1800 }' },
+                                        { name: 'vehicleHeight', type: 'object', sample: '{ mm: 1450 }' },
+                                        { name: 'recommendedFuelType', type: 'string', sample: '"..."' },
+                                        { name: 'degreeOfElectrification', type: 'string', sample: '"..."' }
+                                    ]
+                                },
+                                {
+                                    name: 'emissionData',
+                                    type: 'object',
+                                    children: [
+                                        { name: 'efficiencyClass', type: 'string', sample: '"A-G"' },
+                                        { name: 'emissionClassification', type: 'string', sample: '"..."' },
+                                        { name: 'wltpCo2', type: 'object', sample: '{ gkm: 150 }' },
+                                        { name: 'wltpFuelConsumption', type: 'object', sample: '{ combined: 6.5, low: 5.0, high: 7.5 }' },
+                                        { name: 'noxValue', type: 'number', sample: '50' },
+                                        { name: 'particleMass', type: 'number', sample: '0.0005' }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            name: 'externalClassification',
+                            type: 'object',
+                            children: [
+                                { name: 'energyLabel', type: 'object', sample: '{ classificationResult: "..." }' },
+                                { name: 'petrolEquivalentOverall', type: 'object', sample: '{ classificationResult: "..." }' },
+                                { name: 'co2EquivalentOverall', type: 'object', sample: '{ classificationResult: "..." }' }
+                            ]
+                        }
+                    ]
+                },
+                { name: 'vehicleLifeCycle', type: 'object', sample: '(usually empty)' }
+            ]
+        };
+
+        // Toggle endpoint expansion
+        function toggleEndpoint(id) {
+            const body = document.getElementById(`${id}-body`);
+            const icon = document.getElementById(`${id}-icon`);
+
+            if (body.classList.contains('expanded')) {
+                body.classList.remove('expanded');
+                icon.classList.remove('expanded');
+            } else {
+                body.classList.add('expanded');
+                icon.classList.add('expanded');
+            }
+        }
+
+        // Try aggregate endpoint
+        async function tryAggregate() {
+            const locale = document.getElementById('aggregate-locale').value || 'de-ch';
+            const brand = document.getElementById('aggregate-brand').value || 'BMW';
+            const responseContainer = document.getElementById('aggregate-response');
+            const responseBody = document.getElementById('aggregate-response-body');
+
+            responseContainer.classList.add('visible');
+            responseBody.innerHTML = '<div class="loading"></div>';
+
+            try {
+                const url = `${BASE_URL}/vehiclesearch/aggregate/${locale}/stocklocator?brand=${brand}`;
+                const body = {
+                    searchContext: [{}],
+                    resultsContext: {
+                        sort: [
+                            {
+                                by: "PRICE",
+                                order: "ASC"
+                            }
+                        ]
+                    }
+                };
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                const data = await response.json();
+                responseBody.innerHTML = formatJSON(data);
+            } catch (error) {
+                responseBody.innerHTML = `<div class="error-message">Error: ${error.message}</div>`;
+            }
+        }
+
+        // Try search endpoint
+        async function trySearch() {
+            const locale = document.getElementById('search-locale').value || 'de-ch';
+            const brand = document.getElementById('search-brand').value || 'BMW';
+            const maxResults = document.getElementById('search-maxResults').value || '12';
+            const startIndex = document.getElementById('search-startIndex').value || '0';
+            const responseContainer = document.getElementById('search-response');
+            const responseBody = document.getElementById('search-response-body');
+
+            responseContainer.classList.add('visible');
+            responseBody.innerHTML = '<div class="loading"></div>';
+
+            try {
+                const url = `${BASE_URL}/vehiclesearch/search/${locale}/stocklocator?maxResults=${maxResults}&startIndex=${startIndex}&brand=${brand}&context=results-page`;
+                const body = {
+                    searchContext: [{}],
+                    resultsContext: {
+                        sort: [
+                            {
+                                by: "PRICE",
+                                order: "ASC"
+                            }
+                        ]
+                    }
+                };
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                const data = await response.json();
+                responseBody.innerHTML = formatJSON(data);
+            } catch (error) {
+                responseBody.innerHTML = `<div class="error-message">Error: ${error.message}</div>`;
+            }
+        }
+
+        // Send console request
+        async function sendConsoleRequest() {
+            const endpoint = document.getElementById('console-endpoint').value;
+            const locale = document.getElementById('console-locale').value || 'de-ch';
+            const bodyText = document.getElementById('console-body').value;
+            const responseContainer = document.getElementById('console-response');
+            const responseBody = document.getElementById('console-response-body');
+
+            responseContainer.classList.add('visible');
+            responseBody.innerHTML = '<div class="loading"></div>';
+
+            try {
+                let url;
+                if (endpoint === 'aggregate') {
+                    url = `${BASE_URL}/vehiclesearch/aggregate/${locale}/stocklocator?brand=BMW`;
+                } else {
+                    const maxResults = document.getElementById('console-maxResults').value || '12';
+                    const startIndex = document.getElementById('console-startIndex').value || '0';
+                    url = `${BASE_URL}/vehiclesearch/search/${locale}/stocklocator?maxResults=${maxResults}&startIndex=${startIndex}&brand=BMW&context=results-page`;
+                }
+
+                const body = JSON.parse(bodyText);
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                const data = await response.json();
+                responseBody.innerHTML = formatJSON(data);
+            } catch (error) {
+                responseBody.innerHTML = `<div class="error-message">Error: ${error.message}</div>`;
+            }
+        }
+
+        // Format JSON with syntax highlighting
+        function formatJSON(obj) {
+            const json = JSON.stringify(obj, null, 2);
+            return json
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:')
+                .replace(/: "([^"]*)"/g, ': <span class="json-string">"$1"</span>')
+                .replace(/: (\d+\.?\d*)/g, ': <span class="json-number">$1</span>')
+                .replace(/: (true|false)/g, ': <span class="json-boolean">$1</span>')
+                .replace(/: null/g, ': <span class="json-null">null</span>');
+        }
+
+        // Render schema tree
+        function renderSchemaTree(node, container, isRoot = false) {
+            const nodeDiv = document.createElement('div');
+            nodeDiv.className = isRoot ? 'tree-node root' : 'tree-node';
+
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'tree-item';
+
+            const hasChildren = node.children && node.children.length > 0;
+
+            // Toggle icon
+            const toggle = document.createElement('span');
+            toggle.className = hasChildren ? 'tree-toggle' : 'tree-toggle leaf';
+            toggle.textContent = hasChildren ? '▶' : '';
+            itemDiv.appendChild(toggle);
+
+            // Key name
+            const key = document.createElement('span');
+            key.className = 'tree-key';
+            key.textContent = node.name;
+            itemDiv.appendChild(key);
+
+            // Type
+            const type = document.createElement('span');
+            type.className = 'tree-type';
+            type.textContent = `: ${node.type}`;
+            itemDiv.appendChild(type);
+
+            // Sample value
+            if (node.sample) {
+                const sample = document.createElement('span');
+                sample.className = 'tree-sample';
+                sample.textContent = `// ${node.sample}`;
+                itemDiv.appendChild(sample);
+            }
+
+            nodeDiv.appendChild(itemDiv);
+
+            // Children container
+            if (hasChildren) {
+                const childrenDiv = document.createElement('div');
+                childrenDiv.className = 'tree-children';
+
+                node.children.forEach(child => {
+                    renderSchemaTree(child, childrenDiv);
+                });
+
+                nodeDiv.appendChild(childrenDiv);
+
+                // Click handler for toggle
+                itemDiv.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (childrenDiv.classList.contains('expanded')) {
+                        childrenDiv.classList.remove('expanded');
+                        toggle.classList.remove('expanded');
+                    } else {
+                        childrenDiv.classList.add('expanded');
+                        toggle.classList.add('expanded');
+                    }
+                });
+            }
+
+            container.appendChild(nodeDiv);
+        }
+
+        // Show/hide search parameters based on endpoint selection
+        document.getElementById('console-endpoint').addEventListener('change', function() {
+            const searchParams = document.getElementById('search-params-group');
+            if (this.value === 'search') {
+                searchParams.style.display = 'block';
+            } else {
+                searchParams.style.display = 'none';
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            const schemaContainer = document.getElementById('schema-tree');
+            renderSchemaTree(vehicleSchema, schemaContainer, true);
+        });
+    </script>
+</body>
+</html>

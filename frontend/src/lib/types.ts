@@ -7,6 +7,7 @@ export interface VehicleCard {
   color?: string
   price?: string
   price_offer?: number
+  monthly_installment?: number
   currency: string
   image?: string
   images: string[]

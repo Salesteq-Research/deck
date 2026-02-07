@@ -40,6 +40,7 @@ class Vehicle(Base):
     power_hp = Column(Integer)
     door_count = Column(Integer)
     country = Column(String(10), default="CH")
+    monthly_installment = Column(Float)
     sales_status = Column(String(50))
     url = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -89,6 +90,7 @@ class Vehicle(Base):
             "power_hp": self.power_hp,
             "door_count": self.door_count,
             "country": self.country,
+            "monthly_installment": self.monthly_installment,
             "sales_status": self.sales_status,
             "url": self.url,
             "created_at": self.created_at.isoformat() if self.created_at else None,

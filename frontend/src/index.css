@@ -1,14 +1,14 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans: ui-sans-serif, -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
 
   --color-background: hsl(0 0% 100%);
-  --color-foreground: hsl(220 20% 10%);
+  --color-foreground: hsl(0 0% 5%);
   --color-card: hsl(0 0% 100%);
-  --color-card-foreground: hsl(220 20% 10%);
+  --color-card-foreground: hsl(0 0% 5%);
   --color-popover: hsl(0 0% 100%);
-  --color-popover-foreground: hsl(220 20% 10%);
+  --color-popover-foreground: hsl(0 0% 5%);
   --color-primary: hsl(214 78% 47%);
   --color-primary-foreground: hsl(0 0% 100%);
   --color-secondary: hsl(210 30% 95%);
@@ -22,23 +22,23 @@
   --color-border: hsl(214 32% 91%);
   --color-input: hsl(214 32% 91%);
   --color-ring: hsl(214 78% 47%);
+  --color-user-bubble: #d7e3eb;
   --radius-sm: 0.25rem;
   --radius-md: 0.375rem;
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
 
-  --animate-typing-dot: typing-dot 1.4s ease-in-out infinite;
+  --animate-typing-dot: typing-dot 1.6s ease-in-out infinite;
   --animate-message-in: message-in 0.3s ease-out;
+  --animate-fade-in-img: fade-in-img 0.4s ease forwards;
 }
 
 @keyframes typing-dot {
-  0%, 60%, 100% {
-    transform: translateY(0);
-    opacity: 0.4;
+  0%, 80%, 100% {
+    transform: scale(0);
   }
-  30% {
-    transform: translateY(-4px);
-    opacity: 1;
+  40% {
+    transform: scale(1);
   }
 }
 
@@ -53,14 +53,23 @@
   }
 }
 
+@keyframes fade-in-img {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
 @layer base {
   * {
     @apply border-border;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01";
   }
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
     margin: 0;
+    font-size: 16px;
+    letter-spacing: -0.4px;
   }
 }
 

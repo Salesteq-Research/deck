@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Send, LayoutGrid } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { AssistantAvatar } from './AssistantAvatar'
 import { TypingIndicator } from './TypingIndicator'
@@ -93,14 +92,14 @@ export function ChatInterface() {
               <div key={index} className="animate-message-in">
                 {message.role === 'user' ? (
                   <div className="flex justify-end">
-                    <div className="max-w-[85%] sm:max-w-[75%] rounded-2xl rounded-br-sm px-3 py-2.5 sm:px-4 sm:py-3 bg-primary text-primary-foreground">
+                    <div className="max-w-[85%] sm:max-w-[75%] rounded-3xl px-4 py-2.5 sm:px-5 sm:py-3 bg-[var(--color-user-bubble)] text-foreground">
                       <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                     </div>
                   </div>
                 ) : (
                   <div className="flex gap-2 sm:gap-3 items-start">
                     <AssistantAvatar />
-                    <div className="flex-1 min-w-0 bg-muted rounded-2xl rounded-tl-sm px-3 py-2.5 sm:px-4 sm:py-3">
+                    <div className="flex-1 min-w-0 px-1 py-1">
                       <MarkdownMessage content={message.content} />
                       {message.vehicles && message.vehicles.length > 0 && (
                         <InlineProductRow vehicles={message.vehicles} />
@@ -115,7 +114,7 @@ export function ChatInterface() {
           {isLoading && (
             <div className="flex gap-2 sm:gap-3 items-start animate-message-in">
               <AssistantAvatar />
-              <div className="bg-muted rounded-2xl rounded-tl-sm px-3 py-2.5 sm:px-4 sm:py-3">
+              <div className="px-1 py-2.5">
                 <TypingIndicator />
               </div>
             </div>
@@ -127,13 +126,13 @@ export function ChatInterface() {
 
       {/* Suggested Questions */}
       {suggestedQuestions.length > 0 && !isLoading && (
-        <div className="px-3 sm:px-6 py-2 border-t bg-muted/30 shrink-0">
+        <div className="px-3 sm:px-6 py-2 border-t shrink-0">
           <div className="max-w-4xl mx-auto">
             <div className="flex gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide pb-0.5">
               {suggestedQuestions.map((question, index) => (
                 <button
                   key={index}
-                  className="shrink-0 px-3 py-1.5 rounded-full border border-border text-xs text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors whitespace-nowrap"
+                  className="shrink-0 px-3 py-1.5 rounded-lg border border-foreground/80 text-xs text-foreground bg-white hover:bg-gray-50 transition-colors whitespace-nowrap"
                   onClick={() => handleSuggestionClick(question)}
                 >
                   {question}
@@ -147,17 +146,21 @@ export function ChatInterface() {
       {/* Input */}
       <div className="border-t p-2.5 sm:p-4 bg-background shrink-0 pb-[calc(0.625rem+env(safe-area-inset-bottom))] sm:pb-4">
         <div className="max-w-4xl mx-auto">
-          <form onSubmit={handleSubmit} className="flex gap-2">
-            <Input
+          <form onSubmit={handleSubmit} className="flex items-center gap-2 bg-[#eee] rounded-full px-4 py-1.5">
+            <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask about BMW models, pricing..."
               disabled={isLoading}
-              className="flex-1 text-base sm:text-sm"
+              className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground"
             />
-            <Button type="submit" size="icon" disabled={isLoading || !input.trim()} className="shrink-0">
-              <Send className="h-4 w-4" />
-            </Button>
+            <button
+              type="submit"
+              disabled={isLoading || !input.trim()}
+              className="shrink-0 w-8 h-8 rounded-full bg-foreground text-background flex items-center justify-center disabled:opacity-30 transition-opacity"
+            >
+              <Send className="h-3.5 w-3.5" />
+            </button>
           </form>
         </div>
       </div>

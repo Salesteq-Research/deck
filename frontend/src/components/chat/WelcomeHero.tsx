@@ -26,7 +26,7 @@ export function WelcomeHero({ onSuggestionClick }: WelcomeHeroProps) {
           <button
             key={question}
             onClick={() => onSuggestionClick(question)}
-            className="px-4 py-2.5 sm:py-2 rounded-full border border-border text-sm text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors active:scale-95"
+            className="px-4 py-2.5 sm:py-2 rounded-lg border border-foreground/80 text-sm text-foreground bg-white hover:bg-gray-50 transition-colors active:scale-95"
           >
             {question}
           </button>

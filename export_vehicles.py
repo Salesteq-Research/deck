@@ -59,6 +59,7 @@ def export():
                 "door_count": entity_data.get("door_count"),
                 "country": entity_data.get("country", "CH"),
                 "sales_status": entity_data.get("sales_status", ""),
+                "monthly_installment": entity_data.get("monthly_installment"),
                 "url": entity_data.get("url", ""),
             }
             vehicles.append(vehicle)

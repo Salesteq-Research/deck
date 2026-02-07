@@ -155,6 +155,7 @@ def chat(request: ChatRequest, db: Session = Depends(get_db)):
             color=v.get("color"),
             price=v.get("price"),
             price_offer=v.get("price_offer"),
+            monthly_installment=v.get("monthly_installment"),
             currency=v.get("currency", "CHF"),
             image=v.get("image"),
             images=v.get("images", []),
