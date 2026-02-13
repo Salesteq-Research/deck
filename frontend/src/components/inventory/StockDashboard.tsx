@@ -124,6 +124,8 @@ export function StockDashboard() {
             BMW Switzerland Inventory
             <span className="mx-1.5">·</span>
             <a href="/api-explorer.html" className="text-primary/70 hover:text-primary hover:underline transition-colors">API Explorer</a>
+            <span className="mx-1.5">·</span>
+            <a href="/backoffice" className="text-primary/70 hover:text-primary hover:underline transition-colors">Backoffice</a>
           </p>
         </div>
         <a href="/">

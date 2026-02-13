@@ -1,192 +1,247 @@
-"""Chat API endpoints."""
+"""Chat API endpoints — powered by tool-use agent with streaming."""
 
+import json
+import logging
 import re
-from typing import Tuple, Optional
 from fastapi import APIRouter, Depends
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..services.claude_service import ClaudeService
-from ..services.rag_service import RAGService
+from ..services.customer_agent import CustomerAgentService
+from ..services.lead_service import upsert_lead, upsert_conversation
+from ..models.vehicle import Vehicle
+from ..models.backoffice import Conversation, ConversationMessage
 from ..models.schemas import ChatRequest, ChatResponse, VehicleCardResponse
-from ..config import MAX_CONTEXT_VEHICLES
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 
-claude_service = ClaudeService()
+
+def _vehicle_card(v: Vehicle) -> dict:
+    """Build a vehicle card dict from a Vehicle ORM object."""
+    return {
+        "vin": v.vin,
+        "name": v.name,
+        "series": v.series,
+        "body_type": v.body_type,
+        "fuel_type": v.fuel_type,
+        "color": v.color,
+        "price": v.price,
+        "price_offer": v.price_offer,
+        "monthly_installment": v.monthly_installment,
+        "currency": v.currency or "CHF",
+        "image": v.image,
+        "images": v.images_list,
+        "dealer_name": v.dealer_name,
+        "url": v.url,
+    }
 
 
-def _parse_price_constraint(message: str) -> Tuple[Optional[float], Optional[float]]:
-    """Extract min/max price from a user message. Returns (min_price, max_price)."""
-    text = message.lower().replace("'", "").replace("\u2019", "")
-    # Normalise common Swiss thousand separators: "60'000" "60,000" "60.000" → "60000"
-    # But keep decimal amounts like "59999.99" by only collapsing when followed by 3 digits
-    text = re.sub(r"(\d)[',.](\d{3})(?!\d)", r"\1\2", text)
+@router.post("/stream")
+def chat_stream(request: ChatRequest, db: Session = Depends(get_db)):
+    """SSE streaming chat endpoint. Returns events as they happen."""
 
-    min_price = None
-    max_price = None
+    # Gate: if operator is "human", store customer message and return human_mode event
+    if request.session_id:
+        conv = db.query(Conversation).filter(Conversation.session_id == request.session_id).first()
+        if conv and conv.operator == "human":
+            msg = ConversationMessage(
+                conversation_id=conv.id,
+                role="user",
+                content=request.message,
+                vehicles_shown="[]",
+                sender="customer",
+            )
+            db.add(msg)
+            conv.message_count = (conv.message_count or 0) + 1
+            db.commit()
 
-    # "under / below / less than / bis / unter / max / up to  60000"
-    m = re.search(
-        r"(?:under|below|less\s+than|up\s+to|bis|unter|max(?:imal)?|cheaper\s+than|within|budget(?:\s+of)?|höchstens|maximal)\s*"
-        r"(?:chf\s*)?(\d[\d]*)",
-        text,
+            def human_generate():
+                yield f"data: {json.dumps({'type': 'human_mode'})}\n\n"
+
+            return StreamingResponse(
+                human_generate(),
+                media_type="text/event-stream",
+                headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+            )
+
+    def generate():
+        agent = CustomerAgentService(db)
+        conversation_history = [
+            {"role": msg.role, "content": msg.content}
+            for msg in request.conversation_history
+        ]
+
+        full_text = ""
+        shown_vins = []
+
+        for event in agent.chat_stream(
+            message=request.message,
+            conversation_history=conversation_history,
+        ):
+            if event["type"] == "tool_call":
+                yield f"data: {json.dumps({'type': 'tool_call', 'name': event['name']})}\n\n"
+
+            elif event["type"] == "text_delta":
+                full_text += event["content"]
+                yield f"data: {json.dumps({'type': 'text', 'content': event['content']})}\n\n"
+
+            elif event["type"] == "vehicles":
+                vins = event["vins"]
+                cards = []
+                for vin in vins[:5]:
+                    v = db.query(Vehicle).filter(Vehicle.vin == vin).first()
+                    if v:
+                        cards.append(_vehicle_card(v))
+                        shown_vins.append(vin)
+                yield f"data: {json.dumps({'type': 'vehicles', 'vehicles': cards})}\n\n"
+
+            elif event["type"] == "done":
+                yield f"data: {json.dumps({'type': 'done'})}\n\n"
+
+        # Capture lead after streaming completes
+        if request.session_id and full_text:
+            try:
+                clean_text = re.sub(r"\s*\[RECOMMEND:[^\]]*\]\s*", "", full_text).strip()
+                lead = upsert_lead(db, request.session_id, request.message, clean_text, shown_vins)
+                upsert_conversation(db, request.session_id, lead, request.message, clean_text, shown_vins)
+                db.commit()
+            except Exception as e:
+                logger.warning(f"Backoffice capture failed: {e}")
+                db.rollback()
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
     )
-    if m:
-        max_price = float(m.group(1))
-
-    # "over / above / more than / ab / über / min / from  60000"
-    m = re.search(
-        r"(?:over|above|more\s+than|from|starting|ab|über|mind(?:estens)?|min(?:imal)?|at\s+least)\s*"
-        r"(?:chf\s*)?(\d[\d]*)",
-        text,
-    )
-    if m:
-        min_price = float(m.group(1))
-
-    # "between 50000 and 80000"  /  "50000-80000"  /  "zwischen 50000 und 80000"
-    m = re.search(
-        r"(?:between|zwischen|from|von)\s*(?:chf\s*)?(\d[\d]*)\s*(?:and|und|to|bis|-)\s*(?:chf\s*)?(\d[\d]*)",
-        text,
-    )
-    if m:
-        min_price = float(m.group(1))
-        max_price = float(m.group(2))
-
-    # "<CHF 60000"  or  "< 60000"
-    m = re.search(r"<\s*(?:chf\s*)?(\d[\d]*)", text)
-    if m and max_price is None:
-        max_price = float(m.group(1))
-
-    # ">CHF 60000"  or  "> 60000"
-    m = re.search(r">\s*(?:chf\s*)?(\d[\d]*)", text)
-    if m and min_price is None:
-        min_price = float(m.group(1))
-
-    return min_price, max_price
 
 
 @router.post("", response_model=ChatResponse)
 def chat(request: ChatRequest, db: Session = Depends(get_db)):
-    """Process a chat message and return AI response with relevant vehicles."""
+    """Non-streaming chat endpoint (fallback)."""
 
-    rag_service = RAGService(db)
+    # Gate: if operator is "human", store customer message and signal human mode
+    if request.session_id:
+        conv = db.query(Conversation).filter(Conversation.session_id == request.session_id).first()
+        if conv and conv.operator == "human":
+            msg = ConversationMessage(
+                conversation_id=conv.id,
+                role="user",
+                content=request.message,
+                vehicles_shown="[]",
+                sender="customer",
+            )
+            db.add(msg)
+            conv.message_count = (conv.message_count or 0) + 1
+            db.commit()
+            return ChatResponse(message="__human_mode__", vehicles=[], suggested_questions=[])
+
+    agent = CustomerAgentService(db)
 
     conversation_history = [
         {"role": msg.role, "content": msg.content}
         for msg in request.conversation_history
     ]
 
-    # --- Parse price constraints -------------------------------------------------
-    min_price, max_price = _parse_price_constraint(request.message)
-    has_price_filter = min_price is not None or max_price is not None
-
-    # --- Price-filtered results (if applicable) ----------------------------------
-    price_results = []
-    if has_price_filter:
-        price_results = rag_service.price_filtered_search(
-            min_price=min_price,
-            max_price=max_price,
-            n_results=MAX_CONTEXT_VEHICLES,
-        )
-
-    # --- Semantic / keyword search -----------------------------------------------
-    search_queries = claude_service.expand_search_queries(
+    result = agent.chat(
         message=request.message,
         conversation_history=conversation_history,
     )
-    all_queries = [request.message] + search_queries
 
-    semantic_results = rag_service.multi_query_search(
-        queries=all_queries,
-        n_results=MAX_CONTEXT_VEHICLES,
-    )
+    clean_text = result["message"]
+    recommended_vins = result["recommended_vins"]
+    all_vins = result["all_vehicle_vins"]
 
-    # --- Merge: price-filtered results first, then semantic (dedup by VIN) -------
-    if has_price_filter:
-        seen_vins = {r["vehicle"]["vin"] for r in price_results}
-        # Add semantic results that also satisfy the price constraint
-        for r in semantic_results:
-            vin = r["vehicle"]["vin"]
-            offer = r["vehicle"].get("price_offer")
-            if vin in seen_vins:
-                continue
-            if offer is not None:
-                if max_price is not None and offer > max_price:
-                    continue
-                if min_price is not None and offer < min_price:
-                    continue
-            price_results.append(r)
-            seen_vins.add(vin)
-        search_results = price_results[:MAX_CONTEXT_VEHICLES]
-    else:
-        search_results = semantic_results
+    card_vins = recommended_vins if recommended_vins else all_vins[:5]
+    vehicle_cards = []
+    for vin in card_vins:
+        v = db.query(Vehicle).filter(Vehicle.vin == vin).first()
+        if v:
+            vehicle_cards.append(VehicleCardResponse(**_vehicle_card(v)))
 
-    # Build context for Claude from the search results
-    context = rag_service.build_context(search_results)
-
-    response_text = claude_service.chat(
-        message=request.message,
-        context=context,
-        conversation_history=conversation_history,
-    )
-
-    # Parse recommended VINs from Claude's response
-    recommend_match = re.search(r"\[RECOMMEND:\s*([^\]]*)\]", response_text)
-    recommended_vins = set()
-    if recommend_match:
-        raw = recommend_match.group(1).strip()
-        if raw.lower() != "none":
-            recommended_vins = {v.strip() for v in raw.split(",") if v.strip()}
-
-    # Strip the [RECOMMEND: ...] tag from the visible message
-    clean_text = re.sub(r"\s*\[RECOMMEND:[^\]]*\]\s*", "", response_text).strip()
-
-    # Build vehicle cards
-    vehicle_map = {}
-    for result in search_results:
-        v = result["vehicle"]
-        vehicle_map[v["vin"]] = VehicleCardResponse(
-            vin=v["vin"],
-            name=v["name"],
-            series=v.get("series"),
-            body_type=v.get("body_type"),
-            fuel_type=v.get("fuel_type"),
-            color=v.get("color"),
-            price=v.get("price"),
-            price_offer=v.get("price_offer"),
-            monthly_installment=v.get("monthly_installment"),
-            currency=v.get("currency", "CHF"),
-            image=v.get("image"),
-            images=v.get("images", []),
-            dealer_name=v.get("dealer_name"),
-            url=v.get("url"),
-        )
-
-    # Return cards in the order Claude recommended; fall back to all if parsing failed
-    if recommended_vins:
-        vehicle_cards = [vehicle_map[vin] for vin in recommended_vins if vin in vehicle_map]
-    else:
-        vehicle_cards = list(vehicle_map.values())
-
-    # Generate suggested follow-up questions
-    suggested_questions = claude_service.generate_suggested_questions(
-        context=context,
-        last_response=clean_text,
-    )
+    # Capture lead
+    if request.session_id:
+        try:
+            shown_vins = [vc.vin for vc in vehicle_cards]
+            lead = upsert_lead(db, request.session_id, request.message, clean_text, shown_vins)
+            upsert_conversation(db, request.session_id, lead, request.message, clean_text, shown_vins)
+            db.commit()
+        except Exception as e:
+            logger.warning(f"Backoffice capture failed: {e}")
+            db.rollback()
 
     return ChatResponse(
         message=clean_text,
         vehicles=vehicle_cards,
-        suggested_questions=suggested_questions,
+        suggested_questions=[],
     )
+
+
+@router.post("/suggestions")
+def get_suggestions(request: ChatRequest, db: Session = Depends(get_db)):
+    """Generate follow-up suggestions (called async after main response)."""
+    agent = CustomerAgentService(db)
+    if not agent.client:
+        return {"suggestions": []}
+
+    try:
+        response = agent.client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=150,
+            messages=[{
+                "role": "user",
+                "content": f"""Based on this BMW sales conversation:
+Last user message: {request.message[:200]}
+
+Generate 3 short follow-up questions a car buyer might ask. One per line, no numbering."""
+            }],
+        )
+        questions = response.content[0].text.strip().split("\n")
+        return {"suggestions": [q.strip() for q in questions if q.strip()][:3]}
+    except Exception as e:
+        logger.error(f"Suggestions error: {e}")
+        return {"suggestions": []}
+
+
+@router.get("/poll")
+def poll_messages(session_id: str, after: int = 0, db: Session = Depends(get_db)):
+    """Poll for new dealer messages (used by customer chat during human takeover)."""
+    conv = db.query(Conversation).filter(Conversation.session_id == session_id).first()
+    if not conv:
+        return {"operator": "ai", "messages": []}
+
+    new_msgs = (
+        db.query(ConversationMessage)
+        .filter(
+            ConversationMessage.conversation_id == conv.id,
+            ConversationMessage.id > after,
+            ConversationMessage.role == "assistant",
+            ConversationMessage.sender == "human",
+        )
+        .order_by(ConversationMessage.id)
+        .all()
+    )
+
+    return {
+        "operator": conv.operator or "ai",
+        "messages": [
+            {"id": m.id, "role": m.role, "content": m.content, "sender": m.sender}
+            for m in new_msgs
+        ],
+    }
 
 
 @router.get("/status")
 def get_chat_status(db: Session = Depends(get_db)):
     """Get chat service status."""
-    rag_service = RAGService(db)
+    agent = CustomerAgentService(db)
     return {
-        "claude_available": claude_service.is_available(),
-        "rag_stats": rag_service.get_stats(),
+        "agent_available": agent.is_available(),
+        "mode": "tool-use-streaming",
     }

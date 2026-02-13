@@ -105,3 +105,83 @@ export interface ChatResponse {
   vehicles: VehicleCard[]
   suggested_questions: string[]
 }
+
+// ── Backoffice Types ──────────────────────────────────────
+
+export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'lost'
+
+export interface Lead {
+  id: number
+  session_id: string
+  customer_name?: string
+  customer_email?: string
+  customer_phone?: string
+  status: LeadStatus
+  score: number
+  interested_vehicles: string[]
+  summary?: string
+  notes?: string
+  message_count: number
+  created_at?: string
+  updated_at?: string
+}
+
+export interface ConversationSummary {
+  id: number
+  session_id: string
+  lead_id?: number
+  message_count: number
+  status: string
+  operator?: string
+  summary?: string
+  created_at?: string
+  updated_at?: string
+}
+
+export interface ConversationMessageItem {
+  id: number
+  role: string
+  content: string
+  vehicles_shown: string[]
+  sender?: string
+  created_at?: string
+}
+
+export interface ConversationDetail extends ConversationSummary {
+  messages: ConversationMessageItem[]
+  lead?: Lead
+}
+
+export interface ActivityItem {
+  id: number
+  event_type: string
+  title: string
+  description?: string
+  metadata_json?: string
+  session_id?: string
+  lead_id?: number
+  created_at?: string
+}
+
+export interface TopVehicle {
+  vin: string
+  count: number
+  name?: string
+  series?: string
+  fuel_type?: string
+  price_offer?: number
+  price?: string
+  color?: string
+  dealer_name?: string
+  image?: string
+}
+
+export interface BackofficeStats {
+  total_leads: number
+  new_leads_today: number
+  active_conversations: number
+  total_conversations: number
+  avg_score: number
+  top_vehicles: TopVehicle[]
+  total_vehicles: number
+}

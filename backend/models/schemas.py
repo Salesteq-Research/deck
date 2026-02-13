@@ -84,6 +84,7 @@ class ChatRequest(BaseModel):
 
     message: str
     conversation_history: List[ChatMessage] = []
+    session_id: Optional[str] = None
 
 
 class ChatResponse(BaseModel):
@@ -99,3 +100,116 @@ class SeriesCount(BaseModel):
 
     series: str
     count: int
+
+
+# ── Backoffice Schemas ──────────────────────────────────────────────
+
+
+class LeadResponse(BaseModel):
+    id: int
+    session_id: str
+    customer_name: Optional[str] = None
+    customer_email: Optional[str] = None
+    customer_phone: Optional[str] = None
+    status: str = "new"
+    score: int = 0
+    interested_vehicles: List[str] = []
+    summary: Optional[str] = None
+    notes: Optional[str] = None
+    message_count: int = 0
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class LeadUpdate(BaseModel):
+    status: Optional[str] = None
+    customer_name: Optional[str] = None
+    customer_email: Optional[str] = None
+    customer_phone: Optional[str] = None
+    notes: Optional[str] = None
+
+
+class ConversationMessageResponse(BaseModel):
+    id: int
+    role: str
+    content: str
+    vehicles_shown: List[str] = []
+    sender: str = "ai"
+    created_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class ConversationResponse(BaseModel):
+    id: int
+    session_id: str
+    lead_id: Optional[int] = None
+    message_count: int = 0
+    status: str = "active"
+    operator: str = "ai"
+    summary: Optional[str] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class ConversationDetailResponse(ConversationResponse):
+    messages: List[ConversationMessageResponse] = []
+    lead: Optional[LeadResponse] = None
+
+
+class ActivityItemResponse(BaseModel):
+    id: int
+    event_type: str
+    title: str
+    description: Optional[str] = None
+    metadata_json: Optional[str] = None
+    session_id: Optional[str] = None
+    lead_id: Optional[int] = None
+    created_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class BackofficeStats(BaseModel):
+    total_leads: int = 0
+    new_leads_today: int = 0
+    active_conversations: int = 0
+    total_conversations: int = 0
+    avg_score: float = 0
+    top_vehicles: List[dict] = []
+    total_vehicles: int = 0
+
+
+class AgentChatRequest(BaseModel):
+    message: str
+    conversation_history: List[ChatMessage] = []
+
+
+class AgentToolCall(BaseModel):
+    name: str
+    input: dict = {}
+    result_summary: str = ""
+
+
+class AgentChatResponse(BaseModel):
+    message: str
+    tool_calls: List[AgentToolCall] = []
+
+
+class DealerReplyRequest(BaseModel):
+    message: str
+
+
+class EmailRequest(BaseModel):
+    lead_id: int
+    subject: str
+    body: str
+    to_email: str

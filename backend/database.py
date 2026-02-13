@@ -12,6 +12,7 @@ from sqlalchemy.pool import StaticPool
 
 from .config import DATABASE_URL, DATA_DIR
 from .models.vehicle import Base, Vehicle
+from .models.backoffice import Lead, Conversation, ConversationMessage, ActivityLog, ServiceRequest  # noqa: F401 — registers tables
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

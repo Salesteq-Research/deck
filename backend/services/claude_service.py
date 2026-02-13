@@ -209,5 +209,50 @@ Return exactly 3 queries, one per line, no numbering or explanation."""
             logger.error(f"Failed to expand search queries: {e}")
             return [message]
 
+    def agent_chat(
+        self,
+        message: str,
+        context: str,
+        conversation_history: List[Dict[str, str]] = None,
+    ) -> str:
+        """Internal Salesteq Agent for dealer operations."""
+        if not self.client:
+            return "AI service unavailable."
+
+        agent_prompt = """You are the Salesteq AI Agent — an internal assistant for BMW dealership staff.
+
+You help dealers:
+- Summarize lead activity and conversation trends
+- Draft follow-up emails to prospects
+- Identify hot leads and suggest next actions
+- Analyze which vehicles generate the most interest
+- Provide actionable insights from chat data
+
+Keep responses concise, professional, and actionable. Use bullet points.
+When drafting emails, be professional and reference specific vehicles the customer showed interest in."""
+
+        messages = []
+        if conversation_history:
+            for msg in conversation_history[-10:]:
+                messages.append({"role": msg["role"], "content": msg["content"]})
+
+        user_message = f"""{context}
+
+Dealer question: {message}"""
+
+        messages.append({"role": "user", "content": user_message})
+
+        try:
+            response = self.client.messages.create(
+                model=CLAUDE_MODEL,
+                max_tokens=1024,
+                system=agent_prompt,
+                messages=messages,
+            )
+            return response.content[0].text
+        except Exception as e:
+            logger.error(f"Agent chat error: {e}")
+            return "I encountered an error. Please try again."
+
     def is_available(self) -> bool:
         return self.client is not None

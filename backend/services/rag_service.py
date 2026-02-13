@@ -108,23 +108,13 @@ class RAGService:
         if not documents:
             return 0
 
-        try:
-            self._chroma_client.delete_collection("vehicles")
-            self._collection = self._chroma_client.create_collection(
-                name="vehicles",
-                embedding_function=self._embedding_function,
-                metadata={"hnsw:space": "cosine"},
-            )
-        except Exception as e:
-            logger.warning(f"Could not clear existing collection: {e}")
-
         batch_size = 100
         for i in range(0, len(documents), batch_size):
             batch_docs = documents[i:i + batch_size]
             batch_meta = metadatas[i:i + batch_size]
             batch_ids = ids[i:i + batch_size]
 
-            self._collection.add(
+            self._collection.upsert(
                 documents=batch_docs,
                 metadatas=batch_meta,
                 ids=batch_ids,
