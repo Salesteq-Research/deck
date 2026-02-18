@@ -8,7 +8,7 @@ from typing import List, Dict, Any, Optional
 from sqlalchemy import func, desc, or_
 from sqlalchemy.orm import Session
 
-from ..config import ANTHROPIC_API_KEY, CLAUDE_MODEL
+from ..config import OPENAI_API_KEY, CHAT_MODEL
 from ..models.vehicle import Vehicle
 from ..models.backoffice import Lead, Conversation, ConversationMessage, ActivityLog
 
@@ -43,99 +43,126 @@ You have full access to the dealership systems via tools. Use them to answer que
 
 AGENT_TOOLS = [
     {
-        "name": "search_inventory",
-        "description": "Search the vehicle inventory. Returns matching vehicles with specs and pricing. Use this to answer any question about available stock.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "query": {"type": "string", "description": "Free-text search (name, VIN, color, dealer, model, etc.)"},
-                "series": {"type": "string", "description": "Filter by series: 1, 2, 3, 4, 5, 7, 8, X1-X7, Z4, i4, i5, i7, iX, iX1-iX3, M"},
-                "fuel_type": {"type": "string", "description": "GASOLINE, DIESEL, or ELECTRIC"},
-                "body_type": {"type": "string", "description": "SEDAN, TOURING, COUPE, CONVERTIBLE, SPORT_ACTIVITY_VEHICLE, SPORT_ACTIVITY_COUPE, GRAN_COUPE, GRAN_TURISMO"},
-                "min_price": {"type": "number", "description": "Minimum price in CHF"},
-                "max_price": {"type": "number", "description": "Maximum price in CHF"},
-                "limit": {"type": "integer", "description": "Max results (default 10, max 50)"},
+        "type": "function",
+        "function": {
+            "name": "search_inventory",
+            "description": "Search the vehicle inventory. Returns matching vehicles with specs and pricing. Use this to answer any question about available stock.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "Free-text search (name, VIN, color, dealer, model, etc.)"},
+                    "series": {"type": "string", "description": "Filter by series: 1, 2, 3, 4, 5, 7, 8, X1-X7, Z4, i4, i5, i7, iX, iX1-iX3, M"},
+                    "fuel_type": {"type": "string", "description": "GASOLINE, DIESEL, or ELECTRIC"},
+                    "body_type": {"type": "string", "description": "LIMOUSINE, TOURING, COUPE, CABRIOLET, SPORT_ACTIVITY_VEHICLE, SC, GRAN_COUPE, GRAN_TURISMO"},
+                    "min_price": {"type": "number", "description": "Minimum price in CHF"},
+                    "max_price": {"type": "number", "description": "Maximum price in CHF"},
+                    "limit": {"type": "integer", "description": "Max results (default 10, max 50)"},
+                },
             },
         },
     },
     {
-        "name": "get_vehicle",
-        "description": "Get full details of a specific vehicle by its VIN.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "vin": {"type": "string", "description": "Vehicle Identification Number"},
-            },
-            "required": ["vin"],
-        },
-    },
-    {
-        "name": "get_inventory_stats",
-        "description": "Get inventory overview: total vehicles, breakdown by fuel type, series, body type, price range, and dealer count.",
-        "input_schema": {
-            "type": "object",
-            "properties": {},
-        },
-    },
-    {
-        "name": "get_leads",
-        "description": "Get customer leads. Returns lead ID, status, score, contact info, and vehicles of interest.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "status": {"type": "string", "description": "Filter: new, contacted, qualified, converted, lost"},
-                "limit": {"type": "integer", "description": "Max results (default 20)"},
+        "type": "function",
+        "function": {
+            "name": "get_vehicle",
+            "description": "Get full details of a specific vehicle by its VIN.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "vin": {"type": "string", "description": "Vehicle Identification Number"},
+                },
+                "required": ["vin"],
             },
         },
     },
     {
-        "name": "get_lead_detail",
-        "description": "Get full details of a lead including their conversation transcript.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "lead_id": {"type": "integer", "description": "The lead ID"},
-            },
-            "required": ["lead_id"],
-        },
-    },
-    {
-        "name": "get_conversations",
-        "description": "Get recent customer chat conversations.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "limit": {"type": "integer", "description": "Max results (default 20)"},
+        "type": "function",
+        "function": {
+            "name": "get_inventory_stats",
+            "description": "Get inventory overview: total vehicles, breakdown by fuel type, series, body type, price range, and dealer count.",
+            "parameters": {
+                "type": "object",
+                "properties": {},
             },
         },
     },
     {
-        "name": "get_conversation_transcript",
-        "description": "Get the full message transcript of a specific conversation.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "conversation_id": {"type": "integer", "description": "The conversation ID"},
-            },
-            "required": ["conversation_id"],
-        },
-    },
-    {
-        "name": "get_activity",
-        "description": "Get recent activity feed: new leads, messages, emails sent, status changes.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "limit": {"type": "integer", "description": "Max events (default 30)"},
+        "type": "function",
+        "function": {
+            "name": "get_leads",
+            "description": "Get customer leads. Returns lead ID, status, score, contact info, and vehicles of interest.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "status": {"type": "string", "description": "Filter: new, contacted, qualified, converted, lost"},
+                    "limit": {"type": "integer", "description": "Max results (default 20)"},
+                },
             },
         },
     },
     {
-        "name": "get_dashboard_stats",
-        "description": "Get dashboard KPIs: total leads, new today, active conversations, avg lead score, top vehicles by interest.",
-        "input_schema": {
-            "type": "object",
-            "properties": {},
+        "type": "function",
+        "function": {
+            "name": "get_lead_detail",
+            "description": "Get full details of a lead including their conversation transcript.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "lead_id": {"type": "integer", "description": "The lead ID"},
+                },
+                "required": ["lead_id"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_conversations",
+            "description": "Get recent customer chat conversations.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "limit": {"type": "integer", "description": "Max results (default 20)"},
+                },
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_conversation_transcript",
+            "description": "Get the full message transcript of a specific conversation.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "conversation_id": {"type": "integer", "description": "The conversation ID"},
+                },
+                "required": ["conversation_id"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_activity",
+            "description": "Get recent activity feed: new leads, messages, emails sent, status changes.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "limit": {"type": "integer", "description": "Max events (default 30)"},
+                },
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_dashboard_stats",
+            "description": "Get dashboard KPIs: total leads, new today, active conversations, avg lead score, top vehicles by interest.",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+            },
         },
     },
 ]
@@ -150,11 +177,11 @@ class AgentService:
         self._init_client()
 
     def _init_client(self):
-        if not ANTHROPIC_API_KEY:
+        if not OPENAI_API_KEY:
             return
         try:
-            import anthropic
-            self.client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+            from openai import OpenAI
+            self.client = OpenAI(api_key=OPENAI_API_KEY)
         except Exception as e:
             logger.error(f"Failed to init agent client: {e}")
 
@@ -167,7 +194,7 @@ class AgentService:
         if not self.client:
             return {"message": "AI service unavailable.", "tool_calls": []}
 
-        messages = []
+        messages = [{"role": "system", "content": AGENT_SYSTEM_PROMPT}]
         if conversation_history:
             for msg in conversation_history[-10:]:
                 messages.append({"role": msg["role"], "content": msg["content"]})
@@ -178,57 +205,50 @@ class AgentService:
 
         for _ in range(max_iterations):
             try:
-                response = self.client.messages.create(
-                    model=CLAUDE_MODEL,
-                    max_tokens=2048,
-                    system=AGENT_SYSTEM_PROMPT,
-                    tools=AGENT_TOOLS,
+                response = self.client.chat.completions.create(
+                    model=CHAT_MODEL,
+                    max_completion_tokens=2048,
                     messages=messages,
+                    tools=AGENT_TOOLS,
                 )
             except Exception as e:
                 logger.error(f"Agent API error: {e}")
                 return {"message": f"Error: {e}", "tool_calls": tool_calls_log}
 
-            # Check if we got tool use blocks
-            if response.stop_reason == "tool_use":
-                # Add assistant's response (contains both text + tool_use blocks)
-                messages.append({"role": "assistant", "content": response.content})
+            choice = response.choices[0]
 
-                # Process each tool use block
-                tool_results = []
-                for block in response.content:
-                    if block.type == "tool_use":
-                        tool_name = block.name
-                        tool_input = block.input
-                        tool_id = block.id
+            if choice.finish_reason == "tool_calls" and choice.message.tool_calls:
+                # Add assistant's message (contains tool_calls metadata)
+                messages.append(choice.message)
 
-                        # Execute the tool
-                        result = self._execute_tool(tool_name, tool_input)
-                        result_str = json.dumps(result, default=str)
+                # Process each tool call
+                for tc in choice.message.tool_calls:
+                    tool_name = tc.function.name
+                    tool_input = json.loads(tc.function.arguments)
 
-                        # Truncate very large results
-                        if len(result_str) > 8000:
-                            result_str = result_str[:8000] + '... (truncated)'
+                    # Execute the tool
+                    result = self._execute_tool(tool_name, tool_input)
+                    result_str = json.dumps(result, default=str)
 
-                        tool_calls_log.append({
-                            "name": tool_name,
-                            "input": tool_input,
-                            "result_summary": self._summarize_result(tool_name, result),
-                        })
+                    # Truncate very large results
+                    if len(result_str) > 8000:
+                        result_str = result_str[:8000] + '... (truncated)'
 
-                        tool_results.append({
-                            "type": "tool_result",
-                            "tool_use_id": tool_id,
-                            "content": result_str,
-                        })
+                    tool_calls_log.append({
+                        "name": tool_name,
+                        "input": tool_input,
+                        "result_summary": self._summarize_result(tool_name, result),
+                    })
 
-                messages.append({"role": "user", "content": tool_results})
+                    # Append tool result as individual message
+                    messages.append({
+                        "role": "tool",
+                        "tool_call_id": tc.id,
+                        "content": result_str,
+                    })
             else:
                 # Final text response
-                text = ""
-                for block in response.content:
-                    if hasattr(block, "text"):
-                        text += block.text
+                text = choice.message.content or ""
                 return {"message": text, "tool_calls": tool_calls_log}
 
         return {"message": "Agent reached max iterations.", "tool_calls": tool_calls_log}

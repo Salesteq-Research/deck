@@ -1,5 +1,3 @@
-import { Car } from 'lucide-react'
-
 interface WelcomeHeroProps {
   onSuggestionClick: (question: string) => void
 }
@@ -13,22 +11,39 @@ const suggestions = [
 
 export function WelcomeHero({ onSuggestionClick }: WelcomeHeroProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-10 sm:py-16 px-2">
-      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 sm:mb-6">
-        <Car className="h-7 w-7 sm:h-8 sm:w-8 text-primary" />
+    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+      {/* BMW Roundel */}
+      <div className="relative mb-8">
+        <div className="w-20 h-20 rounded-full border-[2.5px] border-foreground/10 flex items-center justify-center">
+          <svg viewBox="0 0 96 96" className="w-16 h-16" fill="none">
+            <circle cx="48" cy="48" r="46" stroke="currentColor" strokeWidth="1.5" className="text-foreground/15" />
+            <circle cx="48" cy="48" r="36" stroke="currentColor" strokeWidth="0.75" className="text-foreground/10" />
+            <text x="48" y="54" textAnchor="middle" className="fill-foreground/80 text-[13px] font-semibold tracking-[0.15em]" style={{ fontFamily: 'system-ui' }}>BMW</text>
+          </svg>
+        </div>
       </div>
-      <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">BMW Sales Advisor</h2>
-      <p className="text-sm text-muted-foreground text-center max-w-md mb-6 sm:mb-8 px-2">
-        Your personal BMW consultant. Ask me about available vehicles, pricing, features, and find your perfect BMW.
+
+      {/* Title */}
+      <h1 className="text-[1.75rem] sm:text-[2rem] font-semibold tracking-[-0.03em] text-foreground mb-2">
+        Sales Advisor
+      </h1>
+      <p className="text-[15px] text-foreground/45 text-center max-w-sm mb-10 leading-relaxed">
+        Your personal BMW consultant for the Swiss market.
+        Ask about vehicles, pricing, or book a test drive.
       </p>
-      <div className="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-2 w-full max-w-lg px-2">
+
+      {/* Suggestion chips */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full max-w-md">
         {suggestions.map((question) => (
           <button
             key={question}
             onClick={() => onSuggestionClick(question)}
-            className="px-4 py-2.5 sm:py-2 rounded-lg border border-foreground/80 text-sm text-foreground bg-white hover:bg-gray-50 transition-colors active:scale-95"
+            className="group relative px-5 py-3.5 rounded-2xl text-[13.5px] text-foreground/70 bg-foreground/[0.03] border border-foreground/[0.06] hover:border-foreground/[0.12] hover:bg-foreground/[0.05] transition-all duration-200 text-left active:scale-[0.98]"
           >
             {question}
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/20 group-hover:text-foreground/40 transition-colors text-sm">
+              &rarr;
+            </span>
           </button>
         ))}
       </div>

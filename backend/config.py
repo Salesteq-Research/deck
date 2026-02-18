@@ -14,7 +14,10 @@ CHROMA_DIR = DATA_DIR / "chroma"
 # Database
 DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DATA_DIR / 'bmw_chat.db'}")
 
-# Anthropic API
+# OpenAI API
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+
+# Keep for backwards compat — unused now
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 
 # Server settings
@@ -28,4 +31,4 @@ CHUNK_OVERLAP = 50
 
 # Chat settings
 MAX_CONTEXT_VEHICLES = 10
-CLAUDE_MODEL = "claude-sonnet-4-20250514"
+CHAT_MODEL = "gpt-5.2"

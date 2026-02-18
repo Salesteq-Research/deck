@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, MessageSquare, Bot, Radio, MessageCircle, Terminal, Globe } from 'lucide-react'
+import { LayoutDashboard, Users, MessageSquare, Bot, Radio, MessageCircle, Globe } from 'lucide-react'
 
 export type BackofficeView = 'dashboard' | 'leads' | 'conversations' | 'live' | 'agent'
 
@@ -11,51 +11,59 @@ const navItems: { id: BackofficeView; icon: typeof LayoutDashboard; label: strin
   { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { id: 'leads', icon: Users, label: 'Leads' },
   { id: 'conversations', icon: MessageSquare, label: 'Conversations' },
-  { id: 'live', icon: Radio, label: 'Live' },
+  { id: 'live', icon: Radio, label: 'Live Monitor' },
   { id: 'agent', icon: Bot, label: 'Agent' },
 ]
 
 export function Sidebar({ active, onNavigate }: SidebarProps) {
   return (
-    <div className="flex flex-col w-14 lg:w-48 border-r border-border bg-background shrink-0">
+    <div className="flex flex-col w-14 lg:w-52 border-r border-white/[0.06] bg-[#0a0b0f] shrink-0">
       {/* Logo */}
-      <div className="flex items-center gap-2 px-3 py-3 border-b border-border">
-        <Terminal className="h-4 w-4 text-primary shrink-0" />
-        <span className="hidden lg:block text-xs font-semibold text-foreground tracking-wide uppercase">Hedin</span>
+      <div className="flex items-center gap-2.5 px-4 py-4 border-b border-white/[0.06]">
+        <svg viewBox="0 0 48 48" className="w-6 h-6 shrink-0" fill="none">
+          <circle cx="24" cy="24" r="22" stroke="currentColor" strokeWidth="1.5" className="text-white/20" />
+          <text x="24" y="28" textAnchor="middle" className="fill-white/50 text-[9px] font-semibold" style={{ fontFamily: 'system-ui' }}>BMW</text>
+        </svg>
+        <div className="hidden lg:block">
+          <span className="text-[13px] font-semibold text-white/90 tracking-[-0.01em]">Hedin</span>
+          <span className="text-[13px] text-white/30 ml-1.5">Dealer</span>
+        </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 py-1">
-        {navItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => onNavigate(item.id)}
-            className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs transition-colors ${
-              active === item.id
-                ? 'text-primary bg-primary/10 border-r-2 border-primary'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <item.icon className="h-3.5 w-3.5 shrink-0" />
-            <span className="hidden lg:block">{item.label}</span>
-          </button>
-        ))}
+      <nav className="flex-1 py-2 px-2">
+        <div className="space-y-0.5">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => onNavigate(item.id)}
+              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-all duration-150 ${
+                active === item.id
+                  ? 'text-white bg-white/[0.08]'
+                  : 'text-white/35 hover:text-white/60 hover:bg-white/[0.04]'
+              }`}
+            >
+              <item.icon className="h-[15px] w-[15px] shrink-0" strokeWidth={active === item.id ? 2 : 1.5} />
+              <span className="hidden lg:block">{item.label}</span>
+            </button>
+          ))}
+        </div>
       </nav>
 
-      {/* Bottom */}
-      <div className="border-t border-border py-1">
+      {/* Bottom links */}
+      <div className="border-t border-white/[0.06] p-2 space-y-0.5">
         <a
           href="/network"
-          className="flex items-center gap-2.5 px-3 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-white/25 hover:text-white/50 hover:bg-white/[0.04] transition-all"
         >
-          <Globe className="h-3.5 w-3.5 shrink-0" />
-          <span className="hidden lg:block">BMW CH Network</span>
+          <Globe className="h-[15px] w-[15px] shrink-0" strokeWidth={1.5} />
+          <span className="hidden lg:block">BMW CH</span>
         </a>
         <a
           href="/"
-          className="flex items-center gap-2.5 px-3 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-white/25 hover:text-white/50 hover:bg-white/[0.04] transition-all"
         >
-          <MessageCircle className="h-3.5 w-3.5 shrink-0" />
+          <MessageCircle className="h-[15px] w-[15px] shrink-0" strokeWidth={1.5} />
           <span className="hidden lg:block">Customer Chat</span>
         </a>
       </div>

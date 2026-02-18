@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Send, LayoutGrid } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { ArrowUp } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { AssistantAvatar } from './AssistantAvatar'
 import { TypingIndicator } from './TypingIndicator'
@@ -22,7 +21,19 @@ export function ChatInterface() {
   const [isHumanMode, setIsHumanMode] = useState(false)
   const lastMessageIdRef = useRef(0)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const [sessionId] = useState(() => crypto.randomUUID())
+
+  // Always focus input
+  useEffect(() => {
+    inputRef.current?.focus()
+  }, [])
+
+  useEffect(() => {
+    if (!isLoading) {
+      inputRef.current?.focus()
+    }
+  }, [isLoading, messages])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -84,23 +95,19 @@ export function ChatInterface() {
         userMessage,
         history,
         sessionId,
-        // onText
         (delta) => {
           fullText += delta
           setStreamingText(fullText)
           setIsStreaming(true)
           setToolCallName(null)
         },
-        // onVehicles
         (v) => {
           vehicles = v
           setStreamingVehicles(v)
         },
-        // onToolCall
         (name) => {
           setToolCallName(name)
         },
-        // onHumanMode
         () => {
           humanModeTriggered = true
           setIsHumanMode(true)
@@ -108,12 +115,10 @@ export function ChatInterface() {
       )
 
       if (humanModeTriggered) {
-        // Human took over — skip AI message finalization, polling will handle replies
         setStreamingText('')
         setStreamingVehicles([])
         setIsStreaming(false)
       } else {
-        // Finalize: move from streaming state to message list
         const assistantMsg: ChatMessage = {
           role: 'assistant',
           content: fullText,
@@ -123,17 +128,12 @@ export function ChatInterface() {
         setStreamingText('')
         setStreamingVehicles([])
         setIsStreaming(false)
-
-        // Fetch suggestions async (non-blocking)
         getChatSuggestions(userMessage, history).then(setSuggestedQuestions)
       }
     } catch {
       setMessages((prev) => [
         ...prev,
-        {
-          role: 'assistant',
-          content: 'Sorry, I encountered an error. Please try again.',
-        },
+        { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' },
       ])
       setStreamingText('')
       setIsStreaming(false)
@@ -153,33 +153,32 @@ export function ChatInterface() {
   }
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-background">
-      {/* Header */}
-      <header className="border-b px-3 sm:px-6 py-2 flex items-center justify-between bg-background shrink-0">
-        <h1 className="text-base sm:text-lg font-bold truncate">BMW Sales Advisor</h1>
-        <div className="flex items-center gap-2 shrink-0 ml-2">
-          <a href="/inventory">
-            <Button variant="outline" size="sm" className="gap-1.5">
-              <LayoutGrid className="h-4 w-4" />
-              <span className="hidden sm:inline">Stock</span>
-            </Button>
-          </a>
-          <a href="/backoffice">
-            <Button variant="outline" size="sm" className="gap-1.5">
-              <span className="hidden sm:inline">Dealer</span>
-            </Button>
-          </a>
-          <a href="/network">
-            <Button variant="outline" size="sm" className="gap-1.5">
-              <span className="hidden sm:inline">BMW CH</span>
-            </Button>
-          </a>
+    <div className="flex flex-col h-[100dvh] bg-background" onClick={() => inputRef.current?.focus()}>
+      {/* Header — minimal, premium */}
+      <header className="px-4 sm:px-6 py-3 flex items-center justify-between shrink-0 border-b border-foreground/[0.06]">
+        <div className="flex items-center gap-3">
+          <svg viewBox="0 0 48 48" className="w-7 h-7" fill="none">
+            <circle cx="24" cy="24" r="23" stroke="currentColor" strokeWidth="1.5" className="text-foreground/20" />
+            <text x="24" y="28" textAnchor="middle" className="fill-foreground/70 text-[9px] font-semibold tracking-[0.08em]" style={{ fontFamily: 'system-ui' }}>BMW</text>
+          </svg>
+          <span className="text-[15px] font-medium tracking-[-0.01em] text-foreground/80">Sales Advisor</span>
         </div>
+        <nav className="flex items-center gap-1">
+          <a href="/inventory" className="px-3 py-1.5 rounded-lg text-[13px] text-foreground/40 hover:text-foreground/70 hover:bg-foreground/[0.04] transition-all">
+            Stock
+          </a>
+          <a href="/backoffice" className="px-3 py-1.5 rounded-lg text-[13px] text-foreground/40 hover:text-foreground/70 hover:bg-foreground/[0.04] transition-all">
+            Dealer
+          </a>
+          <a href="/network" className="px-3 py-1.5 rounded-lg text-[13px] text-foreground/40 hover:text-foreground/70 hover:bg-foreground/[0.04] transition-all">
+            Network
+          </a>
+        </nav>
       </header>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 px-3 py-3 sm:px-6 sm:py-4">
-        <div className="max-w-4xl mx-auto space-y-3 sm:space-y-4">
+      <ScrollArea className="flex-1 px-4 py-4 sm:px-6">
+        <div className="max-w-2xl mx-auto space-y-4">
           {messages.length === 0 && !isLoading ? (
             <WelcomeHero onSuggestionClick={handleSuggestionClick} />
           ) : (
@@ -187,14 +186,14 @@ export function ChatInterface() {
               <div key={index} className="animate-message-in">
                 {message.role === 'user' ? (
                   <div className="flex justify-end">
-                    <div className="max-w-[85%] sm:max-w-[75%] rounded-3xl px-4 py-2.5 sm:px-5 sm:py-3 bg-[var(--color-user-bubble)] text-foreground">
-                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    <div className="max-w-[85%] sm:max-w-[70%] rounded-[1.25rem] rounded-br-md px-4 py-2.5 bg-foreground text-background">
+                      <p className="text-[14px] leading-relaxed">{message.content}</p>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex gap-2 sm:gap-3 items-start">
+                  <div className="flex gap-3 items-start">
                     <AssistantAvatar />
-                    <div className="flex-1 min-w-0 px-1 py-1">
+                    <div className="flex-1 min-w-0 pt-0.5">
                       <MarkdownMessage content={message.content} />
                       {message.vehicles && message.vehicles.length > 0 && (
                         <InlineProductRow vehicles={message.vehicles} />
@@ -208,9 +207,9 @@ export function ChatInterface() {
 
           {/* Streaming response */}
           {isLoading && (
-            <div className="flex gap-2 sm:gap-3 items-start animate-message-in">
+            <div className="flex gap-3 items-start animate-message-in">
               <AssistantAvatar />
-              <div className="flex-1 min-w-0 px-1 py-1">
+              <div className="flex-1 min-w-0 pt-0.5">
                 {isStreaming && streamingText ? (
                   <>
                     <MarkdownMessage content={streamingText} />
@@ -219,12 +218,16 @@ export function ChatInterface() {
                     )}
                   </>
                 ) : toolCallName ? (
-                  <div className="flex items-center gap-2 py-2">
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-foreground/60 animate-pulse" />
-                    <span className="text-xs text-muted-foreground">searching inventory...</span>
+                  <div className="flex items-center gap-2.5 py-2">
+                    <div className="flex gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-foreground/30 animate-typing-dot [animation-delay:0ms]" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-foreground/30 animate-typing-dot [animation-delay:200ms]" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-foreground/30 animate-typing-dot [animation-delay:400ms]" />
+                    </div>
+                    <span className="text-[12px] text-foreground/30">Searching inventory</span>
                   </div>
                 ) : (
-                  <div className="px-1 py-2.5">
+                  <div className="py-2">
                     <TypingIndicator />
                   </div>
                 )}
@@ -238,13 +241,13 @@ export function ChatInterface() {
 
       {/* Suggested Questions */}
       {suggestedQuestions.length > 0 && !isLoading && (
-        <div className="px-3 sm:px-6 py-2 border-t shrink-0">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide pb-0.5">
+        <div className="px-4 sm:px-6 pb-2 shrink-0">
+          <div className="max-w-2xl mx-auto">
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
               {suggestedQuestions.map((question, index) => (
                 <button
                   key={index}
-                  className="shrink-0 px-3 py-1.5 rounded-lg border border-foreground/80 text-xs text-foreground bg-white hover:bg-gray-50 transition-colors whitespace-nowrap"
+                  className="shrink-0 px-3.5 py-2 rounded-xl text-[12.5px] text-foreground/50 bg-foreground/[0.03] border border-foreground/[0.07] hover:border-foreground/[0.14] hover:text-foreground/70 transition-all whitespace-nowrap"
                   onClick={() => handleSuggestionClick(question)}
                 >
                   {question}
@@ -255,23 +258,25 @@ export function ChatInterface() {
         </div>
       )}
 
-      {/* Input */}
-      <div className="border-t p-2.5 sm:p-4 bg-background shrink-0 pb-[calc(0.625rem+env(safe-area-inset-bottom))] sm:pb-4">
-        <div className="max-w-4xl mx-auto">
-          <form onSubmit={handleSubmit} className="flex items-center gap-2 bg-[#eee] rounded-full px-4 py-1.5">
+      {/* Input — clean, focused, Apple-style */}
+      <div className="px-4 sm:px-6 pt-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-4 shrink-0">
+        <div className="max-w-2xl mx-auto">
+          <form onSubmit={handleSubmit} className="relative">
             <input
+              ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about BMW models, pricing..."
+              placeholder="Message BMW Sales Advisor..."
               disabled={isLoading}
-              className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground"
+              autoFocus
+              className="w-full bg-foreground/[0.04] border border-foreground/[0.08] rounded-2xl pl-5 pr-12 py-3.5 text-[14.5px] text-foreground placeholder:text-foreground/25 outline-none focus:border-foreground/[0.15] focus:bg-foreground/[0.06] transition-all duration-200 disabled:opacity-40"
             />
             <button
               type="submit"
               disabled={isLoading || !input.trim()}
-              className="shrink-0 w-8 h-8 rounded-full bg-foreground text-background flex items-center justify-center disabled:opacity-30 transition-opacity"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-foreground flex items-center justify-center disabled:opacity-15 transition-all duration-200 hover:scale-105 active:scale-95"
             >
-              <Send className="h-3.5 w-3.5" />
+              <ArrowUp className="h-4 w-4 text-background" strokeWidth={2.5} />
             </button>
           </form>
         </div>

@@ -191,9 +191,9 @@ def get_suggestions(request: ChatRequest, db: Session = Depends(get_db)):
         return {"suggestions": []}
 
     try:
-        response = agent.client.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=150,
+        response = agent.client.chat.completions.create(
+            model="gpt-5.2",
+            max_completion_tokens=150,
             messages=[{
                 "role": "user",
                 "content": f"""Based on this BMW sales conversation:
@@ -202,7 +202,7 @@ Last user message: {request.message[:200]}
 Generate 3 short follow-up questions a car buyer might ask. One per line, no numbering."""
             }],
         )
-        questions = response.content[0].text.strip().split("\n")
+        questions = response.choices[0].message.content.strip().split("\n")
         return {"suggestions": [q.strip() for q in questions if q.strip()][:3]}
     except Exception as e:
         logger.error(f"Suggestions error: {e}")

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import {
   Building2, MessageSquare, Zap, TrendingUp, Bot,
-  Car, BarChart3, Globe, MessageCircle, LayoutGrid, Shield, Wrench,
+  Car, BarChart3, Wrench,
 } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
@@ -120,9 +120,9 @@ const eventPrefix: Record<string, string> = {
 
 function KpiCard({ label, value, sub, accent }: { label: string; value: string | number; sub?: string; accent?: boolean }) {
   return (
-    <div className={`border rounded-md px-4 py-3 ${accent ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-border bg-card'}`}>
-      <p className="text-[11px] text-muted-foreground mb-1 uppercase tracking-wider">{label}</p>
-      <p className={`text-2xl font-bold tabular-nums ${accent ? 'text-emerald-400' : 'text-foreground'}`}>
+    <div className={`rounded-xl px-4 py-3.5 ${accent ? 'border border-emerald-500/20 bg-emerald-500/[0.06]' : 'border border-white/[0.06] bg-white/[0.03]'}`}>
+      <p className="text-[11px] text-white/30 mb-1.5 tracking-wide">{label}</p>
+      <p className={`text-[22px] font-semibold tabular-nums tracking-[-0.02em] ${accent ? 'text-emerald-400' : 'text-white/90'}`}>
         {value}
         {sub && <span className="text-sm font-normal text-muted-foreground ml-0.5">{sub}</span>}
       </p>
@@ -191,39 +191,32 @@ export function NetworkDashboard() {
   const bodyMax = demand?.body_demand.length ? Math.max(...demand.body_demand.map(d => Math.max(d.demand, d.supply))) : 1
 
   return (
-    <div className="backoffice flex flex-col h-[100dvh] bg-background text-foreground font-mono text-[13px]">
+    <div className="backoffice flex flex-col h-[100dvh] bg-[#0c0d11] text-white/85 font-sans text-[13px]">
       {/* Header */}
-      <header className="flex items-center justify-between px-5 py-2.5 border-b border-border shrink-0">
+      <header className="flex items-center justify-between px-6 py-3 border-b border-white/[0.06] shrink-0">
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Globe className="h-4 w-4 text-primary" />
-            <span className="font-semibold text-foreground">BMW Switzerland</span>
-            <span className="text-border">/</span>
-            <span className="text-muted-foreground">network command center</span>
+          <svg viewBox="0 0 48 48" className="w-6 h-6" fill="none">
+            <circle cx="24" cy="24" r="22" stroke="currentColor" strokeWidth="1.5" className="text-white/20" />
+            <text x="24" y="28" textAnchor="middle" className="fill-white/50 text-[9px] font-semibold" style={{ fontFamily: 'system-ui' }}>BMW</text>
+          </svg>
+          <div>
+            <span className="text-[15px] font-medium text-white/90 tracking-[-0.01em]">BMW Switzerland</span>
+            <span className="text-[15px] text-white/25 ml-2">Network</span>
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-5">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2">
               <span className="animate-pulse-dot absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
             </span>
-            <span className="text-xs text-emerald-400">{stats?.dealer_count ?? '—'} dealers online</span>
+            <span className="text-[12px] text-emerald-400/80">{stats?.dealer_count ?? '—'} dealers</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <a href="/" className="px-2.5 py-1 rounded text-[11px] text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex items-center gap-1.5">
-              <MessageCircle className="h-3 w-3" />
-              <span className="hidden sm:inline">Chat</span>
-            </a>
-            <a href="/inventory" className="px-2.5 py-1 rounded text-[11px] text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex items-center gap-1.5">
-              <LayoutGrid className="h-3 w-3" />
-              <span className="hidden sm:inline">Stock</span>
-            </a>
-            <a href="/backoffice" className="px-2.5 py-1 rounded text-[11px] text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex items-center gap-1.5">
-              <Shield className="h-3 w-3" />
-              <span className="hidden sm:inline">Dealer</span>
-            </a>
-          </div>
+          <nav className="flex items-center gap-1">
+            <a href="/" className="px-3 py-1.5 rounded-lg text-[12px] text-white/30 hover:text-white/60 hover:bg-white/[0.04] transition-all">Chat</a>
+            <a href="/inventory" className="px-3 py-1.5 rounded-lg text-[12px] text-white/30 hover:text-white/60 hover:bg-white/[0.04] transition-all">Stock</a>
+            <a href="/backoffice" className="px-3 py-1.5 rounded-lg text-[12px] text-white/30 hover:text-white/60 hover:bg-white/[0.04] transition-all">Dealer</a>
+          </nav>
         </div>
       </header>
 
@@ -231,8 +224,8 @@ export function NetworkDashboard() {
         <div className="p-5 space-y-4 max-w-[1400px] mx-auto">
 
           {/* AI Executive Brief */}
-          <div className="border border-primary/30 rounded-md bg-primary/5">
-            <div className="px-4 py-2 border-b border-primary/20 flex items-center gap-2">
+          <div className="rounded-xl border border-blue-500/15 bg-blue-500/[0.04]">
+            <div className="px-4 py-2 border-b border-blue-500/10 flex items-center gap-2">
               <Bot className="h-3.5 w-3.5 text-primary" />
               <span className="text-xs text-primary font-medium">executive brief</span>
               {briefTools.length > 0 && (
@@ -269,8 +262,8 @@ export function NetworkDashboard() {
 
           {/* Lead Funnel */}
           {stats && stats.lead_funnel && Object.keys(stats.lead_funnel).length > 0 && (
-            <div className="border border-border rounded-md bg-card">
-              <div className="px-4 py-2.5 border-b border-border flex items-center gap-1.5">
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02]">
+              <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center gap-1.5">
                 <TrendingUp className="h-3 w-3 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">lead_pipeline</span>
               </div>
@@ -322,8 +315,8 @@ export function NetworkDashboard() {
             const entries = Object.entries(stats.service_breakdown).sort((a, b) => b[1] - a[1])
             const maxSvc = Math.max(...entries.map(e => e[1]), 1)
             return (
-              <div className="border border-border rounded-md bg-card">
-                <div className="px-4 py-2.5 border-b border-border flex items-center gap-1.5">
+              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02]">
+                <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center gap-1.5">
                   <Wrench className="h-3 w-3 text-muted-foreground" />
                   <span className="text-xs text-muted-foreground">service_requests</span>
                   <span className="text-[10px] text-muted-foreground ml-auto">{stats.total_service_requests} total — {stats.pending_service_requests} pending</span>
@@ -353,8 +346,8 @@ export function NetworkDashboard() {
           {/* Demand Intelligence */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             {/* Series Demand */}
-            <div className="border border-border rounded-md bg-card">
-              <div className="px-4 py-2.5 border-b border-border flex items-center gap-1.5">
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02]">
+              <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center gap-1.5">
                 <BarChart3 className="h-3 w-3 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">demand_by_series</span>
                 <span className="text-[10px] text-muted-foreground ml-auto flex items-center gap-2">
@@ -379,8 +372,8 @@ export function NetworkDashboard() {
             </div>
 
             {/* Fuel Type Demand */}
-            <div className="border border-border rounded-md bg-card">
-              <div className="px-4 py-2.5 border-b border-border flex items-center gap-1.5">
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02]">
+              <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center gap-1.5">
                 <Zap className="h-3 w-3 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">fuel_type_demand</span>
                 <span className="text-[10px] text-muted-foreground ml-auto">ev transition tracking</span>
@@ -440,8 +433,8 @@ export function NetworkDashboard() {
 
           {/* Body Type + Price Segments */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            <div className="border border-border rounded-md bg-card">
-              <div className="px-4 py-2.5 border-b border-border flex items-center gap-1.5">
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02]">
+              <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center gap-1.5">
                 <Car className="h-3 w-3 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">body_type_demand</span>
               </div>
@@ -462,8 +455,8 @@ export function NetworkDashboard() {
             </div>
 
             {/* Price Segment Demand */}
-            <div className="border border-border rounded-md bg-card">
-              <div className="px-4 py-2.5 border-b border-border flex items-center gap-1.5">
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02]">
+              <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center gap-1.5">
                 <TrendingUp className="h-3 w-3 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">price_segment_demand</span>
               </div>
@@ -495,8 +488,8 @@ export function NetworkDashboard() {
           {/* Dealer Network + Activity */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
             {/* Dealer Leaderboard */}
-            <div className="lg:col-span-2 border border-border rounded-md bg-card">
-              <div className="px-4 py-2.5 border-b border-border flex items-center gap-1.5">
+            <div className="lg:col-span-2 rounded-xl border border-white/[0.06] bg-white/[0.02]">
+              <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center gap-1.5">
                 <Building2 className="h-3 w-3 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">dealer_network</span>
                 <span className="text-[10px] text-muted-foreground ml-auto">{dealers.length} dealers</span>
@@ -504,7 +497,7 @@ export function NetworkDashboard() {
               <div className="overflow-x-auto">
                 <table className="w-full text-[11px]">
                   <thead>
-                    <tr className="border-b border-border text-muted-foreground">
+                    <tr className="border-b border-white/[0.06] text-muted-foreground">
                       <th className="text-left px-4 py-2 font-normal">#</th>
                       <th className="text-left px-2 py-2 font-normal">dealer</th>
                       <th className="text-right px-2 py-2 font-normal">stock</th>
@@ -515,7 +508,7 @@ export function NetworkDashboard() {
                   </thead>
                   <tbody>
                     {dealers.slice(0, 15).map((d, i) => (
-                      <tr key={d.dealer_name} className="border-b border-border last:border-0 hover:bg-secondary/30 transition-colors">
+                      <tr key={d.dealer_name} className="border-b border-white/[0.06] last:border-0 hover:bg-secondary/30 transition-colors">
                         <td className="px-4 py-2 text-muted-foreground">{i + 1}</td>
                         <td className="px-2 py-2 text-foreground truncate max-w-[200px]">{d.dealer_name}</td>
                         <td className="px-2 py-2 text-right tabular-nums text-muted-foreground">{d.stock}</td>
@@ -545,8 +538,8 @@ export function NetworkDashboard() {
             </div>
 
             {/* Activity Feed */}
-            <div className="border border-border rounded-md bg-card">
-              <div className="px-4 py-2.5 border-b border-border flex items-center gap-1.5">
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02]">
+              <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center gap-1.5">
                 <MessageSquare className="h-3 w-3 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">network_activity</span>
               </div>
@@ -557,7 +550,7 @@ export function NetworkDashboard() {
                   activity.map((item) => {
                     const prefix = eventPrefix[item.event_type] || '·'
                     return (
-                      <div key={item.id} className="flex items-start gap-2 px-4 py-2 border-b border-border last:border-0 text-xs">
+                      <div key={item.id} className="flex items-start gap-2 px-4 py-2 border-b border-white/[0.06] last:border-0 text-xs">
                         <span className="text-primary shrink-0 w-3 text-center">{prefix}</span>
                         <div className="min-w-0 flex-1">
                           <span className="text-foreground">{item.title}</span>
