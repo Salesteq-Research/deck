@@ -3,6 +3,7 @@ import { ChatInterface } from './components/chat/ChatInterface'
 import { StockDashboard } from './components/inventory/StockDashboard'
 import { BackofficeLayout } from './components/backoffice/BackofficeLayout'
 import { NetworkDashboard } from './components/network/NetworkDashboard'
+import { TestDriveBooking } from './components/testdrive/TestDriveBooking'
 
 function App() {
   const [path, setPath] = useState(window.location.pathname)
@@ -23,6 +24,10 @@ function App() {
 
   if (path === '/network') {
     return <NetworkDashboard />
+  }
+
+  if (path === '/testdrive') {
+    return <TestDriveBooking />
   }
 
   return <ChatInterface />

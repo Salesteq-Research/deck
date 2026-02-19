@@ -134,3 +134,42 @@ class ServiceRequest(Base):
 
     def __repr__(self):
         return f"<ServiceRequest(id={self.id}, type='{self.service_type}', status='{self.status}')>"
+
+
+class TestDriveBooking(Base):
+    """A test drive booking request — mirrors BMW Switzerland booking flow."""
+
+    __tablename__ = "test_drive_bookings"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    session_id = Column(String(100), index=True)
+    booking_ref = Column(String(20), unique=True)  # e.g. TD-2026-0042
+
+    # Vehicle
+    vin = Column(String(50))
+    vehicle_name = Column(String(500))
+    series = Column(String(100))
+    body_type = Column(String(100))
+    fuel_type = Column(String(50))
+
+    # Customer
+    salutation = Column(String(20))  # Herr/Frau
+    first_name = Column(String(200))
+    last_name = Column(String(200))
+    email = Column(String(300))
+    phone = Column(String(100))
+
+    # Appointment
+    preferred_date = Column(String(200))
+    time_preference = Column(String(50))  # morning/midday/afternoon/evening
+    dealer_name = Column(String(300))
+    dealer_id = Column(String(50))
+    comments = Column(Text)
+
+    # Status
+    status = Column(String(30), default="pending")  # pending/confirmed/completed/cancelled
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<TestDriveBooking(id={self.id}, ref='{self.booking_ref}', status='{self.status}')>"

@@ -6,6 +6,7 @@ from .chat import router as chat_router
 from .inventory import router as inventory_router
 from .backoffice import router as backoffice_router
 from .network import router as network_router
+from .testdrive import router as testdrive_router
 
 __all__ = [
     "vehicles_router",
@@ -14,4 +15,5 @@ __all__ = [
     "inventory_router",
     "backoffice_router",
     "network_router",
+    "testdrive_router",
 ]
