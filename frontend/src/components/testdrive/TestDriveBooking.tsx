@@ -1,10 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { ArrowUp, Calendar, Car, MapPin, CheckCircle2 } from 'lucide-react'
+import { ArrowUp, Calendar, Car, MapPin, CheckCircle2, Zap, Fuel, Battery } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { AssistantAvatar } from '../chat/AssistantAvatar'
 import { TypingIndicator } from '../chat/TypingIndicator'
 import { MarkdownMessage } from '../chat/MarkdownMessage'
-import { InlineProductRow } from '../chat/InlineProductRow'
 import type { ChatMessage, VehicleCard } from '@/lib/types'
 
 const API_BASE = '/api'
@@ -57,18 +56,17 @@ async function sendTestDriveStream(
 }
 
 const suggestions = [
-  "I'd like to test drive a BMW 5 Series",
-  "Show me electric vehicles for test drive",
-  "What SUVs can I test drive?",
-  "Ich mochte eine Probefahrt buchen",
+  "Ich möchte einen BMW X3 Probe fahren",
+  "Welche Elektrofahrzeuge kann ich testen?",
+  "Show me SUVs for test drive",
+  "I'd like to test drive a BMW 3 Series",
 ]
 
-// Progress tracker steps
 const steps = [
   { key: 'vehicle', label: 'Fahrzeug', icon: Car },
   { key: 'dealer', label: 'Standort', icon: MapPin },
   { key: 'date', label: 'Termin', icon: Calendar },
-  { key: 'confirm', label: 'Bestatigt', icon: CheckCircle2 },
+  { key: 'confirm', label: 'Bestätigt', icon: CheckCircle2 },
 ]
 
 export function TestDriveBooking() {
@@ -88,17 +86,18 @@ export function TestDriveBooking() {
   useEffect(() => { if (!isLoading) inputRef.current?.focus() }, [isLoading, messages])
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages, streamingText])
 
-  // Track booking progress based on conversation
+  // Track booking progress from conversation content
   useEffect(() => {
     const allText = messages.map(m => m.content).join(' ').toLowerCase()
-    if (allText.includes('booking_reference') || allText.includes('td-202') || allText.includes('bestatigt') || allText.includes('confirmed')) {
+    if (allText.includes('td-202') || allText.includes('buchungsreferenz') || allText.includes('booking_reference') || allText.includes('bestätigt')) {
       setActiveStep(3)
-    } else if (allText.includes('date') || allText.includes('termin') || allText.includes('time') || allText.includes('wann')) {
+    } else if (allText.includes('datum') || allText.includes('termin') || allText.includes('wann') || allText.includes('preferred date') || allText.includes('time of day')) {
       setActiveStep(2)
-    } else if (allText.includes('dealer') || allText.includes('handler') || allText.includes('standort') || allText.includes('partner')) {
+    } else if (allText.includes('händler') || allText.includes('partner') || allText.includes('standort') || allText.includes('dealer') || allText.includes('niederlassung')) {
       setActiveStep(1)
-    } else if (messages.some(m => m.vehicles && m.vehicles.length > 0)) {
-      setActiveStep(1)
+    } else if (messages.some(m => m.role === 'user' && m.vehicles && m.vehicles.length === 0) || messages.length > 2) {
+      // After initial exchange, assume vehicle step in progress
+      if (messages.length >= 2) setActiveStep(0)
     }
   }, [messages])
 
@@ -151,7 +150,7 @@ export function TestDriveBooking() {
       setStreamingVehicles([])
       setIsStreaming(false)
     } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' }])
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Entschuldigung, ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.' }])
       setStreamingText('')
       setIsStreaming(false)
     } finally {
@@ -160,14 +159,29 @@ export function TestDriveBooking() {
     }
   }, [messages, isLoading, sessionId])
 
+  // When user clicks a model card, send a selection message to the agent
+  const handleModelSelect = useCallback((vehicle: VehicleCard) => {
+    sendMessage(`Ich möchte eine Probefahrt mit dem ${vehicle.name} buchen`)
+  }, [sendMessage])
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     sendMessage(input)
   }
 
+  const toolCallLabel = (name: string) => {
+    const labels: Record<string, string> = {
+      'browse_test_drive_models': 'Modelle laden...',
+      'get_model_details': 'Modelldetails laden...',
+      'get_available_dealers': 'BMW Partner suchen...',
+      'confirm_test_drive_booking': 'Buchung wird bestätigt...',
+    }
+    return labels[name] || 'Wird verarbeitet...'
+  }
+
   return (
     <div className="flex flex-col h-[100dvh] bg-white" onClick={() => inputRef.current?.focus()}>
-      {/* Header — BMW Test Drive branding */}
+      {/* Header */}
       <header className="px-4 sm:px-6 py-3 flex items-center justify-between shrink-0 border-b border-[#e6e6e6]">
         <div className="flex items-center gap-3">
           <svg viewBox="0 0 48 48" className="w-7 h-7" fill="none">
@@ -180,18 +194,9 @@ export function TestDriveBooking() {
           </div>
         </div>
         <nav className="flex items-center gap-1">
-          <a href="/testdrive/inventory" className="px-3 py-1.5 rounded-lg text-[13px] text-[#1c69d4]/70 hover:text-[#1c69d4] hover:bg-[#1c69d4]/[0.06] font-medium transition-all">
-            Fleet
-          </a>
-          <a href="/" className="px-3 py-1.5 rounded-lg text-[13px] text-foreground/40 hover:text-foreground/70 hover:bg-foreground/[0.04] transition-all">
-            Chat
-          </a>
-          <a href="/inventory" className="px-3 py-1.5 rounded-lg text-[13px] text-foreground/40 hover:text-foreground/70 hover:bg-foreground/[0.04] transition-all">
-            Stock
-          </a>
-          <a href="/backoffice" className="px-3 py-1.5 rounded-lg text-[13px] text-foreground/40 hover:text-foreground/70 hover:bg-foreground/[0.04] transition-all">
-            Dealer
-          </a>
+          <a href="/testdrive/inventory" className="px-3 py-1.5 rounded-lg text-[13px] text-[#1c69d4]/70 hover:text-[#1c69d4] hover:bg-[#1c69d4]/[0.06] font-medium transition-all">Modelle</a>
+          <a href="/" className="px-3 py-1.5 rounded-lg text-[13px] text-foreground/40 hover:text-foreground/70 hover:bg-foreground/[0.04] transition-all">Chat</a>
+          <a href="/backoffice" className="px-3 py-1.5 rounded-lg text-[13px] text-foreground/40 hover:text-foreground/70 hover:bg-foreground/[0.04] transition-all">Dealer</a>
         </nav>
       </header>
 
@@ -205,10 +210,9 @@ export function TestDriveBooking() {
               const isCurrent = i === activeStep
               return (
                 <div key={step.key} className="flex items-center gap-2 flex-1">
-                  <div className={`
-                    flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-medium transition-all duration-500
-                    ${isCurrent ? 'bg-[#1c69d4] text-white' : isActive ? 'bg-[#1c69d4]/10 text-[#1c69d4]' : 'bg-[#f0f0f0] text-[#999]'}
-                  `}>
+                  <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-medium transition-all duration-500 ${
+                    isCurrent ? 'bg-[#1c69d4] text-white' : isActive ? 'bg-[#1c69d4]/10 text-[#1c69d4]' : 'bg-[#f0f0f0] text-[#999]'
+                  }`}>
                     <Icon className="w-3 h-3" />
                     <span className="hidden sm:inline">{step.label}</span>
                   </div>
@@ -242,7 +246,7 @@ export function TestDriveBooking() {
                     <div className="flex-1 min-w-0 pt-0.5">
                       <MarkdownMessage content={message.content} />
                       {message.vehicles && message.vehicles.length > 0 && (
-                        <InlineProductRow vehicles={message.vehicles} />
+                        <SelectableModelCards vehicles={message.vehicles} onSelect={handleModelSelect} disabled={isLoading} />
                       )}
                     </div>
                   </div>
@@ -260,7 +264,7 @@ export function TestDriveBooking() {
                   <>
                     <MarkdownMessage content={streamingText} />
                     {streamingVehicles.length > 0 && (
-                      <InlineProductRow vehicles={streamingVehicles} />
+                      <SelectableModelCards vehicles={streamingVehicles} onSelect={handleModelSelect} disabled />
                     )}
                   </>
                 ) : toolCallName ? (
@@ -270,17 +274,10 @@ export function TestDriveBooking() {
                       <span className="w-1.5 h-1.5 rounded-full bg-[#1c69d4]/40 animate-typing-dot [animation-delay:200ms]" />
                       <span className="w-1.5 h-1.5 rounded-full bg-[#1c69d4]/40 animate-typing-dot [animation-delay:400ms]" />
                     </div>
-                    <span className="text-[12px] text-[#999]">
-                      {toolCallName === 'search_test_drive_vehicles' ? 'Fahrzeuge suchen...' :
-                       toolCallName === 'get_available_dealers' ? 'Handler laden...' :
-                       toolCallName === 'confirm_test_drive_booking' ? 'Buchung bestatigen...' :
-                       'Processing...'}
-                    </span>
+                    <span className="text-[12px] text-[#999]">{toolCallLabel(toolCallName)}</span>
                   </div>
                 ) : (
-                  <div className="py-2">
-                    <TypingIndicator />
-                  </div>
+                  <div className="py-2"><TypingIndicator /></div>
                 )}
               </div>
             </div>
@@ -298,7 +295,12 @@ export function TestDriveBooking() {
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Welches Modell mochten Sie Probe fahren?"
+              placeholder={
+                activeStep === 0 ? "Welches Modell möchten Sie Probe fahren?" :
+                activeStep === 1 ? "In welcher Region ist Ihr BMW Partner?" :
+                activeStep === 2 ? "Wann möchten Sie die Probefahrt machen?" :
+                "Nachricht eingeben..."
+              }
               disabled={isLoading}
               autoFocus
               className="w-full bg-[#f5f5f5] border border-[#e6e6e6] rounded-2xl pl-5 pr-12 py-3.5 text-[14.5px] text-[#1c1c1c] placeholder:text-[#999] outline-none focus:border-[#1c69d4]/30 focus:bg-white transition-all duration-200 disabled:opacity-40"
@@ -321,10 +323,71 @@ export function TestDriveBooking() {
 }
 
 
+/** Selectable model cards — clicking sends the model name to the agent */
+function SelectableModelCards({ vehicles, onSelect, disabled }: {
+  vehicles: VehicleCard[]
+  onSelect: (v: VehicleCard) => void
+  disabled?: boolean
+}) {
+  if (vehicles.length === 0) return null
+
+  return (
+    <div className="mt-3 pt-3">
+      <div className="flex gap-3 overflow-x-auto py-2 px-0.5 scrollbar-hide">
+        {vehicles.map((v) => (
+          <button
+            key={v.vin}
+            disabled={disabled}
+            onClick={(e) => { e.stopPropagation(); onSelect(v) }}
+            className="flex-shrink-0 w-[220px] sm:w-[250px] flex flex-col rounded-xl border border-[#e6e6e6] bg-white overflow-hidden text-left transition-all duration-200 hover:border-[#1c69d4] hover:shadow-md active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none group"
+          >
+            {/* Image */}
+            <div className="w-full h-[120px] sm:h-[140px] bg-gradient-to-br from-[#f5f5f5] to-[#eee] relative flex items-center justify-center">
+              {v.image ? (
+                <img src={v.image} alt={v.name} className="w-[80%] h-auto object-contain drop-shadow-md group-hover:scale-105 transition-transform duration-300" />
+              ) : (
+                <Car className="w-10 h-10 text-[#ccc]" />
+              )}
+              {/* Powertrain badge */}
+              <div className={`absolute top-2 right-2 flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium ${
+                v.fuel_type?.includes('Electri') ? 'bg-emerald-500/90 text-white' :
+                v.fuel_type?.includes('Hybrid') ? 'bg-blue-500/90 text-white' :
+                'bg-white/90 text-[#555]'
+              }`}>
+                {v.fuel_type?.includes('Electri') ? <Zap className="w-2.5 h-2.5" /> :
+                 v.fuel_type?.includes('Hybrid') ? <Battery className="w-2.5 h-2.5" /> :
+                 <Fuel className="w-2.5 h-2.5" />}
+                {v.fuel_type}
+              </div>
+            </div>
+
+            {/* Info */}
+            <div className="p-3 flex-1 flex flex-col">
+              <h4 className="text-[13px] font-semibold text-[#1c1c1c] leading-tight line-clamp-2">{v.name}</h4>
+              <p className="text-[11px] text-[#888] mt-0.5">
+                {v.series && <span className="text-[#1c69d4] font-medium">{v.series}</span>}
+                {v.body_type && <> &middot; {v.body_type}</>}
+              </p>
+              {v.price && (
+                <p className="text-[13px] font-bold text-[#1c1c1c] mt-auto pt-2">{v.price}</p>
+              )}
+
+              {/* Select CTA */}
+              <div className="mt-2 py-1.5 rounded-lg bg-[#1c69d4]/[0.06] text-[#1c69d4] text-[11px] font-medium text-center group-hover:bg-[#1c69d4] group-hover:text-white transition-all">
+                Dieses Modell wählen
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+
 function TestDriveWelcome({ onSuggestionClick }: { onSuggestionClick: (q: string) => void }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[55vh] px-4">
-      {/* BMW Roundel with test drive icon */}
       <div className="relative mb-8">
         <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#1c69d4]/5 to-[#1c69d4]/10 flex items-center justify-center">
           <div className="w-16 h-16 rounded-full border-[2px] border-[#1c69d4]/20 flex items-center justify-center">
@@ -333,18 +396,16 @@ function TestDriveWelcome({ onSuggestionClick }: { onSuggestionClick: (q: string
         </div>
       </div>
 
-      {/* Title */}
       <h1 className="text-[1.75rem] sm:text-[2rem] font-semibold tracking-[-0.03em] text-[#1c1c1c] mb-2">
         Probefahrt buchen
       </h1>
       <p className="text-[15px] text-[#888] text-center max-w-md mb-2 leading-relaxed">
-        Book your BMW test drive experience. Our AI assistant will guide you through selecting a vehicle, choosing a dealer, and scheduling your appointment.
+        Unser AI-Assistent führt Sie durch die Buchung: Fahrzeug wählen, BMW Partner finden, Termin vereinbaren.
       </p>
       <p className="text-[13px] text-[#aaa] text-center max-w-sm mb-10">
-        Wahlen Sie Ihr Wunschfahrzeug und vereinbaren Sie einen Termin bei Ihrem BMW Partner.
+        Our AI assistant guides you step by step: choose a model, find a dealer, book your appointment.
       </p>
 
-      {/* Suggestion chips */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full max-w-md">
         {suggestions.map((question) => (
           <button
