@@ -1,9 +1,10 @@
-"""Test Drive Booking API — dedicated AI-guided booking flow."""
+"""Test Drive Booking API — dedicated AI-guided booking flow + fleet inventory."""
 
 import json
 import logging
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from ..database import get_db
@@ -133,4 +134,107 @@ def get_testdrive_stats(db: Session = Depends(get_db)):
         "total_bookings": total,
         "confirmed": confirmed,
         "pending": pending,
+    }
+
+
+# ── Test Drive Fleet Inventory ─────────────────────────────
+
+@router.get("/vehicles")
+def get_testdrive_vehicles(
+    series: str = Query(None),
+    fuel_type: str = Query(None),
+    body_type: str = Query(None),
+    search: str = Query(None),
+    sort_by: str = Query("name"),
+    sort_dir: str = Query("asc"),
+    db: Session = Depends(get_db),
+):
+    """Get the curated test drive fleet."""
+    query = db.query(Vehicle).filter(Vehicle.is_test_drive == True)  # noqa: E712
+
+    if series:
+        query = query.filter(Vehicle.series == series)
+    if fuel_type:
+        query = query.filter(Vehicle.fuel_type == fuel_type)
+    if body_type:
+        query = query.filter(Vehicle.body_type == body_type)
+    if search:
+        term = f"%{search}%"
+        query = query.filter(or_(
+            Vehicle.name.ilike(term),
+            Vehicle.series.ilike(term),
+            Vehicle.body_type.ilike(term),
+            Vehicle.color.ilike(term),
+        ))
+
+    # Sort
+    sort_col = getattr(Vehicle, sort_by, Vehicle.name)
+    if sort_dir == "desc":
+        query = query.order_by(sort_col.desc().nullslast())
+    else:
+        query = query.order_by(sort_col.asc().nullslast())
+
+    vehicles = query.all()
+    return {
+        "items": [v.to_dict() for v in vehicles],
+        "total": len(vehicles),
+    }
+
+
+@router.get("/vehicles/stats")
+def get_testdrive_vehicle_stats(db: Session = Depends(get_db)):
+    """Get statistics for the test drive fleet."""
+    base = db.query(Vehicle).filter(Vehicle.is_test_drive == True)  # noqa: E712
+    total = base.count()
+
+    series_rows = (
+        base.with_entities(Vehicle.series, func.count(Vehicle.vin))
+        .group_by(Vehicle.series)
+        .order_by(func.count(Vehicle.vin).desc())
+        .all()
+    )
+    fuel_rows = (
+        base.with_entities(Vehicle.fuel_type, func.count(Vehicle.vin))
+        .group_by(Vehicle.fuel_type)
+        .all()
+    )
+    body_rows = (
+        base.with_entities(Vehicle.body_type, func.count(Vehicle.vin))
+        .group_by(Vehicle.body_type)
+        .order_by(func.count(Vehicle.vin).desc())
+        .all()
+    )
+
+    price_min = base.with_entities(func.min(Vehicle.price_offer)).scalar()
+    price_max = base.with_entities(func.max(Vehicle.price_offer)).scalar()
+    price_avg = base.with_entities(func.avg(Vehicle.price_offer)).scalar()
+
+    return {
+        "total_vehicles": total,
+        "series_breakdown": {s: c for s, c in series_rows},
+        "fuel_type_breakdown": {f: c for f, c in fuel_rows},
+        "body_type_breakdown": {b: c for b, c in body_rows},
+        "price_range": {
+            "min": price_min,
+            "max": price_max,
+            "avg": round(price_avg, 2) if price_avg else None,
+        },
+    }
+
+
+@router.get("/vehicles/filter-options")
+def get_testdrive_filter_options(db: Session = Depends(get_db)):
+    """Get distinct filter values for the test drive fleet."""
+    base = db.query(Vehicle).filter(Vehicle.is_test_drive == True)  # noqa: E712
+
+    def distinct_values(column):
+        rows = base.with_entities(column).filter(column.isnot(None)).distinct().order_by(column).all()
+        return [r[0] for r in rows]
+
+    return {
+        "series": distinct_values(Vehicle.series),
+        "fuel_types": distinct_values(Vehicle.fuel_type),
+        "body_types": distinct_values(Vehicle.body_type),
+        "colors": distinct_values(Vehicle.color),
+        "drive_types": distinct_values(Vehicle.drive_type),
     }

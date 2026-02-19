@@ -167,6 +167,9 @@ export function ChatInterface() {
           <a href="/testdrive" className="px-3 py-1.5 rounded-lg text-[13px] text-[#1c69d4]/70 hover:text-[#1c69d4] hover:bg-[#1c69d4]/[0.06] font-medium transition-all">
             Test Drive
           </a>
+          <a href="/testdrive/inventory" className="px-3 py-1.5 rounded-lg text-[13px] text-foreground/40 hover:text-foreground/70 hover:bg-foreground/[0.04] transition-all">
+            Fleet
+          </a>
           <a href="/inventory" className="px-3 py-1.5 rounded-lg text-[13px] text-foreground/40 hover:text-foreground/70 hover:bg-foreground/[0.04] transition-all">
             Stock
           </a>

@@ -131,6 +131,44 @@ def import_vehicles_from_json(filepath: Path = None, db: Session = None) -> int:
             db.close()
 
 
+def import_test_drive_fleet(filepath: Path = None, db: Session = None) -> int:
+    """Mark vehicles from the test drive fleet JSON as test drive vehicles."""
+    if filepath is None:
+        filepath = DATA_DIR / "test_drive_fleet.json"
+
+    if not filepath.exists():
+        logger.warning(f"Test drive fleet file not found: {filepath}")
+        return 0
+
+    with open(filepath) as f:
+        fleet_data = json.load(f)
+
+    fleet_vins = {v["vin"] for v in fleet_data if v.get("vin")}
+
+    if db is None:
+        db = SessionLocal()
+        should_close = True
+    else:
+        should_close = False
+
+    try:
+        # Reset all test drive flags
+        db.query(Vehicle).filter(Vehicle.is_test_drive == True).update({"is_test_drive": False})  # noqa: E712
+        # Set test drive flag for fleet vehicles
+        updated = db.query(Vehicle).filter(Vehicle.vin.in_(fleet_vins)).update({"is_test_drive": True}, synchronize_session="fetch")
+        db.commit()
+        logger.info(f"Marked {updated} vehicles as test drive fleet")
+        return updated
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Failed to import test drive fleet: {e}")
+        raise
+    finally:
+        if should_close:
+            db.close()
+
+
 if __name__ == "__main__":
     init_db()
     import_vehicles_from_json()
+    import_test_drive_fleet()

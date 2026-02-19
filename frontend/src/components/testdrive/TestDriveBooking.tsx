@@ -180,6 +180,9 @@ export function TestDriveBooking() {
           </div>
         </div>
         <nav className="flex items-center gap-1">
+          <a href="/testdrive/inventory" className="px-3 py-1.5 rounded-lg text-[13px] text-[#1c69d4]/70 hover:text-[#1c69d4] hover:bg-[#1c69d4]/[0.06] font-medium transition-all">
+            Fleet
+          </a>
           <a href="/" className="px-3 py-1.5 rounded-lg text-[13px] text-foreground/40 hover:text-foreground/70 hover:bg-foreground/[0.04] transition-all">
             Chat
           </a>

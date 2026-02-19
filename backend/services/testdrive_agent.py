@@ -233,7 +233,7 @@ class TestDriveAgentService:
             return {"error": str(e)}
 
     def _search_vehicles(self, input: Dict) -> Dict:
-        query = self.db.query(Vehicle)
+        query = self.db.query(Vehicle).filter(Vehicle.is_test_drive == True)  # noqa: E712
         if input.get("series"):
             query = query.filter(Vehicle.series == input["series"])
         if input.get("fuel_type"):
@@ -278,10 +278,10 @@ class TestDriveAgentService:
         }
 
     def _get_dealers(self, input: Dict) -> Dict:
-        # Get distinct dealers from inventory
+        # Get distinct dealers from test drive fleet
         dealer_rows = (
             self.db.query(Vehicle.dealer_name, Vehicle.dealer_id, func.count(Vehicle.vin))
-            .filter(Vehicle.dealer_name.isnot(None))
+            .filter(Vehicle.dealer_name.isnot(None), Vehicle.is_test_drive == True)  # noqa: E712
             .group_by(Vehicle.dealer_name, Vehicle.dealer_id)
             .order_by(Vehicle.dealer_name)
             .all()
