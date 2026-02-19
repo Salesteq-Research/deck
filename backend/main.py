@@ -5,7 +5,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .database import init_db, import_vehicles_from_json, import_test_drive_fleet
+from .database import init_db, import_vehicles_from_json
 from .services.rag_service import RAGService
 from .database import SessionLocal
 from .api import vehicles_router, admin_router, chat_router, inventory_router, backoffice_router, network_router, testdrive_router
@@ -45,10 +45,6 @@ async def startup_event():
     logger.info("Importing vehicles from JSON...")
     count = import_vehicles_from_json()
     logger.info(f"Imported {count} vehicles")
-
-    logger.info("Marking test drive fleet...")
-    td_count = import_test_drive_fleet()
-    logger.info(f"Marked {td_count} vehicles as test drive fleet")
 
     logger.info("Indexing vehicles for RAG search...")
     db = SessionLocal()

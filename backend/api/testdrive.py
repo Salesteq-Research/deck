@@ -1,16 +1,15 @@
-"""Test Drive Booking API — dedicated AI-guided booking flow + fleet inventory."""
+"""Test Drive Booking API — model catalog + AI-guided booking flow."""
 
 import json
 import logging
+from pathlib import Path
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
-from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..services.testdrive_agent import TestDriveAgentService
 from ..services.lead_service import upsert_lead
-from ..models.vehicle import Vehicle
 from ..models.backoffice import TestDriveBooking
 from ..models.schemas import ChatRequest
 
@@ -18,39 +17,41 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/testdrive", tags=["testdrive"])
 
+# ── Load model catalog from JSON (in-memory, not DB) ─────────
 
-def _vehicle_card(v: Vehicle) -> dict:
-    return {
-        "vin": v.vin,
-        "name": v.name,
-        "series": v.series,
-        "body_type": v.body_type,
-        "fuel_type": v.fuel_type,
-        "color": v.color,
-        "price": v.price,
-        "price_offer": v.price_offer,
-        "monthly_installment": v.monthly_installment,
-        "currency": v.currency or "CHF",
-        "image": v.image,
-        "images": v.images_list if hasattr(v, 'images_list') else [],
-        "dealer_name": v.dealer_name,
-        "url": v.url,
-    }
+_models_cache: list[dict] | None = None
 
+
+def _load_models() -> list[dict]:
+    global _models_cache
+    if _models_cache is not None:
+        return _models_cache
+    catalog_path = Path(__file__).parent.parent.parent / "data" / "test_drive_models.json"
+    if catalog_path.exists():
+        with open(catalog_path) as f:
+            _models_cache = json.load(f)
+    else:
+        _models_cache = []
+    logger.info(f"Loaded {len(_models_cache)} test drive models from catalog")
+    return _models_cache
+
+
+# ── Chat / Booking Flow ──────────────────────────────────────
 
 @router.post("/chat/stream")
 def testdrive_chat_stream(request: ChatRequest, db: Session = Depends(get_db)):
     """SSE streaming chat for test drive booking flow."""
+    models = _load_models()
 
     def generate():
-        agent = TestDriveAgentService(db)
+        agent = TestDriveAgentService(db, models)
         conversation_history = [
             {"role": msg.role, "content": msg.content}
             for msg in request.conversation_history
         ]
 
         full_text = ""
-        shown_vins = []
+        shown_model_ids = []
 
         for event in agent.chat_stream(
             message=request.message,
@@ -64,15 +65,16 @@ def testdrive_chat_stream(request: ChatRequest, db: Session = Depends(get_db)):
                 full_text += event["content"]
                 yield f"data: {json.dumps({'type': 'text', 'content': event['content']})}\n\n"
 
-            elif event["type"] == "vehicles":
-                vins = event["vins"]
+            elif event["type"] == "models":
+                model_ids = event.get("model_ids", [])
                 cards = []
-                for vin in vins[:5]:
-                    v = db.query(Vehicle).filter(Vehicle.vin == vin).first()
-                    if v:
-                        cards.append(_vehicle_card(v))
-                        shown_vins.append(vin)
-                yield f"data: {json.dumps({'type': 'vehicles', 'vehicles': cards})}\n\n"
+                for mid in model_ids[:5]:
+                    m = next((x for x in models if x["id"] == mid), None)
+                    if m:
+                        cards.append(_model_to_card(m))
+                        shown_model_ids.append(mid)
+                if cards:
+                    yield f"data: {json.dumps({'type': 'vehicles', 'vehicles': cards})}\n\n"
 
             elif event["type"] == "done":
                 yield f"data: {json.dumps({'type': 'done'})}\n\n"
@@ -82,7 +84,7 @@ def testdrive_chat_stream(request: ChatRequest, db: Session = Depends(get_db)):
             try:
                 import re
                 clean_text = re.sub(r"\s*\[RECOMMEND:[^\]]*\]\s*", "", full_text).strip()
-                upsert_lead(db, request.session_id, request.message, clean_text, shown_vins)
+                upsert_lead(db, request.session_id, request.message, clean_text, shown_model_ids)
                 db.commit()
             except Exception as e:
                 logger.warning(f"Lead capture failed: {e}")
@@ -94,6 +96,29 @@ def testdrive_chat_stream(request: ChatRequest, db: Session = Depends(get_db)):
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
 
+
+def _model_to_card(m: dict) -> dict:
+    """Convert a model catalog entry to a VehicleCard for the frontend."""
+    powertrain_labels = {"electric": "Electric", "hybrid": "Plug-in Hybrid", "gasoline": "Gasoline", "diesel": "Diesel"}
+    return {
+        "vin": m["id"],
+        "name": m["name"],
+        "series": m.get("series", ""),
+        "body_type": m.get("body_type", ""),
+        "fuel_type": powertrain_labels.get(m.get("powertrain", ""), ""),
+        "color": m.get("highlight", ""),
+        "price": f"ab CHF {m.get('starting_price', 0):,.0f}".replace(",", "'"),
+        "price_offer": m.get("starting_price"),
+        "monthly_installment": None,
+        "currency": "CHF",
+        "image": m.get("image", ""),
+        "images": [m["image"]] if m.get("image") else [],
+        "dealer_name": None,
+        "url": m.get("url", ""),
+    }
+
+
+# ── Bookings ─────────────────────────────────────────────────
 
 @router.get("/bookings")
 def get_bookings(limit: int = 20, db: Session = Depends(get_db)):
@@ -137,104 +162,75 @@ def get_testdrive_stats(db: Session = Depends(get_db)):
     }
 
 
-# ── Test Drive Fleet Inventory ─────────────────────────────
+# ── Model Catalog API (serves from JSON, not DB) ─────────────
 
 @router.get("/vehicles")
-def get_testdrive_vehicles(
+def get_testdrive_models(
     series: str = Query(None),
-    fuel_type: str = Query(None),
+    powertrain: str = Query(None),
     body_type: str = Query(None),
     search: str = Query(None),
-    sort_by: str = Query("name"),
-    sort_dir: str = Query("asc"),
-    db: Session = Depends(get_db),
 ):
-    """Get the curated test drive fleet."""
-    query = db.query(Vehicle).filter(Vehicle.is_test_drive == True)  # noqa: E712
+    """Get BMW test drive model catalog."""
+    models = _load_models()
+    result = models
 
     if series:
-        query = query.filter(Vehicle.series == series)
-    if fuel_type:
-        query = query.filter(Vehicle.fuel_type == fuel_type)
+        result = [m for m in result if m.get("series", "").lower() == series.lower()]
+    if powertrain:
+        result = [m for m in result if m.get("powertrain", "").lower() == powertrain.lower()]
     if body_type:
-        query = query.filter(Vehicle.body_type == body_type)
+        result = [m for m in result if m.get("body_type", "").lower() == body_type.lower()]
     if search:
-        term = f"%{search}%"
-        query = query.filter(or_(
-            Vehicle.name.ilike(term),
-            Vehicle.series.ilike(term),
-            Vehicle.body_type.ilike(term),
-            Vehicle.color.ilike(term),
-        ))
+        q = search.lower()
+        result = [m for m in result if q in m.get("name", "").lower() or q in m.get("series", "").lower() or q in m.get("highlight", "").lower()]
 
-    # Sort
-    sort_col = getattr(Vehicle, sort_by, Vehicle.name)
-    if sort_dir == "desc":
-        query = query.order_by(sort_col.desc().nullslast())
-    else:
-        query = query.order_by(sort_col.asc().nullslast())
-
-    vehicles = query.all()
     return {
-        "items": [v.to_dict() for v in vehicles],
-        "total": len(vehicles),
+        "items": result,
+        "total": len(result),
     }
 
 
 @router.get("/vehicles/stats")
-def get_testdrive_vehicle_stats(db: Session = Depends(get_db)):
-    """Get statistics for the test drive fleet."""
-    base = db.query(Vehicle).filter(Vehicle.is_test_drive == True)  # noqa: E712
-    total = base.count()
+def get_testdrive_model_stats():
+    """Get statistics for the test drive model catalog."""
+    models = _load_models()
 
-    series_rows = (
-        base.with_entities(Vehicle.series, func.count(Vehicle.vin))
-        .group_by(Vehicle.series)
-        .order_by(func.count(Vehicle.vin).desc())
-        .all()
-    )
-    fuel_rows = (
-        base.with_entities(Vehicle.fuel_type, func.count(Vehicle.vin))
-        .group_by(Vehicle.fuel_type)
-        .all()
-    )
-    body_rows = (
-        base.with_entities(Vehicle.body_type, func.count(Vehicle.vin))
-        .group_by(Vehicle.body_type)
-        .order_by(func.count(Vehicle.vin).desc())
-        .all()
-    )
+    series_count: dict[str, int] = {}
+    powertrain_count: dict[str, int] = {}
+    body_count: dict[str, int] = {}
+    prices = []
 
-    price_min = base.with_entities(func.min(Vehicle.price_offer)).scalar()
-    price_max = base.with_entities(func.max(Vehicle.price_offer)).scalar()
-    price_avg = base.with_entities(func.avg(Vehicle.price_offer)).scalar()
+    for m in models:
+        s = m.get("series", "Other")
+        series_count[s] = series_count.get(s, 0) + 1
+        p = m.get("powertrain", "other")
+        powertrain_count[p] = powertrain_count.get(p, 0) + 1
+        b = m.get("body_type", "Other")
+        body_count[b] = body_count.get(b, 0) + 1
+        if m.get("starting_price"):
+            prices.append(m["starting_price"])
 
     return {
-        "total_vehicles": total,
-        "series_breakdown": {s: c for s, c in series_rows},
-        "fuel_type_breakdown": {f: c for f, c in fuel_rows},
-        "body_type_breakdown": {b: c for b, c in body_rows},
+        "total_vehicles": len(models),
+        "series_breakdown": dict(sorted(series_count.items(), key=lambda x: -x[1])),
+        "powertrain_breakdown": powertrain_count,
+        "body_type_breakdown": dict(sorted(body_count.items(), key=lambda x: -x[1])),
         "price_range": {
-            "min": price_min,
-            "max": price_max,
-            "avg": round(price_avg, 2) if price_avg else None,
+            "min": min(prices) if prices else None,
+            "max": max(prices) if prices else None,
+            "avg": round(sum(prices) / len(prices), 0) if prices else None,
         },
     }
 
 
 @router.get("/vehicles/filter-options")
-def get_testdrive_filter_options(db: Session = Depends(get_db)):
-    """Get distinct filter values for the test drive fleet."""
-    base = db.query(Vehicle).filter(Vehicle.is_test_drive == True)  # noqa: E712
-
-    def distinct_values(column):
-        rows = base.with_entities(column).filter(column.isnot(None)).distinct().order_by(column).all()
-        return [r[0] for r in rows]
+def get_testdrive_model_filter_options():
+    """Get distinct filter values for the test drive model catalog."""
+    models = _load_models()
 
     return {
-        "series": distinct_values(Vehicle.series),
-        "fuel_types": distinct_values(Vehicle.fuel_type),
-        "body_types": distinct_values(Vehicle.body_type),
-        "colors": distinct_values(Vehicle.color),
-        "drive_types": distinct_values(Vehicle.drive_type),
+        "series": sorted(set(m.get("series", "") for m in models if m.get("series"))),
+        "powertrains": sorted(set(m.get("powertrain", "") for m in models if m.get("powertrain"))),
+        "body_types": sorted(set(m.get("body_type", "") for m in models if m.get("body_type"))),
     }

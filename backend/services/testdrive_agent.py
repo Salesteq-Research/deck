@@ -1,74 +1,79 @@
-"""Specialized AI agent for BMW test drive booking — conversational flow."""
+"""Specialized AI agent for BMW test drive booking — conversational booking flow."""
 
 import json
 import logging
-import random
+import re
 from datetime import datetime
 from typing import List, Dict, Any, Generator
 
-from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from ..config import OPENAI_API_KEY
-from ..models.vehicle import Vehicle
 from ..models.backoffice import TestDriveBooking, ActivityLog
 
 logger = logging.getLogger(__name__)
 
 TESTDRIVE_MODEL = "gpt-5.2"
 
-SYSTEM_PROMPT = """You are the BMW Test Drive Booking Assistant for the Swiss market.
+SYSTEM_PROMPT = """You are the BMW Probefahrt (Test Drive) Booking Assistant for Switzerland.
 
-## Your Role
-You guide customers through booking a test drive at their preferred BMW dealer in Switzerland. You are warm, professional, and efficient. You speak German and English fluently.
+## Your Mission
+Guide each customer step-by-step through booking a test drive. You are warm, efficient, and professional. Speak the language the customer uses (German or English).
 
-## Booking Flow
-Guide the customer through these steps naturally in conversation:
+## STRICT Booking Flow — follow these steps IN ORDER:
 
-1. **Vehicle Selection** — Help them choose which BMW to test drive. Use search_test_drive_vehicles to find available models. Show them options based on their interests.
-2. **Dealer Selection** — Use get_available_dealers to show nearby dealers. Let them pick one.
-3. **Date & Time** — Ask for their preferred date and time of day (morning, midday, afternoon, or evening).
-4. **Personal Details** — Collect: salutation (Herr/Frau), first name, last name, email, phone number.
-5. **Confirmation** — Use confirm_test_drive_booking to finalize. Show them a summary.
+### Step 1: Vehicle Selection
+- Ask what BMW model they'd like to test drive
+- Use browse_test_drive_models to show available models
+- Once they pick a model, CONFIRM their choice and move to Step 2
+- Do NOT show more cars after they've chosen one
 
-## Rules
-- ALWAYS use search_test_drive_vehicles first when the customer mentions any vehicle interest
-- Be conversational — don't dump all questions at once. Ask one or two things at a time.
-- When showing vehicles, let the card UI do the work. Don't list specs in text.
-- After they pick a vehicle, naturally move to dealer, then date, then personal info.
-- If they haven't decided on a vehicle, help them explore options.
-- Format dates naturally: "Dienstag, 4. Marz" or "next Tuesday"
-- Time preferences: Morgens (8-11), Mittags (11-13), Nachmittags (13-17), Abends (17-19)
+### Step 2: Dealer / Location
+- Use get_available_dealers to list BMW partners in their area
+- Ask which dealer they prefer, or if they have a location preference
+- Once they pick a dealer, CONFIRM and move to Step 3
 
-## Response Format (STRICT)
-Keep responses SHORT — max 2-3 sentences. Be direct and helpful.
+### Step 3: Date & Time
+- Ask for their preferred date and time of day
+- Time options: Morgens (8-11), Mittags (11-13), Nachmittags (13-17), Abends (17-19)
+- Once they provide date + time, CONFIRM and move to Step 4
 
-At the end of your response, include vehicle recommendations:
-[RECOMMEND: vin1, vin2, vin3] or [RECOMMEND: none]
+### Step 4: Personal Details
+- Collect: Anrede (Herr/Frau), Vorname, Nachname, E-Mail, Telefon
+- Ask for all details in ONE message to keep it efficient
+- Once provided, CONFIRM everything and proceed to booking
 
-## Confirmation Format
-When confirming a booking, format it clearly:
-- Vehicle: [name]
-- Dealer: [name]
-- Date: [date], [time preference]
-- Reference: [booking ref]
+### Step 5: Confirmation
+- Use confirm_test_drive_booking with ALL collected details
+- Show a clear summary with the booking reference
+- Tell them their BMW partner will contact them within 24h
 
-Let them know the dealer will contact them within 24 hours to confirm the exact time."""
+## CRITICAL RULES:
+1. Move through steps sequentially. Do NOT skip steps or go back.
+2. After showing models, do NOT keep showing more unless asked. Guide them to CHOOSE.
+3. Keep responses SHORT — 2-3 sentences max.
+4. NEVER dump all questions at once. One step at a time.
+5. When the customer selects a model, immediately move to dealer selection.
+6. Do NOT include [RECOMMEND:...] tags in your text output.
+
+## Model Recommendation Format
+At the END of your response (only when showing models), add:
+[RECOMMEND: model_id1, model_id2]
+Use "none" when not recommending models: [RECOMMEND: none]"""
 
 TESTDRIVE_TOOLS = [
     {
         "type": "function",
         "function": {
-            "name": "search_test_drive_vehicles",
-            "description": "Search BMW vehicles available for test drives. Use this to help customers find the right model.",
+            "name": "browse_test_drive_models",
+            "description": "Browse BMW models available for test drive. Use to show the customer what they can test drive.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "query": {"type": "string", "description": "Free-text search (model name, type, etc.)"},
-                    "series": {"type": "string", "description": "BMW series: 1, 2, 3, 4, 5, 7, 8, X1, X2, X3, X4, X5, X6, X7, Z4, i4, i5, i7, iX, iX1, iX2, iX3, M"},
-                    "fuel_type": {"type": "string", "enum": ["GASOLINE", "DIESEL", "ELECTRIC"], "description": "Fuel type"},
-                    "body_type": {"type": "string", "enum": ["LIMOUSINE", "TOURING", "COUPE", "CABRIOLET", "SPORT_ACTIVITY_VEHICLE", "SC", "GRAN_COUPE", "GRAN_TURISMO", "SPORTS_HATCH", "ROADSTER"], "description": "Body type"},
-                    "limit": {"type": "integer", "description": "Max results (default 6)"},
+                    "query": {"type": "string", "description": "Free-text search (e.g. 'electric SUV', 'X3', 'M Performance')"},
+                    "series": {"type": "string", "description": "BMW series: 1, 2, 3, 4, 5, 7, X1, X2, X3, X4, X5, X6, X7, Z4, i4, i5, i7, iX, M, XM"},
+                    "powertrain": {"type": "string", "enum": ["gasoline", "electric", "hybrid"], "description": "Powertrain type"},
+                    "body_type": {"type": "string", "description": "Body type: SAV, SAC, Limousine, Touring, Coupé, Cabriolet, Gran Coupé, Roadster, Hatchback, Active Tourer"},
                 },
             },
         },
@@ -76,14 +81,14 @@ TESTDRIVE_TOOLS = [
     {
         "type": "function",
         "function": {
-            "name": "get_vehicle_details",
-            "description": "Get full details of a specific vehicle by VIN for test drive.",
+            "name": "get_model_details",
+            "description": "Get full details of a specific test drive model.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "vin": {"type": "string", "description": "Vehicle Identification Number"},
+                    "model_id": {"type": "string", "description": "Model ID from the catalog"},
                 },
-                "required": ["vin"],
+                "required": ["model_id"],
             },
         },
     },
@@ -91,11 +96,11 @@ TESTDRIVE_TOOLS = [
         "type": "function",
         "function": {
             "name": "get_available_dealers",
-            "description": "Get list of BMW dealers in Switzerland that offer test drives.",
+            "description": "Get BMW dealers in Switzerland offering test drives. Call this after the customer has selected a vehicle.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "region": {"type": "string", "description": "Optional region filter (e.g. Zurich, Bern, Basel, Geneva)"},
+                    "region": {"type": "string", "description": "Region filter: Zurich, Bern, Basel, Geneva, Lausanne, Luzern, St. Gallen, Winterthur, etc."},
                 },
             },
         },
@@ -104,33 +109,59 @@ TESTDRIVE_TOOLS = [
         "type": "function",
         "function": {
             "name": "confirm_test_drive_booking",
-            "description": "Confirm and create the test drive booking. Call this when all details are collected.",
+            "description": "Finalize and confirm the test drive booking. Call ONLY when all details are collected: model, dealer, date, time, and personal info.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "vin": {"type": "string", "description": "VIN of selected vehicle"},
-                    "dealer_name": {"type": "string", "description": "Selected dealer name"},
-                    "preferred_date": {"type": "string", "description": "Preferred date (e.g. '2026-03-04' or 'next Tuesday')"},
-                    "time_preference": {"type": "string", "enum": ["morning", "midday", "afternoon", "evening"], "description": "Preferred time of day"},
-                    "salutation": {"type": "string", "enum": ["Herr", "Frau"], "description": "Salutation"},
-                    "first_name": {"type": "string", "description": "Customer first name"},
-                    "last_name": {"type": "string", "description": "Customer last name"},
-                    "email": {"type": "string", "description": "Customer email"},
-                    "phone": {"type": "string", "description": "Customer phone number"},
+                    "model_id": {"type": "string", "description": "Selected model ID"},
+                    "model_name": {"type": "string", "description": "Selected model name"},
+                    "dealer_name": {"type": "string", "description": "Selected dealer"},
+                    "preferred_date": {"type": "string", "description": "Preferred date"},
+                    "time_preference": {"type": "string", "enum": ["morning", "midday", "afternoon", "evening"], "description": "Time of day"},
+                    "salutation": {"type": "string", "enum": ["Herr", "Frau"], "description": "Anrede"},
+                    "first_name": {"type": "string", "description": "Vorname"},
+                    "last_name": {"type": "string", "description": "Nachname"},
+                    "email": {"type": "string", "description": "E-Mail"},
+                    "phone": {"type": "string", "description": "Telefon"},
                     "comments": {"type": "string", "description": "Optional comments"},
                 },
-                "required": ["vin", "dealer_name", "preferred_date", "time_preference", "first_name", "last_name", "email"],
+                "required": ["model_id", "model_name", "dealer_name", "preferred_date", "time_preference", "first_name", "last_name", "email"],
             },
         },
     },
 ]
 
+# Swiss BMW dealers (curated list)
+SWISS_DEALERS = [
+    {"name": "BMW Niederlassung Zürich-Dielsdorf", "region": "Zürich", "address": "Wehntalerstrasse 180, 8157 Dielsdorf"},
+    {"name": "BMW Niederlassung Zürich", "region": "Zürich", "address": "Badenerstrasse 600, 8048 Zürich"},
+    {"name": "Auto Frey AG", "region": "Zürich", "address": "Luggwegstrasse 9, 8048 Zürich"},
+    {"name": "Häusermann AG", "region": "Zürich", "address": "Giesshübelstrasse 40, 8045 Zürich"},
+    {"name": "BMW Niederlassung Bern", "region": "Bern", "address": "Worblentalstrasse 32, 3063 Ittigen"},
+    {"name": "Auto Wederich AG", "region": "Bern", "address": "Bernstrasse 388, 3154 Rüschegg"},
+    {"name": "Hedin Automotive Basel AG", "region": "Basel", "address": "St. Jakobs-Strasse 399, 4052 Basel"},
+    {"name": "BMW Niederlassung Basel", "region": "Basel", "address": "Grosspeterstrasse 45, 4002 Basel"},
+    {"name": "Automobile Fankhauser AG", "region": "Luzern", "address": "Friedentalstrasse 43, 6004 Luzern"},
+    {"name": "Gruss AG", "region": "Luzern", "address": "Industriestrasse 18, 6034 Inwil"},
+    {"name": "Heron Automobiles SA", "region": "Genève", "address": "Chemin de la Marbrerie 8, 1227 Carouge"},
+    {"name": "Grand Garage Simond SA", "region": "Genève", "address": "Route de Meyrin 49, 1202 Genève"},
+    {"name": "Garage de l'Union SA", "region": "Lausanne", "address": "Route de Berne 2, 1010 Lausanne"},
+    {"name": "Autobritt SA", "region": "Lausanne", "address": "Avenue du Grey 48, 1004 Lausanne"},
+    {"name": "Alpstaeg Automobile AG", "region": "St. Gallen", "address": "Zürcher Strasse 505, 9015 St. Gallen"},
+    {"name": "Keller Automobile AG", "region": "Winterthur", "address": "Zürcherstrasse 41, 8400 Winterthur"},
+    {"name": "Auto Ziegler AG", "region": "Aarau", "address": "Rohrerstrasse 25, 5000 Aarau"},
+    {"name": "Garage Galliker AG", "region": "Zug", "address": "Zugerbergstrasse 2, 6300 Zug"},
+    {"name": "Schaller Automobile AG", "region": "Thun", "address": "Gwattstrasse 142, 3600 Thun"},
+    {"name": "Itin + Holliger AG", "region": "Solothurn", "address": "Bielstrasse 56, 4500 Solothurn"},
+]
+
 
 class TestDriveAgentService:
-    """AI agent specialized for test drive booking flow."""
+    """AI agent for test drive booking — uses model catalog, not dealer inventory."""
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, models: list[dict] | None = None):
         self.db = db
+        self.models = models or []
         self.client = None
         self._init_client()
 
@@ -146,7 +177,7 @@ class TestDriveAgentService:
     def chat_stream(self, message: str, conversation_history: List[Dict[str, str]] = None, session_id: str = None) -> Generator[Dict[str, Any], None, None]:
         if not self.client:
             yield {"type": "text_delta", "content": "AI service is currently unavailable."}
-            yield {"type": "done", "recommended_vins": [], "all_vins": []}
+            yield {"type": "done"}
             return
 
         messages = [{"role": "system", "content": SYSTEM_PROMPT}]
@@ -155,7 +186,7 @@ class TestDriveAgentService:
                 messages.append({"role": msg["role"], "content": msg["content"]})
         messages.append({"role": "user", "content": message})
 
-        all_vehicle_vins = []
+        all_model_ids: list[str] = []
 
         for _ in range(8):
             try:
@@ -168,7 +199,7 @@ class TestDriveAgentService:
             except Exception as e:
                 logger.error(f"OpenAI error: {e}")
                 yield {"type": "text_delta", "content": "I apologize, but I encountered an error. Please try again."}
-                yield {"type": "done", "recommended_vins": [], "all_vins": []}
+                yield {"type": "done"}
                 return
 
             choice = response.choices[0]
@@ -179,139 +210,135 @@ class TestDriveAgentService:
                     args = json.loads(tc.function.arguments)
                     yield {"type": "tool_call", "name": tc.function.name, "input": args}
                     result = self._execute_tool(tc.function.name, args, session_id)
-                    self._collect_vins(result, all_vehicle_vins)
+                    self._collect_model_ids(result, all_model_ids)
                     result_str = json.dumps(result, default=str)
                     if len(result_str) > 8000:
                         result_str = result_str[:8000] + "... (truncated)"
                     messages.append({"role": "tool", "tool_call_id": tc.id, "content": result_str})
             else:
-                import re
                 text = choice.message.content or ""
+                # Extract recommendations
                 recommend_match = re.search(r"\[RECOMMEND:\s*([^\]]*)\]", text)
-                recommended_vins = []
+                recommended_ids = []
                 if recommend_match:
                     raw = recommend_match.group(1).strip()
                     if raw.lower() != "none":
-                        recommended_vins = [v.strip() for v in raw.split(",") if v.strip()]
+                        recommended_ids = [v.strip() for v in raw.split(",") if v.strip()]
                 clean_text = re.sub(r"\s*\[RECOMMEND:[^\]]*\]\s*", "", text).strip()
+
                 yield {"type": "text_delta", "content": clean_text}
-                deduped_vins = list(dict.fromkeys(all_vehicle_vins))
-                yield {"type": "vehicles", "vins": recommended_vins if recommended_vins else deduped_vins[:5]}
-                yield {"type": "done", "recommended_vins": recommended_vins, "all_vins": deduped_vins}
+
+                # Send model cards if we have recommendations
+                ids_to_show = recommended_ids if recommended_ids else [x for x in all_model_ids if x]
+                if ids_to_show:
+                    yield {"type": "models", "model_ids": ids_to_show[:5]}
+
+                yield {"type": "done"}
                 return
 
         yield {"type": "text_delta", "content": "Could you rephrase your question?"}
-        yield {"type": "done", "recommended_vins": [], "all_vins": list(dict.fromkeys(all_vehicle_vins))}
+        yield {"type": "done"}
 
-    def _collect_vins(self, result: Any, vins: List[str]):
+    def _collect_model_ids(self, result: Any, ids: list[str]):
         if isinstance(result, dict):
-            if "vin" in result:
-                vins.append(result["vin"])
-            if "vehicles" in result and isinstance(result["vehicles"], list):
-                for v in result["vehicles"]:
-                    if isinstance(v, dict) and "vin" in v:
-                        vins.append(v["vin"])
-        elif isinstance(result, list):
-            for item in result:
-                if isinstance(item, dict) and "vin" in item:
-                    vins.append(item["vin"])
+            if "id" in result:
+                ids.append(result["id"])
+            if "models" in result and isinstance(result["models"], list):
+                for m in result["models"]:
+                    if isinstance(m, dict) and "id" in m:
+                        ids.append(m["id"])
 
-    def _execute_tool(self, name: str, input: Dict[str, Any], session_id: str = None) -> Any:
+    def _execute_tool(self, name: str, args: Dict[str, Any], session_id: str = None) -> Any:
         try:
-            if name == "search_test_drive_vehicles":
-                return self._search_vehicles(input)
-            elif name == "get_vehicle_details":
-                return self._get_vehicle(input)
+            if name == "browse_test_drive_models":
+                return self._browse_models(args)
+            elif name == "get_model_details":
+                return self._get_model(args)
             elif name == "get_available_dealers":
-                return self._get_dealers(input)
+                return self._get_dealers(args)
             elif name == "confirm_test_drive_booking":
-                return self._confirm_booking(input, session_id)
+                return self._confirm_booking(args, session_id)
             else:
                 return {"error": f"Unknown tool: {name}"}
         except Exception as e:
             logger.error(f"Tool {name} error: {e}")
             return {"error": str(e)}
 
-    def _search_vehicles(self, input: Dict) -> Dict:
-        query = self.db.query(Vehicle).filter(Vehicle.is_test_drive == True)  # noqa: E712
-        if input.get("series"):
-            query = query.filter(Vehicle.series == input["series"])
-        if input.get("fuel_type"):
-            query = query.filter(Vehicle.fuel_type == input["fuel_type"])
-        if input.get("body_type"):
-            query = query.filter(Vehicle.body_type == input["body_type"])
-        if input.get("query"):
-            from sqlalchemy import or_
-            term = f"%{input['query']}%"
-            query = query.filter(or_(
-                Vehicle.name.ilike(term),
-                Vehicle.series.ilike(term),
-                Vehicle.body_type.ilike(term),
-                Vehicle.fuel_type.ilike(term),
-            ))
-        total = query.count()
-        limit = min(input.get("limit", 6), 12)
-        # Get a representative sample: one per series/body combo
-        vehicles = query.order_by(Vehicle.price_offer.asc().nullslast()).limit(limit).all()
+    def _browse_models(self, args: Dict) -> Dict:
+        results = list(self.models)
+
+        if args.get("series"):
+            s = args["series"].lower()
+            results = [m for m in results if m.get("series", "").lower() == s]
+        if args.get("powertrain"):
+            p = args["powertrain"].lower()
+            results = [m for m in results if m.get("powertrain", "").lower() == p]
+        if args.get("body_type"):
+            b = args["body_type"].lower()
+            results = [m for m in results if b in m.get("body_type", "").lower()]
+        if args.get("query"):
+            q = args["query"].lower()
+            results = [m for m in results if
+                       q in m.get("name", "").lower() or
+                       q in m.get("series", "").lower() or
+                       q in m.get("body_type", "").lower() or
+                       q in m.get("highlight", "").lower() or
+                       q in m.get("powertrain", "").lower()]
+
         return {
-            "total_available": total,
-            "showing": len(vehicles),
-            "vehicles": [{
-                "vin": v.vin, "name": v.name, "series": v.series,
-                "body_type": v.body_type, "fuel_type": v.fuel_type,
-                "drive_type": v.drive_type, "color": v.color,
-                "price_chf": v.price_offer, "price_formatted": v.price,
-                "power_hp": v.power_hp, "dealer": v.dealer_name,
-            } for v in vehicles],
+            "total_available": len(results),
+            "models": [{
+                "id": m["id"],
+                "name": m["name"],
+                "series": m.get("series", ""),
+                "body_type": m.get("body_type", ""),
+                "powertrain": m.get("powertrain", ""),
+                "starting_price_chf": m.get("starting_price"),
+                "power_hp": m.get("power_hp"),
+                "range_km": m.get("range_km"),
+                "highlight": m.get("highlight", ""),
+            } for m in results[:8]],
         }
 
-    def _get_vehicle(self, input: Dict) -> Dict:
-        v = self.db.query(Vehicle).filter(Vehicle.vin == input["vin"]).first()
-        if not v:
-            return {"error": f"Vehicle {input['vin']} not found"}
+    def _get_model(self, args: Dict) -> Dict:
+        model_id = args.get("model_id", "")
+        m = next((x for x in self.models if x["id"] == model_id), None)
+        if not m:
+            return {"error": f"Model '{model_id}' not found"}
         return {
-            "vin": v.vin, "name": v.name, "series": v.series,
-            "body_type": v.body_type, "fuel_type": v.fuel_type,
-            "drive_type": v.drive_type, "color": v.color,
-            "price_chf": v.price_offer, "price_formatted": v.price,
-            "power_hp": v.power_hp, "dealer": v.dealer_name,
+            "id": m["id"],
+            "name": m["name"],
+            "series": m.get("series", ""),
+            "body_type": m.get("body_type", ""),
+            "powertrain": m.get("powertrain", ""),
+            "starting_price_chf": m.get("starting_price"),
+            "power_hp": m.get("power_hp"),
+            "range_km": m.get("range_km"),
+            "highlight": m.get("highlight", ""),
+            "url": m.get("url", ""),
         }
 
-    def _get_dealers(self, input: Dict) -> Dict:
-        # Get distinct dealers from test drive fleet
-        dealer_rows = (
-            self.db.query(Vehicle.dealer_name, Vehicle.dealer_id, func.count(Vehicle.vin))
-            .filter(Vehicle.dealer_name.isnot(None), Vehicle.is_test_drive == True)  # noqa: E712
-            .group_by(Vehicle.dealer_name, Vehicle.dealer_id)
-            .order_by(Vehicle.dealer_name)
-            .all()
-        )
-
-        region = (input.get("region") or "").lower()
-        dealers = []
-        for name, did, count in dealer_rows:
-            if region and region not in (name or "").lower():
-                continue
-            dealers.append({
-                "name": name,
-                "dealer_id": did,
-                "vehicles_in_stock": count,
-                "test_drive_available": True,
-                "opening_hours": "Mo-Fr 08:00-18:30, Sa 09:00-16:00",
-            })
-
+    def _get_dealers(self, args: Dict) -> Dict:
+        region = (args.get("region") or "").lower()
+        dealers = SWISS_DEALERS
+        if region:
+            dealers = [d for d in dealers if region in d["region"].lower()]
         return {
             "total_dealers": len(dealers),
-            "dealers": dealers[:20],
+            "dealers": [{
+                "name": d["name"],
+                "region": d["region"],
+                "address": d["address"],
+                "test_drive_available": True,
+                "opening_hours": "Mo-Fr 08:00-18:30, Sa 09:00-16:00",
+            } for d in dealers[:10]],
         }
 
-    def _confirm_booking(self, input: Dict, session_id: str = None) -> Dict:
-        vin = input.get("vin", "")
-        v = self.db.query(Vehicle).filter(Vehicle.vin == vin).first()
-        vehicle_name = v.name if v else "BMW"
-        series = v.series if v else ""
-        body_type = v.body_type if v else ""
-        fuel_type = v.fuel_type if v else ""
+    def _confirm_booking(self, args: Dict, session_id: str = None) -> Dict:
+        model_name = args.get("model_name", "BMW")
+        model_id = args.get("model_id", "")
+        m = next((x for x in self.models if x["id"] == model_id), None)
+        series = m.get("series", "") if m else ""
 
         # Generate booking reference
         year = datetime.utcnow().year
@@ -329,46 +356,46 @@ class TestDriveAgentService:
             booking = TestDriveBooking(
                 session_id=session_id or "",
                 booking_ref=booking_ref,
-                vin=vin,
-                vehicle_name=vehicle_name,
+                vin=model_id,
+                vehicle_name=model_name,
                 series=series,
-                body_type=body_type,
-                fuel_type=fuel_type,
-                salutation=input.get("salutation", ""),
-                first_name=input.get("first_name", ""),
-                last_name=input.get("last_name", ""),
-                email=input.get("email", ""),
-                phone=input.get("phone", ""),
-                preferred_date=input.get("preferred_date", ""),
-                time_preference=input.get("time_preference", ""),
-                dealer_name=input.get("dealer_name", ""),
-                comments=input.get("comments", ""),
+                body_type=m.get("body_type", "") if m else "",
+                fuel_type=m.get("powertrain", "") if m else "",
+                salutation=args.get("salutation", ""),
+                first_name=args.get("first_name", ""),
+                last_name=args.get("last_name", ""),
+                email=args.get("email", ""),
+                phone=args.get("phone", ""),
+                preferred_date=args.get("preferred_date", ""),
+                time_preference=args.get("time_preference", ""),
+                dealer_name=args.get("dealer_name", ""),
+                comments=args.get("comments", ""),
                 status="confirmed",
             )
             self.db.add(booking)
 
             self.db.add(ActivityLog(
                 event_type="test_drive_booked",
-                title=f"Test Drive: {vehicle_name}",
-                description=f"{input.get('first_name', '')} {input.get('last_name', '')} - {input.get('dealer_name', '')} - {input.get('preferred_date', '')}",
+                title=f"Probefahrt: {model_name}",
+                description=f"{args.get('first_name', '')} {args.get('last_name', '')} — {args.get('dealer_name', '')} — {args.get('preferred_date', '')}",
                 session_id=session_id or "",
             ))
             self.db.commit()
         except Exception as e:
-            logger.error(f"Failed to persist test drive booking: {e}")
+            logger.error(f"Failed to persist booking: {e}")
             self.db.rollback()
 
         return {
             "status": "confirmed",
             "booking_reference": booking_ref,
-            "vehicle": vehicle_name,
-            "dealer": input.get("dealer_name", ""),
-            "date": input.get("preferred_date", ""),
-            "time": time_labels.get(input.get("time_preference", ""), input.get("time_preference", "")),
-            "customer": f"{input.get('salutation', '')} {input.get('first_name', '')} {input.get('last_name', '')}".strip(),
-            "email": input.get("email", ""),
-            "phone": input.get("phone", ""),
-            "note": "Your BMW dealer will contact you within 24 hours to confirm the exact appointment time.",
+            "vehicle": model_name,
+            "dealer": args.get("dealer_name", ""),
+            "date": args.get("preferred_date", ""),
+            "time": time_labels.get(args.get("time_preference", ""), args.get("time_preference", "")),
+            "customer": f"{args.get('salutation', '')} {args.get('first_name', '')} {args.get('last_name', '')}".strip(),
+            "email": args.get("email", ""),
+            "phone": args.get("phone", ""),
+            "note": "Ihr BMW Partner wird sich innerhalb von 24 Stunden bei Ihnen melden, um den genauen Termin zu bestätigen.",
         }
 
     def is_available(self) -> bool:
