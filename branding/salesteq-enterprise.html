@@ -9,57 +9,70 @@
   @page { size: A4; margin: 0; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Inter', system-ui, sans-serif; color: #131314; background: #faf9f0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .page { width: 210mm; min-height: 297mm; padding: 40px 48px; position: relative; overflow: hidden; page-break-after: always; background: #faf9f0; }
+  .page { width: 210mm; min-height: 297mm; padding: 36px 44px; position: relative; overflow: hidden; page-break-after: always; background: #faf9f0; }
   .page:last-child { page-break-after: auto; }
-  .header { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; }
-  .logo-mark svg { width: 32px; height: 32px; }
-  .wordmark { font-size: 18px; font-weight: 700; letter-spacing: 0.01em; }
+  .header { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; }
+  .logo-mark svg { width: 30px; height: 30px; }
+  .wordmark { font-size: 17px; font-weight: 700; letter-spacing: 0.01em; }
   .header-right { margin-left: auto; font-size: 9px; color: #3d3d3f; opacity: 0.35; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; }
-  .divider { border: none; border-top: 1px solid rgba(19,19,20,0.06); margin: 14px 0 20px; }
-  .label { font-size: 10px; font-weight: 600; color: #d97757; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; }
-  .footer { position: absolute; bottom: 28px; left: 48px; right: 48px; display: flex; justify-content: space-between; font-size: 9px; color: #3d3d3f; opacity: 0.3; }
+  .divider { border: none; border-top: 1px solid rgba(19,19,20,0.06); margin: 12px 0 16px; }
+  .label { font-size: 9.5px; font-weight: 600; color: #d97757; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 14px; }
+  .footer { position: absolute; bottom: 24px; left: 44px; right: 44px; display: flex; justify-content: space-between; font-size: 9px; color: #3d3d3f; opacity: 0.3; }
   .watermark { position: absolute; right: -30px; top: 50%; transform: translateY(-50%); opacity: 0.012; }
   .watermark line { stroke: #131314; stroke-width: 6; stroke-linecap: round; }
 
   /* Page 1 */
-  .hero h1 { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; margin-bottom: 14px; max-width: 470px; }
+  .hero h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 10px; max-width: 490px; }
   .hero h1 em { font-style: normal; color: #d97757; }
-  .hero p { font-size: 14px; color: #3d3d3f; line-height: 1.7; max-width: 490px; margin-bottom: 28px; }
-  .pain-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
-  .pain { background: #131314; border-radius: 10px; padding: 16px 18px; color: #faf9f0; }
-  .pain .num { font-size: 24px; font-weight: 800; color: #d97757; letter-spacing: -0.03em; }
-  .pain .txt { font-size: 10.5px; opacity: 0.5; line-height: 1.45; margin-top: 2px; }
-  .shift h2 { font-size: 20px; font-weight: 800; letter-spacing: -0.01em; line-height: 1.2; margin-bottom: 14px; }
+  .hero-sub { font-size: 13px; color: #3d3d3f; line-height: 1.65; max-width: 500px; margin-bottom: 20px; }
+
+  .dept-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 22px; }
+  .dept { background: #131314; border-radius: 10px; padding: 14px 16px; color: #faf9f0; }
+  .dept .dept-label { font-size: 9px; font-weight: 600; color: #d97757; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+  .dept .issue { font-size: 10.5px; opacity: 0.5; line-height: 1.5; margin-bottom: 5px; }
+  .dept .stat { font-size: 20px; font-weight: 800; color: #d97757; letter-spacing: -0.03em; margin-top: 4px; }
+  .dept .stat-label { font-size: 9px; opacity: 0.35; margin-top: 1px; }
+
+  .overline { font-size: 10px; font-weight: 700; letter-spacing: -0.01em; color: #3d3d3f; opacity: 0.45; margin-bottom: 4px; }
+  .shift h2 { font-size: 19px; font-weight: 800; letter-spacing: -0.01em; line-height: 1.2; margin-bottom: 12px; }
   .shift h2 em { font-style: normal; color: #d97757; }
-  .shift-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 24px; }
-  .shift-card { border-left: 3px solid #d97757; padding: 10px 14px; }
-  .shift-card h3 { font-size: 12px; font-weight: 700; margin-bottom: 3px; }
-  .shift-card p { font-size: 10.5px; color: #3d3d3f; line-height: 1.5; }
-  .bottom-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-  .bstat { border-left: 3px solid #d97757; padding-left: 12px; }
-  .bstat .n { font-size: 24px; font-weight: 800; letter-spacing: -0.03em; }
-  .bstat .l { font-size: 9.5px; color: #3d3d3f; opacity: 0.55; margin-top: 1px; }
+  .shift-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .shift-card { border-left: 3px solid #d97757; padding: 8px 12px; }
+  .shift-card h3 { font-size: 11.5px; font-weight: 700; margin-bottom: 2px; }
+  .shift-card p { font-size: 10px; color: #3d3d3f; line-height: 1.5; }
+
+  .bottom-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .bstat { border-left: 3px solid #d97757; padding-left: 10px; }
+  .bstat .n { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; }
+  .bstat .l { font-size: 9px; color: #3d3d3f; opacity: 0.5; margin-top: 1px; }
 
   /* Page 2 */
-  .prod-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
-  .prod { border: 1px solid rgba(19,19,20,0.06); border-radius: 10px; padding: 16px 18px; }
-  .prod svg { width: 28px; height: 22px; color: #d97757; margin-bottom: 6px; }
-  .prod h3 { font-size: 13px; font-weight: 700; }
-  .prod .tag { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #3d3d3f; opacity: 0.4; letter-spacing: 0.04em; margin-bottom: 4px; }
-  .prod p { font-size: 10.5px; color: #3d3d3f; line-height: 1.5; }
-  .prod .spec { font-size: 9.5px; color: #d97757; font-weight: 600; margin-top: 5px; }
-  .prod-full { grid-column: span 2; }
+  .pillar-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+  .pillar { border: 1px solid rgba(19,19,20,0.06); border-radius: 10px; padding: 14px 16px; }
+  .pillar .pillar-num { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #d97757; opacity: 0.6; letter-spacing: 0.04em; margin-bottom: 4px; }
+  .pillar h3 { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+  .pillar .pillar-tag { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; color: #3d3d3f; opacity: 0.4; letter-spacing: 0.04em; margin-bottom: 6px; }
+  .pillar p { font-size: 10px; color: #3d3d3f; line-height: 1.55; }
+  .pillar .flow { font-size: 9.5px; color: #131314; font-weight: 500; margin-top: 6px; line-height: 1.5; border-top: 1px solid rgba(19,19,20,0.05); padding-top: 6px; }
 
-  .ent-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; margin-bottom: 20px; }
-  .ent-item { font-size: 11px; color: #3d3d3f; line-height: 1.5; padding: 6px 0; border-bottom: 1px solid rgba(19,19,20,0.04); }
+  .prod-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 18px; }
+  .prod-card { text-align: center; padding: 10px 6px; border: 1px solid rgba(19,19,20,0.05); border-radius: 8px; }
+  .prod-card svg { width: 24px; height: 19px; color: #d97757; margin-bottom: 4px; }
+  .prod-card h4 { font-size: 11px; font-weight: 700; }
+  .prod-card .ptag { font-family: 'JetBrains Mono', monospace; font-size: 7.5px; color: #3d3d3f; opacity: 0.4; letter-spacing: 0.03em; margin-bottom: 3px; }
+  .prod-card p { font-size: 9px; color: #3d3d3f; line-height: 1.45; }
+  .prod-card .spec { font-size: 8.5px; color: #d97757; font-weight: 600; margin-top: 4px; }
+
+  .ent-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 18px; margin-bottom: 16px; }
+  .ent-item { font-size: 10.5px; color: #3d3d3f; line-height: 1.45; padding: 5px 0; border-bottom: 1px solid rgba(19,19,20,0.04); }
   .ent-item strong { color: #131314; }
 
-  .cta { background: #131314; border-radius: 12px; padding: 22px 26px; display: flex; align-items: center; justify-content: space-between; }
-  .cta h3 { color: #faf9f0; font-size: 16px; font-weight: 700; }
-  .cta p { color: rgba(250,249,240,0.45); font-size: 11px; margin-top: 2px; }
-  .cta .btn { background: #d97757; color: #faf9f0; font-size: 12px; font-weight: 600; padding: 10px 22px; border-radius: 8px; text-decoration: none; }
+  .cta { background: #131314; border-radius: 12px; padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; }
+  .cta h3 { color: #faf9f0; font-size: 15px; font-weight: 700; }
+  .cta p { color: rgba(250,249,240,0.45); font-size: 10.5px; margin-top: 2px; }
+  .cta .btn { background: #d97757; color: #faf9f0; font-size: 11.5px; font-weight: 600; padding: 9px 20px; border-radius: 8px; text-decoration: none; white-space: nowrap; }
 
-  .trust { margin-top: 14px; display: flex; gap: 20px; font-size: 9px; color: #3d3d3f; opacity: 0.4; }
+  .trust { margin-top: 10px; display: flex; gap: 18px; font-size: 9px; color: #3d3d3f; opacity: 0.4; }
   .trust strong { color: #131314; opacity: 0.6; font-weight: 600; }
 </style>
 </head>
@@ -79,31 +92,54 @@
   <div class="label">The Problem</div>
 
   <div class="hero">
-    <h1>Enterprise commercial teams are drowning in tools <em>instead of closing deals.</em></h1>
-    <p>Your sales reps spend 70% of their time on admin. Your contact center can't scale without hiring. Your data decays faster than you can clean it. You pay for 8+ tools that don't talk to each other — and still need consultants to glue them together.</p>
+    <h1>Enterprises run Sales, Marketing and Customer Service <em>with too many people, too many tools, and too little intelligence.</em></h1>
+    <p>Three departments. Separate teams. Separate tools. Separate data. Your CRM doesn't talk to your contact center. Your marketing campaigns don't know what your sales reps learned yesterday. And every new language, market, or channel requires more headcount.</p>
   </div>
 
-  <div class="pain-grid">
-    <div class="pain"><div class="num">3–6 months</div><div class="txt">Average CRM implementation. Plus consultants, data migration, and integration projects before anyone sees value.</div></div>
-    <div class="pain"><div class="num">$150K+</div><div class="txt">Typical enterprise deployment cost. Per-seat licensing, per-credit data fees, per-connector integrations. Costs compound.</div></div>
-    <div class="pain"><div class="num">30% / year</div><div class="txt">Contact and company data decay rate. Emails bounce, people move, companies restructure. Your intelligence is rotting.</div></div>
-    <div class="pain"><div class="num">67%</div><div class="txt">Of customers abandon calls on hold. Multilingual support requires separate teams, shifts, and training per language.</div></div>
+  <div class="dept-grid">
+    <div class="dept">
+      <div class="dept-label">Customer Service</div>
+      <div class="issue">Scaling requires hiring per language and shift. Quality is inconsistent. Customers wait. Context is lost between channels.</div>
+      <div class="stat">67%</div>
+      <div class="stat-label">of customers abandon calls on hold</div>
+    </div>
+    <div class="dept">
+      <div class="dept-label">Sales</div>
+      <div class="issue">Reps spend most of their time on admin — research, data entry, CRM updates — instead of selling. Pipeline data is stale within weeks.</div>
+      <div class="stat">70%</div>
+      <div class="stat-label">of rep time spent on non-selling tasks</div>
+    </div>
+    <div class="dept">
+      <div class="dept-label">Marketing</div>
+      <div class="issue">Campaigns built on outdated lists. No feedback loop from sales conversations. Outreach feels generic because it is generic.</div>
+      <div class="stat">30%/yr</div>
+      <div class="stat-label">contact data decay rate</div>
+    </div>
   </div>
 
   <div class="shift">
-    <h2>What changes when <em>AI runs commercial operations.</em></h2>
+    <div class="overline">And on top of it all —</div>
+    <h2>8–12 tools that don't connect. 3–6 months to deploy a CRM. <em>$150K+ before anyone sees value.</em></h2>
+  </div>
+
+  <hr class="divider" style="margin: 14px 0;">
+
+  <div class="label">The Shift</div>
+
+  <div class="shift">
+    <h2>What changes when <em>AI runs all three.</em></h2>
     <div class="shift-grid">
       <div class="shift-card">
         <h3>AI employees, not AI features</h3>
-        <p>Autonomous agents that plan, reason, and execute multi-step workflows. Humans set goals and approve. AI does the work.</p>
+        <p>Autonomous agents that plan, reason, and execute. Humans set goals and approve. AI does the work — across sales, marketing, and service.</p>
       </div>
       <div class="shift-card">
         <h3>One platform, not ten tools</h3>
-        <p>Sales, marketing, customer service — natively integrated. No sync, no connectors, no per-tool licensing. One AI runs it all.</p>
+        <p>Sales outreach, campaign intelligence, and customer service — natively integrated. Shared data, shared AI, no sync, no connectors.</p>
       </div>
       <div class="shift-card">
         <h3>Hours to deploy, not months</h3>
-        <p>The system scans your company, learns your products, configures itself and starts operating. Zero consultants. Zero integrations.</p>
+        <p>Scans your company, learns your products, configures itself, and starts operating. Zero consultants. Zero integrations. 24 hours.</p>
       </div>
     </div>
   </div>
@@ -112,72 +148,98 @@
     <div class="bstat"><div class="n">7M+</div><div class="l">Companies indexed</div></div>
     <div class="bstat"><div class="n">14M+</div><div class="l">Contacts searchable</div></div>
     <div class="bstat"><div class="n">55+</div><div class="l">AI tools, live</div></div>
-    <div class="bstat"><div class="n">&lt;100ms</div><div class="l">Search across all data</div></div>
+    <div class="bstat"><div class="n">&lt;400ms</div><div class="l">Voice response latency</div></div>
   </div>
 
   <div class="footer"><span>Salesteq — Elyon GmbH, Zug, Switzerland</span><span>Confidential</span></div>
 </div>
 
-<!-- ═══════════════ PAGE 2 — WHAT WE'VE BUILT ═══════════════ -->
+<!-- ═══════════════ PAGE 2 — THE PLATFORM ═══════════════ -->
 <div class="page">
   <svg class="watermark" viewBox="0 0 200 500" width="280"><line x1="40" y1="400" x2="80" y2="50"/><line x1="90" y1="400" x2="130" y2="50"/><line x1="140" y1="400" x2="180" y2="50"/></svg>
 
   <div class="header">
     <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7" fill="#131314"/><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg></div>
     <div class="wordmark">Salesteq</div>
-    <div class="header-right">What We've Built</div>
+    <div class="header-right">The Platform</div>
   </div>
   <hr class="divider">
 
-  <div class="label">The Platform — Five Products, Production Today</div>
+  <div class="label">Three Domains — One AI Platform</div>
 
-  <div class="prod-grid">
-    <div class="prod">
+  <div class="pillar-grid">
+    <div class="pillar">
+      <div class="pillar-num">01</div>
+      <h3>Operate</h3>
+      <div class="pillar-tag">Customer Service</div>
+      <p>AI handles customer support — voice-first, any language, real-time. Hears emotion, responds naturally, takes action while still talking. Customers don't notice it's AI.</p>
+      <div class="flow">Customer calls → AI answers in their language → resolves issue → escalates if needed — all under 400ms response time.</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-num">02</div>
+      <h3>Grow</h3>
+      <div class="pillar-tag">Sales & Marketing</div>
+      <p>AI runs the full cycle — prospecting, research, outreach, qualification, pipeline management. Generates campaigns from live intelligence. Calls leads and books meetings.</p>
+      <div class="flow">Define target → AI researches, drafts emails, calls prospects, qualifies, manages pipeline — humans approve key decisions.</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-num">03</div>
+      <h3>Know</h3>
+      <div class="pillar-tag">Intelligence</div>
+      <p>Two knowledge systems unified. The world outside: 7M companies, 14M contacts. Your world inside: products, documents, emails, learnings. Gets smarter with every interaction.</p>
+      <div class="flow">AI enriches, scores, researches — then feeds intelligence into service conversations and sales outreach automatically.</div>
+    </div>
+  </div>
+
+  <div class="label">Five Products — Built from Scratch, Production Today</div>
+
+  <div class="prod-strip">
+    <div class="prod-card">
       <svg viewBox="0 0 72 56" fill="none"><path d="M10 48 L26 8" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/><path d="M30 48 L46 8" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/><path d="M50 48 L66 8" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/></svg>
-      <h3>Badger</h3><div class="tag">Autonomous Agent</div>
-      <p>Plans, reasons, spawns sub-agents, executes. Full sales cycle from prospecting to deal closure. Customer service triage. Campaign orchestration.</p>
-      <div class="spec">55+ tools · 5x parallel agents · multi-model routing · full audit trail</div>
+      <h4>Badger</h4><div class="ptag">Autonomous Agent</div>
+      <p>Plans, reasons, executes across all three domains.</p>
+      <div class="spec">55+ tools · 5x parallel</div>
     </div>
-    <div class="prod">
+    <div class="prod-card">
       <svg viewBox="0 0 72 56" fill="none"><path d="M4 10 L68 10" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M4 22 L48 22" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M4 34 L60 34" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M4 46 L38 46" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg>
-      <h3>Index</h3><div class="tag">Commercial Intelligence</div>
-      <p>7M companies, 14M contacts. Org charts, tech stacks, funding, revenue, hiring signals. Full-text search in milliseconds. No per-credit pricing.</p>
-      <div class="spec">4 daily enrichment pipelines · 0-6 quality scoring · real-time web scraping</div>
+      <h4>Index</h4><div class="ptag">World Outside</div>
+      <p>7M companies, 14M contacts, org charts, tech stacks.</p>
+      <div class="spec">Full-text · &lt;100ms</div>
     </div>
-    <div class="prod">
+    <div class="prod-card">
       <svg viewBox="0 0 72 56" fill="none"><path d="M8 36 A16 16 0 0 1 24 52" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M8 24 A28 28 0 0 1 36 52" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M8 10 A42 42 0 0 1 50 52" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg>
-      <h3>Yeda</h3><div class="tag">Self-Building Knowledge</div>
-      <p>Automatically researches your company, maps products, builds ICP. Reads documents, emails, calendar. Gets smarter with every conversation. Six structured knowledge categories.</p>
-      <div class="spec">Auto-learning · document extraction · email intelligence · conversational memory</div>
+      <h4>Yeda</h4><div class="ptag">Your World Inside</div>
+      <p>Self-building knowledge. Products, docs, emails, calendar.</p>
+      <div class="spec">Auto-learning</div>
     </div>
-    <div class="prod">
+    <div class="prod-card">
       <svg viewBox="0 0 72 56" fill="none"><path d="M8 18 A10 10 0 0 1 8 38" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M8 10 A18 18 0 0 1 8 46" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M8 2 A26 26 0 0 1 8 54" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg>
-      <h3>Kol</h3><div class="tag">Proprietary Voice Intelligence</div>
-      <p>Built in-house — not an API wrapper. Speech recognition, neural synthesis, emotion detection, multilingual. Natural conversations that customers don't notice are AI.</p>
-      <div class="spec">&lt;400ms latency · emotion-aware · barge-in native · proprietary ASR + TTS</div>
+      <h4>Kol</h4><div class="ptag">Voice Engine</div>
+      <p>Proprietary ASR + TTS. Emotion-aware. Any language.</p>
+      <div class="spec">&lt;400ms · in-house</div>
     </div>
-    <div class="prod prod-full">
+    <div class="prod-card">
       <svg viewBox="0 0 72 56" fill="none"><path d="M36 52 L36 6" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M36 52 L22 10" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M36 52 L50 10" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M36 52 L8 18" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M36 52 L64 18" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg>
-      <h3>Zera</h3><div class="tag">Autonomous Deployment</div>
-      <p>Scans your website and public data. Ingests your contacts and documents. Learns your ICP from historical patterns. Configures pipelines, service rules, and outreach. Operational in hours — not months. No consultants. No integration projects.</p>
-      <div class="spec">24h deployment · zero integrations · self-configuring · continuously improving</div>
+      <h4>Zera</h4><div class="ptag">Deployment</div>
+      <p>Scans, ingests, learns, configures. Operational in 24h.</p>
+      <div class="spec">Zero setup</div>
     </div>
   </div>
 
   <div class="label">Enterprise-Ready</div>
 
   <div class="ent-grid">
-    <div class="ent-item"><strong>Data isolation</strong> — Multi-tenant RLS at database layer. Your data never touches another org.</div>
-    <div class="ent-item"><strong>Full audit trail</strong> — Every AI decision logged. Complete transparency and accountability.</div>
-    <div class="ent-item"><strong>Swiss headquarters</strong> — Elyon GmbH, Zug. European infrastructure, GDPR-compliant.</div>
-    <div class="ent-item"><strong>Human-in-the-loop</strong> — High-stakes actions require explicit approval. You control the threshold.</div>
-    <div class="ent-item"><strong>Original R&D</strong> — PhD founders in AI + speech. Core innovation, not API wrappers.</div>
-    <div class="ent-item"><strong>Production-grade</strong> — Running live at Naghi Group, BMW KSA, DAR Global, Allianz, Suhner.</div>
+    <div class="ent-item"><strong>Data isolation</strong> — Multi-tenant RLS. Your data never touches another org.</div>
+    <div class="ent-item"><strong>Full audit trail</strong> — Every AI decision logged, observable, reviewable.</div>
+    <div class="ent-item"><strong>Swiss HQ</strong> — Elyon GmbH, Zug. European infrastructure. GDPR-compliant.</div>
+    <div class="ent-item"><strong>Human-in-the-loop</strong> — AI proposes, humans approve. You control the threshold.</div>
+    <div class="ent-item"><strong>Original R&D</strong> — PhD founders in AI + speech recognition. Not API wrappers.</div>
+    <div class="ent-item"><strong>Production clients</strong> — Naghi Group, BMW KSA, DAR Global, Allianz, Suhner.</div>
   </div>
 
   <div class="cta">
     <div>
-      <h3>See the real product, running live.</h3>
+      <h3>See all three running live.</h3>
       <p>No slides. We demo on your data, your use case. 45 minutes.</p>
     </div>
     <a href="mailto:viktor@salesteq.com" class="btn">Book a demo →</a>
