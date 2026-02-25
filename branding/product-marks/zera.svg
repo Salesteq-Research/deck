@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 56" width="72" height="56" fill="none">
+  <!-- Zera — Autonomous Deployment: five lines radiating from base, sprouting seed -->
+  <path d="M36 52 L36 6" stroke="#d97757" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M36 52 L22 10" stroke="#d97757" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M36 52 L50 10" stroke="#d97757" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M36 52 L8 18" stroke="#d97757" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M36 52 L64 18" stroke="#d97757" stroke-width="3.5" stroke-linecap="round"/>
+</svg>

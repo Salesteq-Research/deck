@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" width="360" height="80">
+  <!-- S-curve mark -->
+  <path d="M40 12 C20 12, 18.5 26, 30 40 C41.5 54, 40 68, 20 68"
+    stroke="#d97757" stroke-width="7" stroke-linecap="round" fill="none"/>
+  <!-- Wordmark -->
+  <text x="72" y="50" fill="#faf9f0" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="34" font-weight="700" letter-spacing="0.01em">Salesteq</text>
+</svg>

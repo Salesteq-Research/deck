@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salesteq — AI Commercial Operations</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, sans-serif; color: #131314; background: #faf9f0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  .page { width: 210mm; min-height: 297mm; padding: 36px 44px; position: relative; overflow: hidden; page-break-after: always; background: #faf9f0; }
+  .page:last-child { page-break-after: auto; }
+
+  /* ── Page 1 ── */
+  .header { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+  .logo-mark svg { width: 36px; height: 36px; }
+  .wordmark { font-size: 22px; font-weight: 700; letter-spacing: 0.01em; }
+  .tagline-top { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #3d3d3f; letter-spacing: 0.1em; opacity: 0.45; text-transform: uppercase; margin-left: auto; }
+
+  .hero { margin: 32px 0 28px; }
+  .hero h1 { font-size: 36px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 12px; }
+  .hero h1 span { color: #d97757; }
+  .hero p { font-size: 15px; color: #3d3d3f; line-height: 1.65; max-width: 480px; }
+
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .stat { border-left: 3px solid #d97757; padding-left: 12px; }
+  .stat .number { font-size: 28px; font-weight: 800; letter-spacing: -0.03em; color: #131314; }
+  .stat .label { font-size: 10px; color: #3d3d3f; opacity: 0.6; letter-spacing: 0.02em; margin-top: 2px; }
+
+  .section-label { font-size: 10px; font-weight: 600; color: #d97757; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; }
+
+  .products-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 24px; margin-bottom: 28px; }
+  .product-card { display: flex; gap: 12px; align-items: flex-start; }
+  .product-card svg { width: 28px; height: 22px; flex-shrink: 0; margin-top: 2px; color: #d97757; }
+  .product-card h3 { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+  .product-card .tag { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #3d3d3f; opacity: 0.4; letter-spacing: 0.04em; }
+  .product-card p { font-size: 11px; color: #3d3d3f; line-height: 1.55; margin-top: 3px; }
+
+  .domains { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+  .domain { background: #131314; border-radius: 10px; padding: 18px 16px; color: #faf9f0; }
+  .domain h3 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .domain p { font-size: 10.5px; line-height: 1.55; opacity: 0.55; }
+  .domain .accent { color: #d97757; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; margin-bottom: 6px; display: block; }
+
+  .divider { border: none; border-top: 1px solid rgba(19,19,20,0.06); margin: 24px 0; }
+
+  /* ── Page 2 ── */
+  .compare-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 24px; }
+  .compare-table th { text-align: left; font-weight: 600; padding: 8px 10px; border-bottom: 2px solid #131314; font-size: 10px; letter-spacing: 0.02em; }
+  .compare-table td { padding: 7px 10px; border-bottom: 1px solid rgba(19,19,20,0.06); color: #3d3d3f; line-height: 1.45; vertical-align: top; }
+  .compare-table td:last-child { color: #131314; font-weight: 600; }
+  .compare-table .highlight { background: rgba(217,119,87,0.06); }
+
+  .use-cases { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+  .use-case { border-left: 3px solid #d97757; padding: 10px 14px; background: rgba(217,119,87,0.03); border-radius: 0 8px 8px 0; }
+  .use-case h4 { font-size: 11px; font-weight: 700; margin-bottom: 3px; }
+  .use-case p { font-size: 10px; color: #3d3d3f; line-height: 1.5; }
+  .use-case .result { font-size: 10px; color: #d97757; font-weight: 600; margin-top: 4px; }
+
+  .trust-row { display: flex; gap: 28px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+  .trust-item { font-size: 10px; color: #3d3d3f; opacity: 0.5; }
+  .trust-item strong { color: #131314; opacity: 1; font-weight: 600; }
+
+  .cta-bar { background: #131314; border-radius: 12px; padding: 24px 28px; display: flex; align-items: center; justify-content: space-between; }
+  .cta-bar h3 { color: #faf9f0; font-size: 18px; font-weight: 700; }
+  .cta-bar p { color: rgba(250,249,240,0.5); font-size: 12px; margin-top: 2px; }
+  .cta-bar .btn { background: #d97757; color: #faf9f0; font-size: 13px; font-weight: 600; padding: 10px 24px; border-radius: 8px; text-decoration: none; display: inline-block; }
+
+  .footer { position: absolute; bottom: 28px; left: 44px; right: 44px; display: flex; justify-content: space-between; font-size: 9px; color: #3d3d3f; opacity: 0.35; }
+
+  .watermark { position: absolute; right: -40px; top: 50%; transform: translateY(-50%); opacity: 0.015; }
+  .watermark line { stroke: #131314; stroke-width: 6; stroke-linecap: round; }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════ PAGE 1 ════════════════════════ -->
+<div class="page">
+  <svg class="watermark" viewBox="0 0 200 500" width="300">
+    <line x1="40" y1="400" x2="80" y2="50"/><line x1="90" y1="400" x2="130" y2="50"/><line x1="140" y1="400" x2="180" y2="50"/>
+  </svg>
+
+  <div class="header">
+    <div class="logo-mark">
+      <svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7" fill="#131314"/><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg>
+    </div>
+    <div class="wordmark">Salesteq</div>
+    <div class="tagline-top">AI Commercial Operations</div>
+  </div>
+
+  <div class="hero">
+    <h1>AI agents that run your <span>commercial operations.</span></h1>
+    <p>One platform replaces your sales, marketing, and customer service stack. Not assistants. Not copilots. AI employees that plan, reason, and execute autonomously.</p>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat"><div class="number">7M+</div><div class="label">Company records</div></div>
+    <div class="stat"><div class="number">14M+</div><div class="label">Contacts indexed</div></div>
+    <div class="stat"><div class="number">55+</div><div class="label">AI tools</div></div>
+    <div class="stat"><div class="number">24/7</div><div class="label">Autonomous execution</div></div>
+  </div>
+
+  <div class="section-label">Five products. One platform.</div>
+
+  <div class="products-grid">
+    <div class="product-card">
+      <svg viewBox="0 0 72 56" fill="none"><path d="M10 48 L26 8" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/><path d="M30 48 L46 8" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/><path d="M50 48 L66 8" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/></svg>
+      <div><h3>Badger</h3><div class="tag">The Agent</div><p>Autonomous AI agent with 55+ tools. Plans, reasons, spawns sub-agents. Executes multi-step workflows across your entire commercial stack.</p></div>
+    </div>
+    <div class="product-card">
+      <svg viewBox="0 0 72 56" fill="none"><path d="M4 10 L68 10" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M4 22 L48 22" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M4 34 L60 34" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M4 46 L38 46" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg>
+      <div><h3>Index</h3><div class="tag">Commercial Intelligence</div><p>7M companies, 14M contacts. Org charts, tech stacks, funding, revenue. Full-text search in milliseconds. No per-credit pricing.</p></div>
+    </div>
+    <div class="product-card">
+      <svg viewBox="0 0 72 56" fill="none"><path d="M8 36 A16 16 0 0 1 24 52" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M8 24 A28 28 0 0 1 36 52" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M8 10 A42 42 0 0 1 50 52" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg>
+      <div><h3>Yeda</h3><div class="tag">Self-Building Knowledge</div><p>Learns your company, products, ICP, and market. Reads documents, emails, calendar. Gets smarter with every interaction.</p></div>
+    </div>
+    <div class="product-card">
+      <svg viewBox="0 0 72 56" fill="none"><path d="M8 18 A10 10 0 0 1 8 38" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M8 10 A18 18 0 0 1 8 46" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M8 2 A26 26 0 0 1 8 54" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg>
+      <div><h3>Kol</h3><div class="tag">Voice Engine</div><p>Proprietary speech pipeline. Recognition, neural synthesis, sentiment analysis. Every language, sub-second latency.</p></div>
+    </div>
+    <div class="product-card" style="grid-column: span 2;">
+      <svg viewBox="0 0 72 56" fill="none"><path d="M36 52 L36 6" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M36 52 L22 10" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M36 52 L50 10" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M36 52 L8 18" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M36 52 L64 18" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg>
+      <div><h3>Zera</h3><div class="tag">Autonomous Deployment</div><p>Scans your website, ingests your data, learns your ICP, configures itself. Operational in hours, not months. No consultants. No integrations.</p></div>
+    </div>
+  </div>
+
+  <div class="section-label">Three domains. One AI.</div>
+
+  <div class="domains">
+    <div class="domain">
+      <span class="accent">SALES</span>
+      <h3>First touch to closed deal</h3>
+      <p>Prospecting, outreach, pipeline management, deal forecasting, automated follow-ups, meeting scheduling. AI runs the full cycle.</p>
+    </div>
+    <div class="domain">
+      <span class="accent">MARKETING</span>
+      <h3>Reach everyone. Personally.</h3>
+      <p>Campaigns, content, email sequences, audience segmentation, performance analytics. Personalized at any scale.</p>
+    </div>
+    <div class="domain">
+      <span class="accent">CUSTOMER SERVICE</span>
+      <h3>Every customer. Every language.</h3>
+      <p>AI voice and chat on any website. Deep product knowledge, multilingual, always on. Instant resolution or intelligent escalation.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>Salesteq — Elyon GmbH, Zug, Switzerland</span>
+    <span>salesteq.com</span>
+  </div>
+</div>
+
+<!-- ════════════════════════ PAGE 2 ════════════════════════ -->
+<div class="page">
+  <svg class="watermark" viewBox="0 0 200 500" width="300">
+    <line x1="40" y1="400" x2="80" y2="50"/><line x1="90" y1="400" x2="130" y2="50"/><line x1="140" y1="400" x2="180" y2="50"/>
+  </svg>
+
+  <div class="header">
+    <div class="logo-mark">
+      <svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7" fill="#131314"/><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg>
+    </div>
+    <div class="wordmark">Salesteq</div>
+    <div class="tagline-top">Why Salesteq</div>
+  </div>
+
+  <hr class="divider" style="margin-top: 12px;">
+
+  <div class="section-label" style="margin-top: 20px;">How we compare</div>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th></th><th>Traditional CRM</th><th>AI Sales Tools</th><th>Salesteq</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Who works?</strong></td><td>Your team</td><td>Your team (AI assists)</td><td class="highlight">AI employees (you approve)</td></tr>
+      <tr><td><strong>Data</strong></td><td>What you enter</td><td>Scraped contact lists</td><td class="highlight">7M companies + your knowledge</td></tr>
+      <tr><td><strong>Voice / CS</strong></td><td>Separate tool</td><td>Not included</td><td class="highlight">Kol: any language, &lt;400ms</td></tr>
+      <tr><td><strong>Setup time</strong></td><td>3–6 months + consultants</td><td>Weeks + integrations</td><td class="highlight">Hours. Zero configuration.</td></tr>
+      <tr><td><strong>Pricing</strong></td><td>Per seat</td><td>Per seat + per credit</td><td class="highlight">AI replaces the seats</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-label">Results</div>
+
+  <div class="use-cases">
+    <div class="use-case">
+      <h4>Automotive — New Market Entry</h4>
+      <p>Zero presence in Europe. No contacts, no pipeline.</p>
+      <div class="result">52 targets identified, 20 outreach sequences launched in 48 hours.</div>
+    </div>
+    <div class="use-case">
+      <h4>Real Estate — Tool Consolidation</h4>
+      <p>Eight tools, four dedicated headcount for admin.</p>
+      <div class="result">8 tools → 1 platform. Same pipeline volume, fraction of cost.</div>
+    </div>
+    <div class="use-case">
+      <h4>Insurance — Multilingual Service</h4>
+      <p>Customer service across 5 countries, massive call center cost.</p>
+      <div class="result">5 countries live in 1 day. 89% auto-resolution. $500K saved.</div>
+    </div>
+    <div class="use-case">
+      <h4>Manufacturing — Scale Outbound</h4>
+      <p>Need 10x outbound without hiring SDRs.</p>
+      <div class="result">280 companies researched, 40 personalized sequences. Reps close.</div>
+    </div>
+  </div>
+
+  <div class="section-label">Trusted by</div>
+
+  <div class="trust-row">
+    <div class="trust-item"><strong>Naghi Group</strong> — Saudi Arabia</div>
+    <div class="trust-item"><strong>DAR Global</strong> — Real Estate</div>
+    <div class="trust-item"><strong>Allianz</strong> — Insurance</div>
+    <div class="trust-item"><strong>Suhner</strong> — Manufacturing</div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section-label">Enterprise credentials</div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; margin-bottom: 28px; font-size: 11px; color: #3d3d3f; line-height: 1.55;">
+    <div><strong style="color:#131314;">Swiss entity</strong> — Elyon GmbH, Zug, Switzerland</div>
+    <div><strong style="color:#131314;">Full audit trail</strong> — Every AI decision logged and reviewable</div>
+    <div><strong style="color:#131314;">Multi-tenant isolation</strong> — Your data never touches another org</div>
+    <div><strong style="color:#131314;">European infrastructure</strong> — Hetzner, GDPR-compliant</div>
+    <div><strong style="color:#131314;">Original R&D</strong> — Autonomous agents, speech, AI — not API wrappers</div>
+    <div><strong style="color:#131314;">Human-in-the-loop</strong> — High-stakes actions require approval</div>
+  </div>
+
+  <div class="cta-bar">
+    <div>
+      <h3>Ready to see it live?</h3>
+      <p>No demo deck. We show you the real product running on your data.</p>
+    </div>
+    <a href="https://agent.salesteq.com" class="btn">Get started →</a>
+  </div>
+
+  <div class="footer">
+    <span>viktor@salesteq.com · +41 76 XXX XX XX</span>
+    <span>salesteq.com</span>
+  </div>
+</div>
+
+</body>
+</html>

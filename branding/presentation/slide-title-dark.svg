@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#131314"/>
+
+  <!-- Ambient terra glow -->
+  <ellipse cx="960" cy="540" rx="500" ry="350" fill="#d97757" opacity="0.04"/>
+  <ellipse cx="900" cy="580" rx="250" ry="180" fill="#d97757" opacity="0.05"/>
+
+  <!-- Badger mark watermark, right -->
+  <g transform="translate(1400, 250)" stroke="#faf9f0" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.03">
+    <line x1="0" y1="200" x2="50" y2="0"/>
+    <line x1="65" y1="200" x2="115" y2="0"/>
+    <line x1="130" y1="200" x2="180" y2="0"/>
+  </g>
+
+  <!-- S-curve logo mark -->
+  <path d="M200 420 C140 420, 136 456, 170 500 C204 544, 200 580, 140 580"
+    stroke="#d97757" stroke-width="10" stroke-linecap="round" fill="none"/>
+
+  <!-- Wordmark -->
+  <text x="240" y="520" fill="#faf9f0" font-family="Inter, system-ui, sans-serif" font-size="52" font-weight="700" letter-spacing="0.01em">Salesteq</text>
+
+  <!-- Tagline -->
+  <text x="242" y="570" fill="rgba(250,249,240,0.4)" font-family="Inter, system-ui, sans-serif" font-size="20" font-weight="500" letter-spacing="0.06em">AI Commercial Operations</text>
+
+  <!-- Terra accent bar bottom -->
+  <rect x="200" y="980" width="120" height="3" rx="1.5" fill="#d97757" opacity="0.5"/>
+</svg>

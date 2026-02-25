@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#131314"/>
+
+  <!-- Ambient glow -->
+  <ellipse cx="960" cy="540" rx="600" ry="400" fill="#d97757" opacity="0.03"/>
+
+  <!-- Section title placeholder area -->
+  <text x="200" y="490" fill="rgba(250,249,240,0.08)" font-family="Inter, system-ui, sans-serif" font-size="160" font-weight="800" letter-spacing="-0.03em">01</text>
+
+  <!-- S-curve logo bottom-right -->
+  <path d="M1780 1000 C1760 1000, 1759 1014, 1770 1028 C1781 1042, 1780 1056, 1760 1056"
+    stroke="#d97757" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.3"/>
+
+  <!-- Terra accent bar left -->
+  <rect x="200" y="520" width="80" height="3" rx="1.5" fill="#d97757" opacity="0.6"/>
+</svg>

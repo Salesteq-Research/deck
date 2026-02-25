@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" width="1200" height="400">
+  <rect width="1200" height="400" fill="#faf9f0"/>
+
+  <!-- Title -->
+  <text x="60" y="55" fill="#131314" font-family="Inter, system-ui, sans-serif" font-size="24" font-weight="700">Salesteq Color Palette</text>
+
+  <!-- Cream -->
+  <rect x="60" y="90" width="160" height="160" rx="12" fill="#faf9f0" stroke="#131314" stroke-width="1" stroke-opacity="0.08"/>
+  <text x="140" y="290" fill="#131314" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Cream</text>
+  <text x="140" y="310" fill="#3d3d3f" font-family="JetBrains Mono, monospace" font-size="12" text-anchor="middle">#faf9f0</text>
+
+  <!-- Cream Dark -->
+  <rect x="250" y="90" width="160" height="160" rx="12" fill="#f0efe4"/>
+  <text x="330" y="290" fill="#131314" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Cream Dark</text>
+  <text x="330" y="310" fill="#3d3d3f" font-family="JetBrains Mono, monospace" font-size="12" text-anchor="middle">#f0efe4</text>
+
+  <!-- Dark -->
+  <rect x="440" y="90" width="160" height="160" rx="12" fill="#131314"/>
+  <text x="520" y="290" fill="#131314" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Dark</text>
+  <text x="520" y="310" fill="#3d3d3f" font-family="JetBrains Mono, monospace" font-size="12" text-anchor="middle">#131314</text>
+
+  <!-- Dark Secondary -->
+  <rect x="630" y="90" width="160" height="160" rx="12" fill="#3d3d3f"/>
+  <text x="710" y="290" fill="#131314" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Dark Sec.</text>
+  <text x="710" y="310" fill="#3d3d3f" font-family="JetBrains Mono, monospace" font-size="12" text-anchor="middle">#3d3d3f</text>
+
+  <!-- Terra -->
+  <rect x="820" y="90" width="160" height="160" rx="12" fill="#d97757"/>
+  <text x="900" y="290" fill="#131314" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Terra</text>
+  <text x="900" y="310" fill="#3d3d3f" font-family="JetBrains Mono, monospace" font-size="12" text-anchor="middle">#d97757</text>
+
+  <!-- Terra Light -->
+  <rect x="1010" y="90" width="160" height="160" rx="12" fill="#e8956e"/>
+  <text x="1090" y="290" fill="#131314" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Terra Light</text>
+  <text x="1090" y="310" fill="#3d3d3f" font-family="JetBrains Mono, monospace" font-size="12" text-anchor="middle">#e8956e</text>
+
+  <!-- Footer -->
+  <text x="60" y="370" fill="#3d3d3f" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="500" opacity="0.5">Fonts: Inter (sans), JetBrains Mono (mono)</text>
+</svg>

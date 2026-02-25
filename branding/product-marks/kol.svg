@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 56" width="72" height="56" fill="none">
+  <!-- Kol — Voice Engine: three semicircular arcs radiating rightward -->
+  <path d="M8 18 A10 10 0 0 1 8 38" stroke="#d97757" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M8 10 A18 18 0 0 1 8 46" stroke="#d97757" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M8 2 A26 26 0 0 1 8 54" stroke="#d97757" stroke-width="3.5" stroke-linecap="round"/>
+</svg>

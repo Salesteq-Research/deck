@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <rect width="400" height="400" fill="#131314"/>
+
+  <!-- Ambient terra glow behind the mark -->
+  <circle cx="200" cy="200" r="140" fill="#d97757" opacity="0.04"/>
+  <circle cx="200" cy="200" r="90" fill="#d97757" opacity="0.03"/>
+
+  <!-- S-curve logo — large, centered, thick stroke -->
+  <path d="M256 74 C148 74, 138 128, 200 200 C262 272, 252 326, 144 326"
+    stroke="#d97757" stroke-width="52" stroke-linecap="round" fill="none"/>
+</svg>

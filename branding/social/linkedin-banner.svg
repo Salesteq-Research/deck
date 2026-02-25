@@ -1,0 +1,26 @@
+<svg viewBox="0 0 1128 191" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1128" height="191" fill="#131314"/>
+
+  <!-- Subtle Badger mark watermark, right side -->
+  <g transform="translate(880, 30)" stroke="#faf9f0" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.04">
+    <line x1="0" y1="130" x2="40" y2="0"/>
+    <line x1="50" y1="130" x2="90" y2="0"/>
+    <line x1="100" y1="130" x2="140" y2="0"/>
+  </g>
+
+  <!-- S-curve logo mark -->
+  <path d="M80 52 C56 52, 54 66, 66 80 C78 94, 76 108, 52 108"
+    stroke="#d97757" stroke-width="5.5" stroke-linecap="round" fill="none"/>
+
+  <!-- Wordmark: SALESTEQ -->
+  <text x="110" y="90" fill="#faf9f0" font-family="Inter, system-ui, sans-serif" font-size="32" font-weight="700" letter-spacing="0.01em">Salesteq</text>
+
+  <!-- Divider line -->
+  <line x1="370" y1="68" x2="370" y2="100" stroke="#faf9f0" stroke-width="1" opacity="0.15"/>
+
+  <!-- Tagline -->
+  <text x="392" y="88" fill="rgba(250,249,240,0.45)" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="500" letter-spacing="0.04em">AI Commercial Operations</text>
+
+  <!-- Accent line bottom -->
+  <rect x="52" y="170" width="80" height="2" rx="1" fill="#d97757" opacity="0.5"/>
+</svg>
