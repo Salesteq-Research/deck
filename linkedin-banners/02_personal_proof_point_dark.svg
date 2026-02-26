@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1584 396" width="1584" height="396">
+  <rect width="1584" height="396" fill="#131314"/>
+
+  <!-- Ambient terra glow -->
+  <ellipse cx="500" cy="198" rx="400" ry="280" fill="#d97757" opacity="0.025"/>
+
+  <!-- Badger watermark -->
+  <g transform="translate(1300, 60)" opacity="0.012">
+      <line x1="0" y1="270.0" x2="54.0" y2="0" stroke="#faf9f0" stroke-width="7.2" stroke-linecap="round"/>
+      <line x1="72.0" y1="270.0" x2="126.0" y2="0" stroke="#faf9f0" stroke-width="7.2" stroke-linecap="round"/>
+      <line x1="144.0" y1="270.0" x2="198.0" y2="0" stroke="#faf9f0" stroke-width="7.2" stroke-linecap="round"/>
+    </g>
+
+  <!-- S-curve mark -->
+  <path d="M100 148 C60 148, 57 178, 80 198 C103 218, 100 248, 60 248"
+    stroke="#d97757" stroke-width="7" stroke-linecap="round" fill="none"/>
+
+  <!-- Wordmark -->
+  <text x="130" y="206" fill="#faf9f0" font-family="Inter, system-ui, sans-serif" font-size="36" font-weight="700" letter-spacing="0.01em">Salesteq</text>
+
+  <!-- Tagline -->
+  <text x="132" y="240" fill="rgba(250,249,240,0.3)" font-family="JetBrains Mono, monospace" font-size="12" font-weight="500" letter-spacing="0.08em">AI COMMERCIAL OPERATIONS</text>
+
+  <!-- Divider -->
+  <line x1="420" y1="140" x2="420" y2="260" stroke="rgba(250,249,240,0.06)" stroke-width="1"/>
+
+  <!-- Right side: proof -->
+  <text x="470" y="182" fill="#d97757" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" letter-spacing="0.06em">LIVE IN PRODUCTION</text>
+
+  <text x="470" y="220" fill="rgba(250,249,240,0.55)" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="500">Powering Naghi Group</text>
+  <text x="470" y="248" fill="rgba(250,249,240,0.3)" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="400">BMW &#183; Rolls Royce &#183; Land Rover &#183; Hyundai &#183; Jaguar</text>
+
+  <!-- Terra accent bar -->
+  <rect x="100" y="360" width="80" height="3" rx="1.5" fill="#d97757" opacity="0.4"/>
+</svg>
