@@ -100,7 +100,7 @@ TESTDRIVE_TOOLS = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "region": {"type": "string", "description": "Region filter: Zurich, Bern, Basel, Geneva, Lausanne, Luzern, St. Gallen, Winterthur, etc."},
+                    "region": {"type": "string", "description": "Region filter. Available: Zürich, Bern, Basel, Luzern, Genève, Lausanne, St. Gallen, Winterthur, Aarau, Zug, Thun, Solothurn"},
                 },
             },
         },
@@ -320,9 +320,19 @@ class TestDriveAgentService:
 
     def _get_dealers(self, args: Dict) -> Dict:
         region = (args.get("region") or "").lower()
+        # Normalize common variants (AI may omit umlauts or use French names)
+        region_aliases = {
+            "zurich": "zürich", "zuerich": "zürich",
+            "geneva": "genève", "genf": "genève", "geneve": "genève",
+            "lucerne": "luzern",
+            "berne": "bern",
+            "aargau": "aarau",
+            "st gallen": "st. gallen", "saint gallen": "st. gallen", "sg": "st. gallen",
+        }
+        region = region_aliases.get(region, region)
         dealers = SWISS_DEALERS
         if region:
-            dealers = [d for d in dealers if region in d["region"].lower()]
+            dealers = [d for d in dealers if region in d["region"].lower() or d["region"].lower() in region]
         return {
             "total_dealers": len(dealers),
             "dealers": [{
