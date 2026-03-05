@@ -177,9 +177,9 @@ export function TestDriveBooking() {
   }
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-[#fafafa]" onClick={() => inputRef.current?.focus()}>
+    <div className="flex flex-col h-[100dvh] bg-[#0d0d0d]" onClick={() => inputRef.current?.focus()}>
       {/* Header — dark, premium */}
-      <header className="px-4 sm:px-6 py-3.5 flex items-center justify-between shrink-0 bg-[#0d0d0d]">
+      <header className="px-4 sm:px-6 py-3.5 flex items-center justify-between shrink-0 bg-[#0d0d0d] border-b border-white/[0.06]">
         <div className="flex items-center gap-3">
           <span className="text-[15px] font-bold text-white tracking-[0.08em]" style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>BMW</span>
           <span className="w-px h-4 bg-white/15" />
@@ -192,7 +192,7 @@ export function TestDriveBooking() {
       </header>
 
       {/* Progress Tracker */}
-      <div className="px-4 sm:px-6 py-3 border-b border-[#e8e8e8] bg-white shrink-0">
+      <div className="px-4 sm:px-6 py-3 border-b border-white/[0.06] bg-[#111] shrink-0">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between">
             {steps.map((step, i) => {
@@ -202,13 +202,13 @@ export function TestDriveBooking() {
               return (
                 <div key={step.key} className="flex items-center gap-2 flex-1">
                   <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-medium transition-all duration-500 ${
-                    isCurrent ? 'bg-[#1c69d4] text-white' : isActive ? 'bg-[#1c69d4]/10 text-[#1c69d4]' : 'bg-[#f0f0f0] text-[#aaa]'
+                    isCurrent ? 'bg-[#1c69d4] text-white' : isActive ? 'bg-[#1c69d4]/20 text-[#4d8fe0]' : 'bg-white/[0.06] text-white/25'
                   }`}>
                     <Icon className="w-3 h-3" />
                     <span className="hidden sm:inline">{step.label}</span>
                   </div>
                   {i < steps.length - 1 && (
-                    <div className={`flex-1 h-[1.5px] transition-all duration-500 ${i < activeStep ? 'bg-[#1c69d4]' : 'bg-[#e6e6e6]'}`} />
+                    <div className={`flex-1 h-[1.5px] transition-all duration-500 ${i < activeStep ? 'bg-[#1c69d4]' : 'bg-white/[0.08]'}`} />
                   )}
                 </div>
               )
@@ -265,7 +265,7 @@ export function TestDriveBooking() {
                       <span className="w-1.5 h-1.5 rounded-full bg-[#1c69d4]/40 animate-typing-dot [animation-delay:200ms]" />
                       <span className="w-1.5 h-1.5 rounded-full bg-[#1c69d4]/40 animate-typing-dot [animation-delay:400ms]" />
                     </div>
-                    <span className="text-[12px] text-[#999]">{toolCallLabel(toolCallName)}</span>
+                    <span className="text-[12px] text-white/30">{toolCallLabel(toolCallName)}</span>
                   </div>
                 ) : (
                   <div className="py-2"><TypingIndicator /></div>
@@ -279,7 +279,7 @@ export function TestDriveBooking() {
       </ScrollArea>
 
       {/* Input */}
-      <div className="px-4 sm:px-6 pt-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-4 shrink-0 border-t border-[#e8e8e8] bg-white">
+      <div className="px-4 sm:px-6 pt-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-4 shrink-0 border-t border-white/[0.06] bg-[#0d0d0d]">
         <div className="max-w-2xl mx-auto">
           <form onSubmit={handleSubmit} className="relative">
             <input
@@ -294,7 +294,7 @@ export function TestDriveBooking() {
               }
               disabled={isLoading}
               autoFocus
-              className="w-full bg-[#f5f5f5] border border-[#e6e6e6] rounded-2xl pl-5 pr-12 py-3.5 text-[14.5px] text-[#1c1c1c] placeholder:text-[#999] outline-none focus:border-[#1c69d4]/30 focus:bg-white transition-all duration-200 disabled:opacity-40"
+              className="w-full bg-white/[0.06] border border-white/[0.08] rounded-2xl pl-5 pr-12 py-3.5 text-[14.5px] text-white placeholder:text-white/25 outline-none focus:border-[#1c69d4]/40 focus:bg-white/[0.08] transition-all duration-200 disabled:opacity-40"
             />
             <button
               type="submit"
@@ -337,10 +337,10 @@ function SelectableModelCards({ vehicles, onSelect, disabled }: {
             key={v.vin}
             disabled={disabled}
             onClick={(e) => { e.stopPropagation(); onSelect(v) }}
-            className="flex-shrink-0 w-[240px] sm:w-[280px] flex flex-col rounded-xl border border-[#e6e6e6] bg-white overflow-hidden text-left transition-all duration-200 hover:border-[#1c69d4] hover:shadow-md active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none group"
+            className="flex-shrink-0 w-[240px] sm:w-[280px] flex flex-col rounded-xl border border-white/[0.08] bg-white/[0.04] overflow-hidden text-left transition-all duration-200 hover:border-white/[0.16] hover:bg-white/[0.07] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none group"
           >
             {/* Image — larger */}
-            <div className="w-full h-[140px] sm:h-[165px] bg-gradient-to-br from-[#f8f8f8] to-[#efefef] relative flex items-center justify-center overflow-hidden">
+            <div className="w-full h-[140px] sm:h-[165px] bg-gradient-to-br from-white/[0.03] to-transparent relative flex items-center justify-center overflow-hidden">
               {v.image ? (
                 <img
                   src={v.image}
@@ -364,17 +364,17 @@ function SelectableModelCards({ vehicles, onSelect, disabled }: {
 
             {/* Info */}
             <div className="p-3.5 flex-1 flex flex-col">
-              <h4 className="text-[13.5px] font-semibold text-[#1c1c1c] leading-tight line-clamp-2">{v.name}</h4>
-              <p className="text-[11px] text-[#888] mt-0.5">
-                {v.series && <span className="text-[#1c69d4] font-medium">{v.series}</span>}
+              <h4 className="text-[13.5px] font-semibold text-white/90 leading-tight line-clamp-2">{v.name}</h4>
+              <p className="text-[11px] text-white/30 mt-0.5">
+                {v.series && <span className="text-[#4d8fe0] font-medium">{v.series}</span>}
                 {v.body_type && <> &middot; {v.body_type}</>}
               </p>
               {v.price && (
-                <p className="text-[14px] font-bold text-[#1c1c1c] mt-auto pt-2">{v.price}</p>
+                <p className="text-[14px] font-bold text-white/80 mt-auto pt-2">{v.price}</p>
               )}
 
               {/* Select CTA */}
-              <div className="mt-2 py-1.5 rounded-lg bg-[#1c69d4]/[0.06] text-[#1c69d4] text-[11px] font-medium text-center group-hover:bg-[#1c69d4] group-hover:text-white transition-all">
+              <div className="mt-2 py-1.5 rounded-lg bg-[#1c69d4]/20 text-[#4d8fe0] text-[11px] font-medium text-center group-hover:bg-[#1c69d4] group-hover:text-white transition-all">
                 Dieses Modell wählen
               </div>
             </div>
