@@ -386,35 +386,112 @@ function SelectableModelCards({ vehicles, onSelect, disabled }: {
 }
 
 
+const FEATURED_IDS = ['i7', 'i4-m50', 'm3-limousine', 'ix', 'x5', 'i7-m70']
+
+interface FeaturedModel {
+  id: string
+  name: string
+  starting_price: number
+  powertrain: string
+  power_hp?: number
+  range_km?: number
+  image?: string
+}
+
 function TestDriveWelcome({ onSuggestionClick }: { onSuggestionClick: (q: string) => void }) {
+  const [featured, setFeatured] = useState<FeaturedModel[]>([])
+
+  useEffect(() => {
+    fetch(`${API_BASE}/testdrive/vehicles`)
+      .then(r => r.json())
+      .then(data => {
+        const all: FeaturedModel[] = data.items || []
+        const picked = FEATURED_IDS.map(id => all.find((m: FeaturedModel) => m.id === id)).filter(Boolean) as FeaturedModel[]
+        setFeatured(picked.length > 0 ? picked : all.slice(0, 6))
+      })
+      .catch(() => {})
+  }, [])
+
+  const formatCHF = (v: number) => `CHF ${v.toLocaleString('de-CH')}`
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-[55vh] px-4">
-      <div className="relative mb-8">
-        <div className="w-20 h-20 rounded-full bg-[#0d0d0d] flex items-center justify-center">
-          <span className="text-[14px] font-bold text-white tracking-[0.12em]" style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>BMW</span>
+    <div className="flex flex-col items-center min-h-[65vh] -mx-4 sm:-mx-6 -mt-4">
+      {/* Dark hero */}
+      <div className="w-full bg-[#0d0d0d] pt-10 pb-8 px-6 text-center">
+        <p className="text-[11px] text-white/25 tracking-[0.2em] uppercase mb-3">Probefahrt</p>
+        <h1 className="text-[1.5rem] sm:text-[1.85rem] font-semibold tracking-[-0.03em] text-white mb-2">
+          Erleben Sie Ihren BMW
+        </h1>
+        <p className="text-[13px] text-white/35 max-w-sm mx-auto leading-relaxed">
+          Wählen Sie ein Modell und unser AI-Assistent bucht Ihre Probefahrt in wenigen Schritten.
+        </p>
+      </div>
+
+      {/* Featured models — horizontal scroll */}
+      <div className="w-full bg-[#0d0d0d] pb-10 overflow-hidden">
+        <div className="flex gap-4 overflow-x-auto px-6 pb-2 scrollbar-hide snap-x snap-mandatory">
+          {featured.map((m) => (
+            <button
+              key={m.id}
+              onClick={() => onSuggestionClick(`Ich möchte eine Probefahrt mit dem ${m.name} buchen`)}
+              className="group flex-shrink-0 w-[260px] sm:w-[300px] snap-start rounded-2xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] hover:border-white/[0.14] transition-all duration-300 overflow-hidden text-left active:scale-[0.98]"
+            >
+              {/* Car image */}
+              <div className="w-full h-[140px] sm:h-[170px] relative flex items-center justify-center overflow-hidden bg-gradient-to-b from-white/[0.02] to-transparent">
+                {m.image && (
+                  <img
+                    src={m.image}
+                    alt={m.name}
+                    className="w-[88%] h-auto object-contain drop-shadow-[0_8px_24px_rgba(0,0,0,0.5)] group-hover:scale-105 transition-transform duration-500"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                  />
+                )}
+                {/* Powertrain pill */}
+                <div className={`absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-medium ${
+                  m.powertrain === 'electric' ? 'bg-emerald-500/20 text-emerald-400' :
+                  m.powertrain === 'hybrid' ? 'bg-blue-500/20 text-blue-400' :
+                  'bg-white/10 text-white/50'
+                }`}>
+                  {m.powertrain === 'electric' ? <Zap className="w-2.5 h-2.5" /> :
+                   m.powertrain === 'hybrid' ? <Battery className="w-2.5 h-2.5" /> :
+                   <Fuel className="w-2.5 h-2.5" />}
+                  {m.powertrain === 'electric' ? 'Elektrisch' : m.powertrain === 'hybrid' ? 'Hybrid' : 'Benzin'}
+                </div>
+              </div>
+
+              {/* Info */}
+              <div className="px-4 pb-4 pt-1">
+                <h3 className="text-[14px] font-semibold text-white/90 leading-tight truncate">{m.name}</h3>
+                <div className="flex items-center gap-2 mt-1 text-[11px] text-white/30">
+                  {m.power_hp && <span>{m.power_hp} PS</span>}
+                  {m.range_km && <><span>·</span><span>{m.range_km} km</span></>}
+                </div>
+                <div className="flex items-center justify-between mt-3">
+                  <span className="text-[14px] font-bold text-white/80">ab {formatCHF(m.starting_price)}</span>
+                  <span className="text-[11px] text-[#1c69d4] font-medium group-hover:text-white transition-colors">
+                    Probefahrt →
+                  </span>
+                </div>
+              </div>
+            </button>
+          ))}
         </div>
       </div>
 
-      <h1 className="text-[1.75rem] sm:text-[2rem] font-semibold tracking-[-0.03em] text-[#1c1c1c] mb-2">
-        Probefahrt buchen
-      </h1>
-      <p className="text-[14px] text-[#888] text-center max-w-md mb-10 leading-relaxed">
-        Unser AI-Assistent führt Sie in wenigen Schritten durch die Buchung — Fahrzeug wählen, BMW Partner finden und Ihren Wunschtermin vereinbaren.
-      </p>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full max-w-md">
-        {suggestions.map((question) => (
-          <button
-            key={question}
-            onClick={() => onSuggestionClick(question)}
-            className="group relative px-5 py-3.5 rounded-2xl text-[13px] text-[#555] bg-white border border-[#e8e8e8] hover:border-[#1c69d4]/20 hover:bg-[#1c69d4]/[0.02] transition-all duration-200 text-left active:scale-[0.98]"
-          >
-            {question}
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#ccc] group-hover:text-[#1c69d4]/40 transition-colors text-sm">
-              &rarr;
-            </span>
-          </button>
-        ))}
+      {/* Or type freely */}
+      <div className="w-full px-6 pt-6 pb-2 text-center">
+        <p className="text-[12px] text-[#999] mb-3">Oder sagen Sie uns, was Sie interessiert</p>
+        <div className="flex flex-wrap justify-center gap-2 max-w-lg mx-auto">
+          {suggestions.map((q) => (
+            <button
+              key={q}
+              onClick={() => onSuggestionClick(q)}
+              className="px-4 py-2 rounded-full text-[12px] text-[#666] bg-white border border-[#e8e8e8] hover:border-[#1c69d4]/20 hover:text-[#1c69d4] transition-all active:scale-[0.97]"
+            >
+              {q}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   )
