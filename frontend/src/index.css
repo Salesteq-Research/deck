@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: ui-sans-serif, -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-sans: "Helvetica Neue", Helvetica, -apple-system, system-ui, "Segoe UI", Arial, sans-serif;
 
   --color-background: hsl(0 0% 100%);
   --color-foreground: hsl(0 0% 5%);

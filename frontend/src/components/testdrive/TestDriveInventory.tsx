@@ -9,7 +9,7 @@ interface TestDriveModel {
   name: string
   series: string
   body_type: string
-  powertrain: string  // electric | hybrid | gasoline | diesel
+  powertrain: string
   starting_price: number
   power_hp?: number
   range_km?: number
@@ -41,7 +41,7 @@ const powertrainLabel = (p: string) =>
 const powertrainColor = (p: string) =>
   p === 'electric' ? 'bg-emerald-500/90 text-white' :
   p === 'hybrid' ? 'bg-blue-500/90 text-white' :
-  'bg-white/90 text-[#333]'
+  'bg-white/80 text-[#333] border border-black/5'
 
 const powertrainIcon = (p: string) =>
   p === 'electric' ? <Zap className="w-3.5 h-3.5" /> :
@@ -96,22 +96,17 @@ export function TestDriveInventory() {
   const clearFilters = () => { setSearch(''); setSeries(''); setPowertrain(''); setBodyType('') }
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-[#f8f8f8]">
-      {/* Header */}
-      <header className="px-4 sm:px-6 py-3 flex items-center justify-between shrink-0 border-b border-[#e6e6e6] bg-white">
+    <div className="flex flex-col h-[100dvh] bg-[#f5f5f5]">
+      {/* Header — dark, matches landing + booking */}
+      <header className="px-4 sm:px-6 py-3.5 flex items-center justify-between shrink-0 bg-[#0d0d0d]">
         <div className="flex items-center gap-3">
-          <svg viewBox="0 0 48 48" className="w-7 h-7" fill="none">
-            <circle cx="24" cy="24" r="23" stroke="currentColor" strokeWidth="1.5" className="text-[#1c1c1c]/20" />
-            <text x="24" y="28" textAnchor="middle" className="fill-[#1c1c1c]/70 text-[9px] font-semibold tracking-[0.08em]" style={{ fontFamily: 'system-ui' }}>BMW</text>
-          </svg>
-          <div className="flex flex-col">
-            <span className="text-[15px] font-semibold tracking-[-0.01em] text-[#1c1c1c]">Probefahrt Modelle</span>
-            <span className="text-[11px] text-[#999] tracking-[0.02em]">Test Drive Model Catalog</span>
-          </div>
+          <span className="text-[15px] font-bold text-white tracking-[0.08em]" style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>BMW</span>
+          <span className="w-px h-4 bg-white/15" />
+          <span className="text-[13px] font-medium text-white/60 tracking-[-0.01em]">Probefahrt Modelle</span>
         </div>
         <nav className="flex items-center gap-1">
-          <a href="/" className="px-3 py-1.5 rounded-lg text-[13px] text-[#666] hover:text-[#1c1c1c] hover:bg-[#f0f0f0] transition-all">Home</a>
-          <a href="/testdrive" className="px-3 py-1.5 rounded-lg text-[13px] text-[#1c69d4]/70 hover:text-[#1c69d4] hover:bg-[#1c69d4]/[0.06] font-medium transition-all">Book Test Drive</a>
+          <a href="/" className="px-3 py-1.5 rounded-lg text-[12px] text-white/30 hover:text-white/60 hover:bg-white/[0.06] transition-all">Home</a>
+          <a href="/testdrive" className="px-3 py-1.5 rounded-lg text-[12px] text-white/30 hover:text-white/60 hover:bg-white/[0.06] transition-all">Probefahrt buchen</a>
         </nav>
       </header>
 
@@ -119,7 +114,7 @@ export function TestDriveInventory() {
       {stats && (
         <div className="px-4 sm:px-6 py-3 border-b border-[#e6e6e6] bg-white shrink-0">
           <div className="max-w-6xl mx-auto flex items-center gap-6 overflow-x-auto">
-            <Stat label="Test Drive Models" value={String(stats.total_vehicles)} accent />
+            <Stat label="Modelle" value={String(stats.total_vehicles)} accent />
             <Stat label="Elektrisch" value={String(stats.powertrain_breakdown['electric'] || 0)} />
             <Stat label="Hybrid" value={String(stats.powertrain_breakdown['hybrid'] || 0)} />
             <Stat label="Benzin" value={String(stats.powertrain_breakdown['gasoline'] || 0)} />
@@ -136,7 +131,7 @@ export function TestDriveInventory() {
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Modell suchen..."
+              placeholder="Modell suchen …"
               className="w-full bg-[#f5f5f5] border border-[#e6e6e6] rounded-lg pl-9 pr-4 py-2 text-[13px] text-[#1c1c1c] placeholder:text-[#999] outline-none focus:border-[#1c69d4]/30 transition-all"
             />
           </div>
@@ -175,11 +170,17 @@ export function TestDriveInventory() {
                     selectedModel?.id === m.id ? 'border-[#1c69d4] shadow-md' : 'border-[#e6e6e6] hover:border-[#ccc]'
                   }`}
                 >
-                  <div className="aspect-[16/9] bg-gradient-to-br from-[#f5f5f5] to-[#e8e8e8] relative overflow-hidden flex items-center justify-center">
+                  <div className="aspect-[16/9] bg-gradient-to-br from-[#f8f8f8] to-[#efefef] relative overflow-hidden flex items-center justify-center">
                     {m.image ? (
-                      <img src={m.image} alt={m.name} loading="lazy" className="w-[85%] h-auto object-contain group-hover:scale-105 transition-transform duration-500 drop-shadow-lg" />
+                      <img
+                        src={m.image}
+                        alt={m.name}
+                        loading="lazy"
+                        className="w-[85%] h-auto object-contain group-hover:scale-105 transition-transform duration-500 drop-shadow-lg"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                      />
                     ) : (
-                      <span className="text-[#ccc] text-[40px] font-bold">BMW</span>
+                      <span className="text-[#ddd] text-[32px] font-bold tracking-[0.1em]">BMW</span>
                     )}
                     <div className={`absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-medium backdrop-blur-sm ${powertrainColor(m.powertrain)}`}>
                       {powertrainIcon(m.powertrain)}
@@ -289,7 +290,12 @@ function ModelDetail({ model, onClose }: { model: TestDriveModel; onClose: () =>
 
         {model.image && (
           <div className="aspect-[16/9] rounded-xl overflow-hidden bg-gradient-to-br from-[#f5f5f5] to-[#e8e8e8] mb-4 flex items-center justify-center">
-            <img src={model.image} alt={model.name} className="w-[85%] h-auto object-contain drop-shadow-lg" />
+            <img
+              src={model.image}
+              alt={model.name}
+              className="w-[85%] h-auto object-contain drop-shadow-lg"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+            />
           </div>
         )}
 
