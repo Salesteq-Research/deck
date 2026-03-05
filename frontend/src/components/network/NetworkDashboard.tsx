@@ -213,7 +213,8 @@ export function NetworkDashboard() {
             <span className="text-[12px] text-emerald-400/80">{stats?.dealer_count ?? '—'} dealers</span>
           </div>
           <nav className="flex items-center gap-1">
-            <a href="/" className="px-3 py-1.5 rounded-lg text-[12px] text-white/30 hover:text-white/60 hover:bg-white/[0.04] transition-all">Chat</a>
+            <a href="/" className="px-3 py-1.5 rounded-lg text-[12px] text-white/30 hover:text-white/60 hover:bg-white/[0.04] transition-all">Home</a>
+            <a href="/chat" className="px-3 py-1.5 rounded-lg text-[12px] text-white/30 hover:text-white/60 hover:bg-white/[0.04] transition-all">Chat</a>
             <a href="/inventory" className="px-3 py-1.5 rounded-lg text-[12px] text-white/30 hover:text-white/60 hover:bg-white/[0.04] transition-all">Stock</a>
             <a href="/backoffice" className="px-3 py-1.5 rounded-lg text-[12px] text-white/30 hover:text-white/60 hover:bg-white/[0.04] transition-all">Dealer</a>
           </nav>

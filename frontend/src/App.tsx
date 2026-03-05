@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Landing } from './components/Landing'
 import { ChatInterface } from './components/chat/ChatInterface'
 import { StockDashboard } from './components/inventory/StockDashboard'
 import { BackofficeLayout } from './components/backoffice/BackofficeLayout'
@@ -14,6 +15,10 @@ function App() {
     window.addEventListener('popstate', onPopState)
     return () => window.removeEventListener('popstate', onPopState)
   }, [])
+
+  if (path === '/chat') {
+    return <ChatInterface />
+  }
 
   if (path === '/inventory') {
     return <StockDashboard />
@@ -35,7 +40,7 @@ function App() {
     return <TestDriveInventory />
   }
 
-  return <ChatInterface />
+  return <Landing />
 }
 
 export default App

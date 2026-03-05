@@ -110,9 +110,8 @@ export function TestDriveInventory() {
           </div>
         </div>
         <nav className="flex items-center gap-1">
-          <a href="/" className="px-3 py-1.5 rounded-lg text-[13px] text-[#666] hover:text-[#1c1c1c] hover:bg-[#f0f0f0] transition-all">Chat</a>
+          <a href="/" className="px-3 py-1.5 rounded-lg text-[13px] text-[#666] hover:text-[#1c1c1c] hover:bg-[#f0f0f0] transition-all">Home</a>
           <a href="/testdrive" className="px-3 py-1.5 rounded-lg text-[13px] text-[#1c69d4]/70 hover:text-[#1c69d4] hover:bg-[#1c69d4]/[0.06] font-medium transition-all">Book Test Drive</a>
-          <a href="/inventory" className="px-3 py-1.5 rounded-lg text-[13px] text-[#666] hover:text-[#1c1c1c] hover:bg-[#f0f0f0] transition-all">Full Stock</a>
         </nav>
       </header>
 

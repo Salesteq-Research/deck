@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, MessageSquare, Bot, Radio, MessageCircle, Globe } from 'lucide-react'
+import { LayoutDashboard, Users, MessageSquare, Bot, Radio, MessageCircle, Globe, Home, Warehouse } from 'lucide-react'
 
 export type BackofficeView = 'dashboard' | 'leads' | 'conversations' | 'live' | 'agent'
 
@@ -53,18 +53,32 @@ export function Sidebar({ active, onNavigate }: SidebarProps) {
       {/* Bottom links */}
       <div className="border-t border-white/[0.06] p-2 space-y-0.5">
         <a
+          href="/"
+          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-white/25 hover:text-white/50 hover:bg-white/[0.04] transition-all"
+        >
+          <Home className="h-[15px] w-[15px] shrink-0" strokeWidth={1.5} />
+          <span className="hidden lg:block">Home</span>
+        </a>
+        <a
+          href="/chat"
+          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-white/25 hover:text-white/50 hover:bg-white/[0.04] transition-all"
+        >
+          <MessageCircle className="h-[15px] w-[15px] shrink-0" strokeWidth={1.5} />
+          <span className="hidden lg:block">Chat</span>
+        </a>
+        <a
+          href="/inventory"
+          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-white/25 hover:text-white/50 hover:bg-white/[0.04] transition-all"
+        >
+          <Warehouse className="h-[15px] w-[15px] shrink-0" strokeWidth={1.5} />
+          <span className="hidden lg:block">Stock</span>
+        </a>
+        <a
           href="/network"
           className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-white/25 hover:text-white/50 hover:bg-white/[0.04] transition-all"
         >
           <Globe className="h-[15px] w-[15px] shrink-0" strokeWidth={1.5} />
-          <span className="hidden lg:block">BMW CH</span>
-        </a>
-        <a
-          href="/"
-          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-white/25 hover:text-white/50 hover:bg-white/[0.04] transition-all"
-        >
-          <MessageCircle className="h-[15px] w-[15px] shrink-0" strokeWidth={1.5} />
-          <span className="hidden lg:block">Customer Chat</span>
+          <span className="hidden lg:block">Network</span>
         </a>
       </div>
     </div>

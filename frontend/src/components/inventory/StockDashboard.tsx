@@ -1,6 +1,4 @@
 import { useState, useEffect, useMemo } from 'react'
-import { MessageSquare } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { StatsBar } from './StatsBar'
 import { FilterBar, type FilterState } from './FilterBar'
 import { VehicleTable } from './VehicleTable'
@@ -122,18 +120,14 @@ export function StockDashboard() {
           <h1 className="text-xl font-bold">Stock Overview</h1>
           <p className="text-sm text-muted-foreground">
             BMW Switzerland Inventory
-            <span className="mx-1.5">·</span>
-            <a href="/api-explorer.html" className="text-primary/70 hover:text-primary hover:underline transition-colors">API Explorer</a>
-            <span className="mx-1.5">·</span>
-            <a href="/backoffice" className="text-primary/70 hover:text-primary hover:underline transition-colors">Backoffice</a>
           </p>
         </div>
-        <a href="/">
-          <Button variant="outline" size="sm">
-            <MessageSquare className="h-4 w-4 mr-2" />
-            Back to Chat
-          </Button>
-        </a>
+        <nav className="flex items-center gap-1">
+          <a href="/" className="px-3 py-1.5 rounded-lg text-[13px] text-foreground/40 hover:text-foreground/70 hover:bg-foreground/[0.04] transition-all">Home</a>
+          <a href="/chat" className="px-3 py-1.5 rounded-lg text-[13px] text-foreground/40 hover:text-foreground/70 hover:bg-foreground/[0.04] transition-all">Chat</a>
+          <a href="/backoffice" className="px-3 py-1.5 rounded-lg text-[13px] text-foreground/40 hover:text-foreground/70 hover:bg-foreground/[0.04] transition-all">Dealer</a>
+          <a href="/network" className="px-3 py-1.5 rounded-lg text-[13px] text-foreground/40 hover:text-foreground/70 hover:bg-foreground/[0.04] transition-all">Network</a>
+        </nav>
       </header>
 
       {/* Stats */}
