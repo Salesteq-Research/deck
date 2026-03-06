@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Search, Zap, Fuel, Filter, X, ChevronRight, Battery } from 'lucide-react'
-import { ScrollArea } from '@/components/ui/scroll-area'
 
 const API_BASE = '/api'
 
@@ -151,7 +150,7 @@ export function TestDriveInventory() {
 
       {/* Grid + Detail */}
       <div className="flex-1 flex min-h-0">
-        <ScrollArea className={`flex-1 px-4 sm:px-6 py-4 ${selectedModel ? 'hidden sm:block' : ''}`}>
+        <div className={`flex-1 overflow-y-auto px-4 sm:px-6 py-4 ${selectedModel ? 'hidden sm:block' : ''}`}>
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <div className="flex gap-1.5">
@@ -233,7 +232,7 @@ export function TestDriveInventory() {
               )}
             </div>
           )}
-        </ScrollArea>
+        </div>
 
         {/* Detail Panel */}
         {selectedModel && (
@@ -279,7 +278,7 @@ function FilterPill({ label, value, options, onChange, format }: {
 
 function ModelDetail({ model, onClose }: { model: TestDriveModel; onClose: () => void }) {
   return (
-    <ScrollArea className="h-full">
+    <div className="h-full overflow-y-auto">
       <div className="p-4">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-[16px] font-bold text-[#1c1c1c] leading-tight">{model.name}</h2>
@@ -328,7 +327,7 @@ function ModelDetail({ model, onClose }: { model: TestDriveModel; onClose: () =>
           </a>
         )}
       </div>
-    </ScrollArea>
+    </div>
   )
 }
 

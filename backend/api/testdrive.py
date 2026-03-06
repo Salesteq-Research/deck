@@ -57,6 +57,7 @@ def testdrive_chat_stream(request: ChatRequest, db: Session = Depends(get_db)):
             message=request.message,
             conversation_history=conversation_history,
             session_id=request.session_id,
+            language=request.language,
         ):
             if event["type"] == "tool_call":
                 yield f"data: {json.dumps({'type': 'tool_call', 'name': event['name']})}\n\n"

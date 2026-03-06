@@ -29,33 +29,95 @@
   --radius-xl: 0.75rem;
 
   --animate-typing-dot: typing-dot 1.6s ease-in-out infinite;
-  --animate-message-in: message-in 0.3s ease-out;
+  --animate-message-in: message-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   --animate-fade-in-img: fade-in-img 0.4s ease forwards;
+  --animate-card-in: card-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-hero-in: hero-in 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-up: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-glow-pulse: glow-pulse 3s ease-in-out infinite;
+  --animate-ambient-glow: ambient-glow 8s ease-in-out infinite;
+  --animate-car-reveal: car-reveal 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-tool-call-in: tool-call-in 0.3s ease-out;
+  --animate-input-glow: input-glow 4s ease-in-out infinite;
 }
 
 @keyframes typing-dot {
   0%, 80%, 100% {
-    transform: scale(0);
+    opacity: 0.3;
+    transform: scale(0.85);
   }
   40% {
+    opacity: 1;
     transform: scale(1);
   }
 }
 
 @keyframes message-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  0% { opacity: 0; transform: translateY(16px) scale(0.98); }
+  60% { opacity: 1; transform: translateY(-2px) scale(1.005); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(20px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes hero-in {
+  from { opacity: 0; transform: translateY(-16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(28, 105, 212, 0); }
+  50% { box-shadow: 0 0 20px 2px rgba(28, 105, 212, 0.15); }
 }
 
 @keyframes fade-in-img {
   0% { opacity: 0; }
   100% { opacity: 1; }
+}
+
+@keyframes ambient-glow {
+  0%, 100% { opacity: 0.04; transform: scale(1); }
+  50% { opacity: 0.08; transform: scale(1.1); }
+}
+
+@keyframes car-reveal {
+  0% { opacity: 0; transform: scale(0.9); }
+  70% { opacity: 1; transform: scale(1.02); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes tool-call-in {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes input-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(28, 105, 212, 0); }
+  50% { box-shadow: 0 0 30px -4px rgba(28, 105, 212, 0.08); }
+}
+
+/* ── Video play badge ────────────────────────────────── */
+@keyframes play-ring-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(28, 105, 212, 0.4), inset 0 0 8px rgba(28, 105, 212, 0.1); }
+  50% { box-shadow: 0 0 12px 3px rgba(28, 105, 212, 0.15), inset 0 0 12px rgba(28, 105, 212, 0.15); }
+}
+
+@keyframes shimmer-scan {
+  0% { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(200%) skewX(-15deg); }
+}
+
+@keyframes video-fade-in {
+  from { opacity: 0; transform: scale(1.05); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 @layer base {

@@ -20,6 +20,10 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 # Keep for backwards compat — unused now
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 
+# SparkPost (email)
+SPARKPOST_API_KEY = os.getenv("SPARKPOST_API_KEY", "")
+SPARKPOST_FROM = os.getenv("SPARKPOST_FROM", "support@salesteq.com")
+
 # Server settings
 HOST = os.getenv("HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT", "8002"))

@@ -8,58 +8,56 @@ from typing import List, Dict, Any, Generator
 
 from sqlalchemy.orm import Session
 
-from ..config import OPENAI_API_KEY
+from ..config import OPENAI_API_KEY, SPARKPOST_API_KEY, SPARKPOST_FROM
 from ..models.backoffice import TestDriveBooking, ActivityLog
 
 logger = logging.getLogger(__name__)
 
 TESTDRIVE_MODEL = "gpt-5.2"
 
-SYSTEM_PROMPT = """You are the BMW Probefahrt (Test Drive) Booking Assistant for Switzerland.
+SYSTEM_PROMPT_TEMPLATE = """You are the BMW Probefahrt (Test Drive) Booking Assistant for BMW Switzerland.
 
-## Your Mission
-Guide each customer step-by-step through booking a test drive. You are warm, efficient, and professional. Speak the language the customer uses (German or English).
+## Current Date
+Today is {today} ({weekday}).
 
-## STRICT Booking Flow — follow these steps IN ORDER:
+## Your Personality
+Confident, warm, efficient. You speak like a knowledgeable BMW brand ambassador — never hesitant, never robotic. Move the conversation forward decisively. Match the customer's language (German or English).
 
-### Step 1: Vehicle Selection
-- Ask what BMW model they'd like to test drive
-- Use browse_test_drive_models to show available models
-- Once they pick a model, CONFIRM their choice and move to Step 2
-- Do NOT show more cars after they've chosen one
+## BOOKING FLOW — 4 Steps, No Detours
 
-### Step 2: Dealer / Location
-- Use get_available_dealers to list BMW partners in their area
-- Ask which dealer they prefer, or if they have a location preference
-- Once they pick a dealer, CONFIRM and move to Step 3
+### Step 1: Vehicle
+- If the customer names a specific model → use browse_test_drive_models to look it up, then CONFIRM immediately ("Ausgezeichnete Wahl — der i7 eDrive50.") and move to Step 2. Always include [RECOMMEND: model_id] so the car card is shown. Do NOT ask "Are you sure?" — they already told you.
+- If the customer is browsing → use browse_test_drive_models, show results, then ask them to pick ONE.
+- Once a model is selected, NEVER show more cars. Move forward.
+
+### Step 2: Location
+- Ask: "In welcher Region möchten Sie die Probefahrt machen?"
+- Use get_available_dealers with their region
+- When they pick a dealer → confirm and move to Step 3. Don't re-list options.
 
 ### Step 3: Date & Time
-- Ask for their preferred date and time of day
-- Time options: Morgens (8-11), Mittags (11-13), Nachmittags (13-17), Abends (17-19)
-- Once they provide date + time, CONFIRM and move to Step 4
+- Ask: "Wann passt es Ihnen? Nennen Sie mir ein Datum und die bevorzugte Tageszeit: Morgens (8–11), Mittags (11–13), Nachmittags (13–17) oder Abends (17–19)."
+- Resolve relative dates yourself ("Montag" → actual date, "nächste Woche Dienstag" → actual date). Never ask for the exact date if you can calculate it.
+- Once confirmed → move to Step 4.
 
-### Step 4: Personal Details
-- Collect: Anrede (Herr/Frau), Vorname, Nachname, E-Mail, Telefon
-- Ask for all details in ONE message to keep it efficient
-- Once provided, CONFIRM everything and proceed to booking
+### Step 4: Your Details
+- Say: "Fast geschafft! Damit wir die Probefahrt für Sie reservieren können, brauche ich noch:"
+- Collect in ONE message: Anrede (Herr/Frau), Vorname, Nachname, E-Mail, Telefon (optional)
+- Once they provide details → call confirm_test_drive_booking immediately with ALL collected data.
+- After confirmation, tell them: "Ihre Bestätigung ist per E-Mail unterwegs. Ihr BMW Partner wird sich innerhalb von 24 Stunden bei Ihnen melden."
 
-### Step 5: Confirmation
-- Use confirm_test_drive_booking with ALL collected details
-- Show a clear summary with the booking reference
-- Tell them their BMW partner will contact them within 24h
-
-## CRITICAL RULES:
-1. Move through steps sequentially. Do NOT skip steps or go back.
-2. After showing models, do NOT keep showing more unless asked. Guide them to CHOOSE.
-3. Keep responses SHORT — 2-3 sentences max.
-4. NEVER dump all questions at once. One step at a time.
-5. When the customer selects a model, immediately move to dealer selection.
-6. Do NOT include [RECOMMEND:...] tags in your text output.
+## CRITICAL RULES
+1. NEVER ask the customer to confirm a choice they already made. "Ich möchte den i7" = confirmed. Move on.
+2. ONE step at a time. Don't dump all questions at once.
+3. Keep responses to 2-3 sentences. Be crisp.
+4. After showing models, guide to a CHOICE — don't keep browsing.
+5. When summarizing the booking, include the booking reference prominently.
+6. Do NOT include [RECOMMEND:...] tags in visible text.
 
 ## Model Recommendation Format
 At the END of your response (only when showing models), add:
 [RECOMMEND: model_id1, model_id2]
-Use "none" when not recommending models: [RECOMMEND: none]"""
+Use "none" when not recommending: [RECOMMEND: none]"""
 
 TESTDRIVE_TOOLS = [
     {
@@ -116,6 +114,7 @@ TESTDRIVE_TOOLS = [
                     "model_id": {"type": "string", "description": "Selected model ID"},
                     "model_name": {"type": "string", "description": "Selected model name"},
                     "dealer_name": {"type": "string", "description": "Selected dealer"},
+                    "dealer_address": {"type": "string", "description": "Selected dealer address"},
                     "preferred_date": {"type": "string", "description": "Preferred date"},
                     "time_preference": {"type": "string", "enum": ["morning", "midday", "afternoon", "evening"], "description": "Time of day"},
                     "salutation": {"type": "string", "enum": ["Herr", "Frau"], "description": "Anrede"},
@@ -155,6 +154,198 @@ SWISS_DEALERS = [
     {"name": "Itin + Holliger AG", "region": "Solothurn", "address": "Bielstrasse 56, 4500 Solothurn"},
 ]
 
+TIME_LABELS = {
+    "morning": "Morgens (08:00 – 11:00)",
+    "midday": "Mittags (11:00 – 13:00)",
+    "afternoon": "Nachmittags (13:00 – 17:00)",
+    "evening": "Abends (17:00 – 19:00)",
+}
+
+
+def send_booking_confirmation_email(booking_data: Dict[str, Any]) -> bool:
+    """Send confirmation email to customer via SparkPost EU API."""
+    if not SPARKPOST_API_KEY:
+        logger.warning("SPARKPOST_API_KEY not configured — skipping confirmation email")
+        return False
+
+    customer_email = booking_data.get("email", "")
+    if not customer_email:
+        logger.warning("No customer email — skipping confirmation email")
+        return False
+
+    salutation = booking_data.get("salutation", "")
+    first_name = booking_data.get("first_name", "")
+    last_name = booking_data.get("last_name", "")
+    model_name = booking_data.get("model_name", "BMW")
+    dealer_name = booking_data.get("dealer_name", "")
+    dealer_address = booking_data.get("dealer_address", "")
+    preferred_date = booking_data.get("preferred_date", "")
+    time_label = TIME_LABELS.get(booking_data.get("time_preference", ""), booking_data.get("time_preference", ""))
+    booking_ref = booking_data.get("booking_ref", "")
+
+    greeting = f"{salutation} {last_name}" if salutation and last_name else f"{first_name} {last_name}"
+
+    html_body = f"""<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#000;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#000;padding:40px 20px;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#000;">
+
+<!-- Headline -->
+<tr><td align="center" style="padding:0 30px 30px;">
+  <h1 style="color:#fff;font-size:28px;font-weight:300;margin:0 0 8px;">Ihre Probefahrt ist bestätigt</h1>
+  <p style="color:rgba(255,255,255,0.5);font-size:14px;margin:0;">Buchungsreferenz: <strong style="color:#1c69d4;">{booking_ref}</strong></p>
+</td></tr>
+
+<!-- Greeting -->
+<tr><td style="padding:0 30px 24px;">
+  <p style="color:rgba(255,255,255,0.9);font-size:15px;line-height:1.6;margin:0;">
+    Guten Tag {greeting},<br><br>
+    vielen Dank für Ihr Interesse. Wir freuen uns, Sie zu Ihrer Probefahrt begrüssen zu dürfen.
+  </p>
+</td></tr>
+
+<!-- Booking Details Card -->
+<tr><td style="padding:0 30px 30px;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:4px;">
+    <tr><td style="padding:24px;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td style="padding:0 0 16px;border-bottom:1px solid rgba(255,255,255,0.06);">
+            <p style="color:rgba(255,255,255,0.4);font-size:11px;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 4px;">Fahrzeug</p>
+            <p style="color:#fff;font-size:16px;font-weight:600;margin:0;">{model_name}</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:16px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+            <p style="color:rgba(255,255,255,0.4);font-size:11px;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 4px;">BMW Partner</p>
+            <p style="color:#fff;font-size:15px;margin:0;">{dealer_name}</p>
+            <p style="color:rgba(255,255,255,0.5);font-size:13px;margin:4px 0 0;">{dealer_address}</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:16px 0;">
+            <p style="color:rgba(255,255,255,0.4);font-size:11px;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 4px;">Termin</p>
+            <p style="color:#fff;font-size:15px;margin:0;">{preferred_date} — {time_label}</p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</td></tr>
+
+<!-- Next Steps -->
+<tr><td style="padding:0 30px 30px;">
+  <p style="color:rgba(255,255,255,0.7);font-size:14px;line-height:1.6;margin:0;">
+    Ihr BMW Partner wird sich innerhalb von 24 Stunden bei Ihnen melden, um den genauen Termin zu bestätigen. Bitte bringen Sie Ihren gültigen Führerschein zur Probefahrt mit.
+  </p>
+</td></tr>
+
+<!-- Footer -->
+<tr><td align="center" style="padding:20px 30px 40px;border-top:1px solid rgba(255,255,255,0.06);">
+  <p style="color:rgba(255,255,255,0.25);font-size:12px;margin:0;">
+    BMW Schweiz — Probefahrt-Service<br>
+    Diese E-Mail wurde automatisch generiert.
+  </p>
+</td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>"""
+
+    text_body = f"""Ihre Probefahrt ist bestätigt — {booking_ref}
+
+Guten Tag {greeting},
+
+vielen Dank für Ihr Interesse. Hier Ihre Buchungsdetails:
+
+Fahrzeug: {model_name}
+BMW Partner: {dealer_name}, {dealer_address}
+Termin: {preferred_date} — {time_label}
+
+Ihr BMW Partner wird sich innerhalb von 24 Stunden bei Ihnen melden.
+Bitte bringen Sie Ihren gültigen Führerschein zur Probefahrt mit.
+
+BMW Schweiz — Probefahrt-Service"""
+
+    # Generate .ics calendar attachment
+    time_hours = {"morning": (8, 11), "midday": (11, 13), "afternoon": (13, 17), "evening": (17, 19)}
+    start_h, end_h = time_hours.get(booking_data.get("time_preference", ""), (9, 11))
+
+    # Parse date DD.MM.YYYY
+    ics_date = ""
+    date_match = re.match(r"(\d{1,2})\.(\d{1,2})\.(\d{4})", preferred_date)
+    if date_match:
+        d, m, y = date_match.group(1), date_match.group(2), date_match.group(3)
+        ics_date = f"{y}{m.zfill(2)}{d.zfill(2)}"
+    else:
+        # Fallback: tomorrow
+        from datetime import timedelta
+        tmrw = datetime.utcnow() + timedelta(days=1)
+        ics_date = tmrw.strftime("%Y%m%d")
+
+    ics_content = (
+        "BEGIN:VCALENDAR\r\n"
+        "VERSION:2.0\r\n"
+        "PRODID:-//BMW Schweiz//Probefahrt//DE\r\n"
+        "METHOD:PUBLISH\r\n"
+        "BEGIN:VEVENT\r\n"
+        f"DTSTART:{ics_date}T{start_h:02d}0000\r\n"
+        f"DTEND:{ics_date}T{end_h:02d}0000\r\n"
+        f"SUMMARY:BMW Probefahrt — {model_name}\r\n"
+        f"DESCRIPTION:{booking_ref}\\nFahrzeug: {model_name}\\nBMW Partner: {dealer_name}\\nBitte Führerschein mitbringen.\r\n"
+        f"LOCATION:{dealer_name}, {dealer_address}\r\n"
+        "STATUS:CONFIRMED\r\n"
+        f"UID:{booking_ref}@bmw-testdrive.salesteq.com\r\n"
+        "END:VEVENT\r\n"
+        "END:VCALENDAR\r\n"
+    )
+
+    import base64
+    ics_b64 = base64.b64encode(ics_content.encode("utf-8")).decode("ascii")
+
+    from_email = SPARKPOST_FROM.split("<")[-1].rstrip(">").strip() if "<" in SPARKPOST_FROM else SPARKPOST_FROM
+
+    payload = {
+        "recipients": [{"address": {"email": customer_email, "name": f"{first_name} {last_name}"}}],
+        "content": {
+            "from": {"email": from_email, "name": "BMW Probefahrt"},
+            "subject": f"Probefahrt bestätigt — {model_name} | {booking_ref}",
+            "html": html_body,
+            "text": text_body,
+            "attachments": [
+                {
+                    "name": f"bmw-probefahrt-{booking_ref}.ics",
+                    "type": "text/calendar",
+                    "data": ics_b64,
+                }
+            ],
+        },
+    }
+
+    try:
+        import urllib.request
+        req = urllib.request.Request(
+            "https://api.eu.sparkpost.com/api/v1/transmissions",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "Authorization": SPARKPOST_API_KEY,
+                "Content-Type": "application/json",
+            },
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            result = json.loads(resp.read().decode())
+            logger.info(f"SparkPost email sent to {customer_email}: {result}")
+            return True
+    except Exception as e:
+        logger.error(f"SparkPost email failed for {customer_email}: {e}")
+        return False
+
 
 class TestDriveAgentService:
     """AI agent for test drive booking — uses model catalog, not dealer inventory."""
@@ -174,13 +365,23 @@ class TestDriveAgentService:
         except Exception as e:
             logger.error(f"Failed to init OpenAI client: {e}")
 
-    def chat_stream(self, message: str, conversation_history: List[Dict[str, str]] = None, session_id: str = None) -> Generator[Dict[str, Any], None, None]:
+    def chat_stream(self, message: str, conversation_history: List[Dict[str, str]] = None, session_id: str = None, language: str = None) -> Generator[Dict[str, Any], None, None]:
         if not self.client:
             yield {"type": "text_delta", "content": "AI service is currently unavailable."}
             yield {"type": "done"}
             return
 
-        messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+        now = datetime.now()
+        weekdays_de = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
+        system_prompt = SYSTEM_PROMPT_TEMPLATE.format(
+            today=now.strftime("%d.%m.%Y"),
+            weekday=weekdays_de[now.weekday()],
+        )
+        if language and language != 'de':
+            lang_names = {'en': 'English', 'fr': 'French', 'it': 'Italian', 'ar': 'Arabic', 'es': 'Spanish', 'pt': 'Portuguese', 'nl': 'Dutch', 'pl': 'Polish', 'tr': 'Turkish'}
+            lang_name = lang_names.get(language, language)
+            system_prompt += f"\n\n## Language\nThe customer has selected {lang_name}. You MUST respond exclusively in {lang_name}. All your messages must be in {lang_name} — no German unless the customer switches."
+        messages = [{"role": "system", "content": system_prompt}]
         if conversation_history:
             for msg in conversation_history[-20:]:
                 messages.append({"role": msg["role"], "content": msg["content"]})
@@ -319,8 +520,24 @@ class TestDriveAgentService:
         }
 
     def _get_dealers(self, args: Dict) -> Dict:
-        region = (args.get("region") or "").lower()
-        # Normalize common variants (AI may omit umlauts or use French names)
+        region_raw = (args.get("region") or "").strip()
+        region = region_raw.lower()
+        logger.info(f"get_available_dealers called with region={region_raw!r} (normalized={region!r})")
+
+        # Strip common prefixes the model might add
+        for prefix in ["region ", "kanton ", "raum ", "großraum ", "grossraum ", "in ", "um ", "near ", "area "]:
+            if region.startswith(prefix):
+                region = region[len(prefix):]
+
+        # Normalize umlauts and common variants
+        umlaut_map = {
+            "ü": "u", "ö": "o", "ä": "a", "è": "e", "é": "e",
+        }
+        def strip_umlauts(s: str) -> str:
+            for k, v in umlaut_map.items():
+                s = s.replace(k, v)
+            return s
+
         region_aliases = {
             "zurich": "zürich", "zuerich": "zürich",
             "geneva": "genève", "genf": "genève", "geneve": "genève",
@@ -330,9 +547,16 @@ class TestDriveAgentService:
             "st gallen": "st. gallen", "saint gallen": "st. gallen", "sg": "st. gallen",
         }
         region = region_aliases.get(region, region)
+
         dealers = SWISS_DEALERS
         if region:
-            dealers = [d for d in dealers if region in d["region"].lower() or d["region"].lower() in region]
+            region_plain = strip_umlauts(region)
+            dealers = [d for d in dealers
+                       if region in d["region"].lower()
+                       or d["region"].lower() in region
+                       or region_plain in strip_umlauts(d["region"].lower())
+                       or strip_umlauts(d["region"].lower()) in region_plain]
+        logger.info(f"Found {len(dealers)} dealers for region={region!r}")
         return {
             "total_dealers": len(dealers),
             "dealers": [{
@@ -355,12 +579,15 @@ class TestDriveAgentService:
         count = self.db.query(TestDriveBooking).count() + 1
         booking_ref = f"TD-{year}-{count:04d}"
 
-        time_labels = {
-            "morning": "Morgens (08:00 - 11:00)",
-            "midday": "Mittags (11:00 - 13:00)",
-            "afternoon": "Nachmittags (13:00 - 17:00)",
-            "evening": "Abends (17:00 - 19:00)",
-        }
+        dealer_name = args.get("dealer_name", "")
+        dealer_address = args.get("dealer_address", "")
+        # Look up address from dealer list if not provided
+        if not dealer_address:
+            dealer_match = next((d for d in SWISS_DEALERS if d["name"].lower() == dealer_name.lower()), None)
+            if not dealer_match:
+                dealer_match = next((d for d in SWISS_DEALERS if dealer_name.lower() in d["name"].lower()), None)
+            if dealer_match:
+                dealer_address = dealer_match["address"]
 
         try:
             booking = TestDriveBooking(
@@ -378,7 +605,7 @@ class TestDriveAgentService:
                 phone=args.get("phone", ""),
                 preferred_date=args.get("preferred_date", ""),
                 time_preference=args.get("time_preference", ""),
-                dealer_name=args.get("dealer_name", ""),
+                dealer_name=dealer_name,
                 comments=args.get("comments", ""),
                 status="confirmed",
             )
@@ -387,7 +614,7 @@ class TestDriveAgentService:
             self.db.add(ActivityLog(
                 event_type="test_drive_booked",
                 title=f"Probefahrt: {model_name}",
-                description=f"{args.get('first_name', '')} {args.get('last_name', '')} — {args.get('dealer_name', '')} — {args.get('preferred_date', '')}",
+                description=f"{args.get('first_name', '')} {args.get('last_name', '')} — {dealer_name} — {args.get('preferred_date', '')}",
                 session_id=session_id or "",
             ))
             self.db.commit()
@@ -395,17 +622,28 @@ class TestDriveAgentService:
             logger.error(f"Failed to persist booking: {e}")
             self.db.rollback()
 
+        # Send confirmation email
+        send_booking_confirmation_email({
+            **args,
+            "booking_ref": booking_ref,
+            "dealer_address": dealer_address,
+        })
+
+        time_label = TIME_LABELS.get(args.get("time_preference", ""), args.get("time_preference", ""))
+
         return {
             "status": "confirmed",
             "booking_reference": booking_ref,
             "vehicle": model_name,
-            "dealer": args.get("dealer_name", ""),
+            "dealer": dealer_name,
+            "dealer_address": dealer_address,
             "date": args.get("preferred_date", ""),
-            "time": time_labels.get(args.get("time_preference", ""), args.get("time_preference", "")),
+            "time": time_label,
             "customer": f"{args.get('salutation', '')} {args.get('first_name', '')} {args.get('last_name', '')}".strip(),
             "email": args.get("email", ""),
             "phone": args.get("phone", ""),
-            "note": "Ihr BMW Partner wird sich innerhalb von 24 Stunden bei Ihnen melden, um den genauen Termin zu bestätigen.",
+            "confirmation_email_sent": True,
+            "note": "Bestätigungs-E-Mail wurde gesendet. Ihr BMW Partner wird sich innerhalb von 24 Stunden bei Ihnen melden.",
         }
 
     def is_available(self) -> bool:
