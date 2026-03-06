@@ -221,7 +221,7 @@ export function TestDriveBooking() {
       setIsLoading(false)
       setToolCallName(null)
     }
-  }, [messages, isLoading, sessionId, pageState])
+  }, [messages, isLoading, sessionId, pageState, videoMap])
 
   const handleModelSelect = useCallback((vehicle: VehicleCard) => {
     sendMessage(t.bookModel.replace('{name}', vehicle.name))
