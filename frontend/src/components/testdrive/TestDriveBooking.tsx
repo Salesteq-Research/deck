@@ -109,9 +109,17 @@ export function TestDriveBooking() {
   const [streamingVehicles, setStreamingVehicles] = useState<VehicleCard[]>([])
   const [toolCallName, setToolCallName] = useState<string | null>(null)
   const [contextInfo, setContextInfo] = useState<{ car?: string; dealer?: string }>({})
+  const [bgVideo, setBgVideo] = useState<string | null>(null)
+  const [videoMap, setVideoMap] = useState<Record<string, string>>({})
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const bgVideoRef = useRef<HTMLVideoElement>(null)
   const [sessionId] = useState(() => crypto.randomUUID())
+
+  // Load video map once
+  useEffect(() => {
+    fetch('/videos/index.json').then(r => r.ok ? r.json() : {}).then(setVideoMap).catch(() => {})
+  }, [])
 
   useEffect(() => { inputRef.current?.focus() }, [])
   useEffect(() => { if (!isLoading) inputRef.current?.focus() }, [isLoading, messages])
@@ -150,6 +158,15 @@ export function TestDriveBooking() {
 
     // Transition from invite to conversation on first message
     if (pageState === 'invite') {
+      // Try to match a video for the selected car
+      const lowerMsg = userMessage.toLowerCase()
+      const matchedId = Object.keys(videoMap).find(id => {
+        const normalized = id.replace(/-/g, ' ').replace('limousine', '').trim()
+        return lowerMsg.includes(normalized)
+      })
+      if (matchedId && videoMap[matchedId]) {
+        setBgVideo(videoMap[matchedId])
+      }
       setPageState('conversation')
     }
 
@@ -336,9 +353,25 @@ export function TestDriveBooking() {
 
   // ── CONVERSATION STATE ──
   return (
-    <div className="flex flex-col h-[100dvh] bg-black" dir={lang === 'ar' ? 'rtl' : 'ltr'} onClick={() => inputRef.current?.focus()}>
+    <div className="flex flex-col h-[100dvh] bg-black relative overflow-hidden" dir={lang === 'ar' ? 'rtl' : 'ltr'} onClick={() => inputRef.current?.focus()}>
+      {/* Cinematic background video */}
+      {bgVideo && (
+        <div className="absolute inset-0 z-0" style={{ animation: 'video-fade-in 1.2s ease-out' }}>
+          <video
+            ref={bgVideoRef}
+            src={bgVideo}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="w-full h-full object-cover"
+          />
+          {/* Dark overlay so chat is readable */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/70 to-black/90" />
+        </div>
+      )}
       {/* Header */}
-      <header className="px-4 sm:px-8 py-3.5 flex items-center justify-between shrink-0 border-b border-white/[0.06]">
+      <header className="px-4 sm:px-8 py-3.5 flex items-center justify-between shrink-0 border-b border-white/[0.06] relative z-10">
         <div className="flex items-center gap-3">
           <img src="/bmw-logo.png" alt="BMW" className="w-7 h-7" />
           <span className="w-px h-4 bg-white/15" />
@@ -352,7 +385,7 @@ export function TestDriveBooking() {
 
       {/* Context bar */}
       {(contextInfo.car || contextInfo.dealer) && (
-        <div className="px-4 sm:px-6 py-2 border-b border-white/[0.06] shrink-0">
+        <div className="px-4 sm:px-6 py-2 border-b border-white/[0.06] shrink-0 relative z-10">
           <div className="max-w-2xl mx-auto flex items-center gap-3 text-[12px] text-white/70">
             {contextInfo.car && (
               <span className="flex items-center gap-1.5">
@@ -371,7 +404,7 @@ export function TestDriveBooking() {
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto overscroll-y-contain px-4 py-5 sm:px-6">
+      <div className="flex-1 overflow-y-auto overscroll-y-contain px-4 py-5 sm:px-6 relative z-10">
         <div className="max-w-2xl mx-auto space-y-5">
           {messages.map((message, index) => (
             <div key={`${message.role}-${index}`} className={index === messages.length - 1 ? 'animate-message-in' : ''}>
@@ -428,7 +461,7 @@ export function TestDriveBooking() {
       </div>
 
       {/* Input — bottom pinned */}
-      <div className="px-4 sm:px-6 pt-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-4 shrink-0 border-t border-white/[0.06]">
+      <div className="px-4 sm:px-6 pt-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-4 shrink-0 border-t border-white/[0.06] relative z-10">
         <div className="max-w-2xl mx-auto">
           <form onSubmit={handleSubmit} className="relative">
             <input
