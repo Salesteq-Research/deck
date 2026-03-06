@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { ArrowUp, Zap, Fuel, Battery, Calendar, Play } from 'lucide-react'
+import { ArrowUp, Zap, Fuel, Battery, Calendar, Play, X } from 'lucide-react'
 import { TypingIndicator } from '../chat/TypingIndicator'
 import { MarkdownMessage } from '../chat/MarkdownMessage'
 import type { ChatMessage, VehicleCard } from '@/lib/types'
@@ -254,8 +254,10 @@ export function TestDriveBooking() {
             <span className="text-[12px] font-bold text-white/80 uppercase tracking-[0.12em]">{t.testDrive}</span>
           </div>
           <nav className="flex items-center gap-1">
-            <a href="/" className="px-3 py-1.5 text-[12px] font-bold text-white/60 uppercase tracking-[0.08em] hover:text-white transition-all">Home</a>
             <a href="/testdrive/inventory" className="px-3 py-1.5 text-[12px] font-bold text-white/60 uppercase tracking-[0.08em] hover:text-white transition-all">Modelle</a>
+            <a href="/" className="ml-1 w-7 h-7 rounded-[4px] flex items-center justify-center text-white/30 hover:text-white/70 hover:bg-white/[0.06] transition-all" title="Verlassen">
+              <X className="w-3.5 h-3.5" strokeWidth={2} />
+            </a>
           </nav>
         </header>
 
@@ -378,8 +380,11 @@ export function TestDriveBooking() {
           <span className="text-[12px] font-bold text-white/80 uppercase tracking-[0.12em]">{t.testDrive}</span>
         </div>
         <nav className="flex items-center gap-1">
-          <a href="/" className="px-3 py-1.5 text-[12px] font-bold text-white/60 uppercase tracking-[0.08em] hover:text-white transition-all">Home</a>
+          <a href="/testdrive" className="px-3 py-1.5 text-[12px] font-bold text-white/60 uppercase tracking-[0.08em] hover:text-white transition-all">Home</a>
           <a href="/testdrive/inventory" className="px-3 py-1.5 text-[12px] font-bold text-white/60 uppercase tracking-[0.08em] hover:text-white transition-all">Modelle</a>
+          <a href="/" className="ml-1 w-7 h-7 rounded-[4px] flex items-center justify-center text-white/30 hover:text-white/70 hover:bg-white/[0.06] transition-all" title="Verlassen">
+            <X className="w-3.5 h-3.5" strokeWidth={2} />
+          </a>
         </nav>
       </header>
 
