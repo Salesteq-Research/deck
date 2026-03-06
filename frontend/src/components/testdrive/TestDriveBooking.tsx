@@ -367,7 +367,7 @@ export function TestDriveBooking() {
             className="w-full h-full object-cover"
           />
           {/* Dark overlay so chat is readable */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/70 to-black/90" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/85 to-black/95" />
         </div>
       )}
       {/* Header */}
