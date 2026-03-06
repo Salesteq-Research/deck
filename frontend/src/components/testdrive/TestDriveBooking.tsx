@@ -602,8 +602,18 @@ function VehicleVideoCard({ vehicle: v, videoSrc, onSelect, disabled, interactiv
             style={isPlaying ? { animation: 'video-fade-in 0.5s ease-out' } : undefined}
           />
         )}
-        {/* Video play badge */}
-        <VideoPlayBadge hasVideo={!!videoSrc} isPlaying={isPlaying} size="md" />
+        {/* Video play badge — click plays video without selecting model */}
+        <VideoPlayBadge hasVideo={!!videoSrc} isPlaying={isPlaying} size="md" onPlay={() => {
+          if (!videoSrc || !videoRef.current) return
+          if (isPlaying) {
+            setIsPlaying(false)
+            videoRef.current.pause()
+          } else {
+            setIsPlaying(true)
+            videoRef.current.currentTime = 0
+            videoRef.current.play().catch(() => {})
+          }
+        }} />
         {/* Light bloom */}
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-[2px] bg-gradient-to-r from-transparent via-[#1c69d4]/30 to-transparent" />
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[60%] h-[40px] bg-[#1c69d4]/[0.04] blur-2xl" />
@@ -734,8 +744,18 @@ function ModelPill({ model: m, videoSrc, onSelect, delay }: {
           />
         )}
 
-        {/* Video play badge */}
-        <VideoPlayBadge hasVideo={!!videoSrc} isPlaying={showVideo} size="sm" />
+        {/* Video play badge — click plays video without selecting model */}
+        <VideoPlayBadge hasVideo={!!videoSrc} isPlaying={showVideo} size="sm" onPlay={() => {
+          if (!videoSrc || !videoRef.current) return
+          if (showVideo) {
+            setShowVideo(false)
+            videoRef.current.pause()
+          } else {
+            setShowVideo(true)
+            videoRef.current.currentTime = 0
+            videoRef.current.play().catch(() => {})
+          }
+        }} />
 
         {/* Subtle light bloom under car */}
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[70%] h-[2px] bg-gradient-to-r from-transparent via-[#1c69d4]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -750,52 +770,60 @@ function ModelPill({ model: m, videoSrc, onSelect, delay }: {
 
 
 /**
- * Cinematic video play badge overlay.
- * - hasVideo + !isPlaying: frosted glass circle with pulsing blue ring + play icon
- * - hasVideo + isPlaying: fades out (video is showing)
- * - !hasVideo: subtle shimmer-scan hint with film-strip icon
+ * Cinematic video play badge overlay — CLICKABLE.
+ * - hasVideo: click plays/pauses, glow ring pulses
+ * - !hasVideo: click triggers shimmer "generating" effect
  */
-function VideoPlayBadge({ hasVideo, isPlaying, size = 'md' }: {
+function VideoPlayBadge({ hasVideo, isPlaying, size = 'md', onPlay }: {
   hasVideo: boolean
   isPlaying: boolean
   size?: 'sm' | 'md'
+  onPlay: () => void
 }) {
+  const [tapped, setTapped] = useState(false)
   const dim = size === 'sm' ? 'w-7 h-7' : 'w-9 h-9'
   const iconSize = size === 'sm' ? 'w-2.5 h-2.5' : 'w-3.5 h-3.5'
 
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    if (hasVideo) {
+      onPlay()
+    } else {
+      // Pulse effect for "not yet available"
+      setTapped(true)
+      setTimeout(() => setTapped(false), 1500)
+    }
+  }, [hasVideo, onPlay])
+
   if (hasVideo) {
-    // Ready state — glowing play button, hides when playing
     return (
-      <div className={`absolute bottom-2.5 left-2.5 ${dim} rounded-full flex items-center justify-center transition-all duration-500 ${isPlaying ? 'opacity-0 scale-75' : 'opacity-100 scale-100'}`}>
-        {/* Outer glow ring */}
-        <div
-          className={`absolute inset-0 rounded-full border border-[#1c69d4]/40`}
-          style={{ animation: 'play-ring-pulse 3s ease-in-out infinite' }}
-        />
-        {/* Frosted glass background */}
+      <div
+        onClick={handleClick}
+        className={`absolute bottom-2.5 left-2.5 ${dim} rounded-full flex items-center justify-center cursor-pointer transition-all duration-500 hover:scale-110 active:scale-95 ${isPlaying ? 'opacity-0 scale-75 pointer-events-none' : 'opacity-100 scale-100'}`}
+      >
+        <div className="absolute inset-0 rounded-full border border-[#1c69d4]/40" style={{ animation: 'play-ring-pulse 3s ease-in-out infinite' }} />
         <div className="absolute inset-0 rounded-full bg-black/50 backdrop-blur-md" />
-        {/* Play icon */}
-        <Play className={`${iconSize} text-[#7ab5ff] relative z-10 ml-[2px] fill-[#7ab5ff]/30 group-hover:fill-[#7ab5ff]/60 group-hover:text-white transition-all duration-200`} strokeWidth={2} />
+        <Play className={`${iconSize} text-[#7ab5ff] relative z-10 ml-[2px] fill-[#7ab5ff]/30 hover:fill-[#7ab5ff]/60 hover:text-white transition-all duration-200`} strokeWidth={2} />
       </div>
     )
   }
 
-  // No video yet — subtle shimmer hint
+  // No video — shimmer hint, tapped = "generating" pulse
   return (
-    <div className={`absolute bottom-2.5 left-2.5 ${dim} rounded-full flex items-center justify-center overflow-hidden opacity-0 group-hover:opacity-70 transition-opacity duration-300`}>
-      {/* Glass bg */}
-      <div className="absolute inset-0 rounded-full bg-white/[0.06] backdrop-blur-sm border border-white/[0.10]" />
-      {/* Shimmer scan */}
-      <div
-        className="absolute inset-0 rounded-full overflow-hidden"
-      >
-        <div
-          className="absolute inset-0 w-[60%] h-full bg-gradient-to-r from-transparent via-white/20 to-transparent"
-          style={{ animation: 'shimmer-scan 2.5s ease-in-out infinite' }}
-        />
+    <div
+      onClick={handleClick}
+      className={`absolute bottom-2.5 left-2.5 ${dim} rounded-full flex items-center justify-center overflow-hidden cursor-pointer hover:scale-110 active:scale-95 transition-all duration-300 ${tapped ? 'opacity-100 scale-100' : 'opacity-0 group-hover:opacity-70'}`}
+    >
+      <div className={`absolute inset-0 rounded-full backdrop-blur-sm border transition-colors duration-300 ${tapped ? 'bg-[#1c69d4]/20 border-[#1c69d4]/40' : 'bg-white/[0.06] border-white/[0.10]'}`} />
+      <div className="absolute inset-0 rounded-full overflow-hidden">
+        <div className="absolute inset-0 w-[60%] h-full bg-gradient-to-r from-transparent via-white/20 to-transparent" style={{ animation: 'shimmer-scan 2.5s ease-in-out infinite' }} />
       </div>
-      {/* Play outline icon */}
-      <Play className={`${iconSize} text-white/40 relative z-10 ml-[1px]`} strokeWidth={1.5} />
+      {tapped ? (
+        <span className="text-[8px] text-[#7ab5ff] font-bold relative z-10 tracking-wider">SOON</span>
+      ) : (
+        <Play className={`${iconSize} text-white/40 relative z-10 ml-[1px]`} strokeWidth={1.5} />
+      )}
     </div>
   )
 }
