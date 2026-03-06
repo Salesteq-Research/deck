@@ -27,79 +27,103 @@ function Tile({ title, desc, href, icon: Icon }: {
   title: string; desc: string; href: string; icon: React.ComponentType<{ className?: string }>
 }) {
   return (
-    <a href={href} className="group flex items-center gap-4 px-5 py-4 rounded-none bg-transparent border-b border-white/[0.08] hover:bg-white/[0.06] transition-all duration-200 active:scale-[0.99]">
-      <div className="w-8 h-8 rounded-none bg-white/[0.06] flex items-center justify-center shrink-0">
-        <Icon className="w-4 h-4 text-white/50 group-hover:text-white/80 transition-colors" />
+    <a href={href} className="group flex items-center gap-4 px-5 py-4 bg-transparent border-b border-white/[0.06] hover:bg-white/[0.04] transition-all duration-200 active:scale-[0.99]">
+      <div className="w-9 h-9 rounded-[4px] bg-white/[0.06] flex items-center justify-center shrink-0 group-hover:bg-[#1c69d4]/20 transition-colors">
+        <Icon className="w-4 h-4 text-white/40 group-hover:text-[#7ab5ff] transition-colors" />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="text-[13px] font-bold text-white/90 uppercase tracking-[0.05em]">{title}</div>
-        <div className="text-[11px] text-white/40 mt-0.5">{desc}</div>
+        <div className="text-[13px] font-bold text-white/90 uppercase tracking-[0.06em]">{title}</div>
+        <div className="text-[11px] text-white/35 mt-0.5">{desc}</div>
       </div>
-      <ArrowRight className="w-3.5 h-3.5 text-white/0 group-hover:text-white/40 group-hover:translate-x-1 transition-all duration-300 shrink-0" />
+      <ArrowRight className="w-3.5 h-3.5 text-white/0 group-hover:text-white/30 group-hover:translate-x-1 transition-all duration-300 shrink-0" />
     </a>
   )
 }
 
 export function Landing() {
   const [heroImage, setHeroImage] = useState<string | null>(null)
+  const [videoMap, setVideoMap] = useState<Record<string, string>>({})
 
   useEffect(() => {
-    fetch(`${API_BASE}/testdrive/vehicles`)
-      .then(r => r.json())
-      .then(data => {
-        const all: FeaturedModel[] = data.items || []
-        const hero = all.find(m => m.id === HERO_MODEL_ID)
-        if (hero?.image) setHeroImage(hero.image)
-      })
-      .catch(() => {})
+    Promise.all([
+      fetch(`${API_BASE}/testdrive/vehicles`).then(r => r.json()),
+      fetch('/videos/index.json').then(r => r.ok ? r.json() : {}).catch(() => ({})),
+    ]).then(([data, videos]) => {
+      const all: FeaturedModel[] = data.items || []
+      const hero = all.find(m => m.id === HERO_MODEL_ID)
+      if (hero?.image) setHeroImage(hero.image)
+      setVideoMap(videos as Record<string, string>)
+    }).catch(() => {})
   }, [])
+
+  const heroVideo = videoMap[HERO_MODEL_ID]
 
   return (
     <div className="min-h-[100dvh] flex flex-col bg-black text-[#efefed] overflow-hidden" style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
 
       {/* Top bar */}
-      <header className="flex items-center justify-between px-6 sm:px-10 py-4 shrink-0">
-        <img src="/bmw-logo.png" alt="BMW" className="w-8 h-8" />
-        <span className="text-[10px] text-white/30 uppercase tracking-[0.2em]">Switzerland</span>
+      <header className="flex items-center justify-between px-4 sm:px-8 py-3.5 shrink-0 border-b border-white/[0.06]">
+        <div className="flex items-center gap-3">
+          <img src="/bmw-logo.png" alt="BMW" className="w-7 h-7" />
+          <span className="w-px h-4 bg-white/15" />
+          <span className="text-[12px] font-bold text-white/80 uppercase tracking-[0.12em]">Switzerland</span>
+        </div>
+        <span className="text-[10px] text-white/20 uppercase tracking-[0.15em]">Salesteq</span>
       </header>
 
-      {/* Hero section — full-width car image with overlaid copy */}
-      <div className="relative flex flex-col items-center justify-center min-h-[28vh] sm:min-h-[32vh] px-6">
-        {/* Background car image */}
-        {heroImage && (
+      {/* Hero section — cinematic with ambient glow */}
+      <div className="relative flex flex-col items-center justify-center min-h-[30vh] sm:min-h-[36vh] px-6 overflow-hidden">
+        {/* Ambient glow */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="w-[400px] h-[400px] rounded-full bg-[#1c69d4] animate-ambient-glow" />
+        </div>
+
+        {/* Background video or car image */}
+        {heroVideo ? (
+          <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+            <video
+              src={heroVideo}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="w-full h-full object-cover opacity-[0.15]"
+            />
+          </div>
+        ) : heroImage ? (
           <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
             <img
               src={heroImage}
               alt="BMW i7"
-              className="w-[85%] sm:w-[65%] max-w-[900px] h-auto object-contain opacity-[0.12] select-none pointer-events-none"
+              className="w-[85%] sm:w-[65%] max-w-[900px] h-auto object-contain opacity-[0.10] select-none pointer-events-none"
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
             />
           </div>
-        )}
+        ) : null}
 
         {/* Hero text */}
-        <div className="relative z-10 text-center">
-          <h1 className="text-[2.2rem] sm:text-[3.2rem] md:text-[4rem] font-light text-white tracking-[-0.03em] leading-[1.05]">
+        <div className="relative z-10 text-center animate-hero-in">
+          <h1 className="text-[2rem] sm:text-[3rem] md:text-[4rem] font-extralight text-white tracking-[-0.02em] leading-[1.05]">
             AI-Powered
           </h1>
-          <h1 className="text-[2.2rem] sm:text-[3.2rem] md:text-[4rem] font-light text-white tracking-[-0.03em] leading-[1.05] mb-4">
+          <h1 className="text-[2rem] sm:text-[3rem] md:text-[4rem] font-extralight text-white tracking-[-0.02em] leading-[1.05] mb-4">
             Platform
           </h1>
-          <p className="text-[12px] sm:text-[13px] text-white/40 tracking-[0.12em] uppercase max-w-md mx-auto">
+          <p className="text-[11px] sm:text-[12px] text-white/70 tracking-[0.15em] uppercase max-w-md mx-auto">
             Intelligent automation for the modern dealership
           </p>
         </div>
       </div>
 
       {/* Modules */}
-      <div className="w-full max-w-[800px] mx-auto px-6 sm:px-10 pb-12">
+      <div className="w-full max-w-[800px] mx-auto px-4 sm:px-8 pb-12 animate-hero-in [animation-delay:200ms] [animation-fill-mode:both]">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-0">
 
           {/* Dealership column */}
           <div>
             <div className="flex items-center gap-2 mb-1 pt-6">
-              <div className="w-3 h-px bg-white/30" />
-              <h2 className="text-[10px] font-bold text-white/40 uppercase tracking-[0.18em]">
+              <div className="w-3 h-px bg-white/20" />
+              <h2 className="text-[10px] font-bold text-white/30 uppercase tracking-[0.18em]">
                 Dealership
               </h2>
             </div>
@@ -109,8 +133,8 @@ export function Landing() {
           {/* Test Drive column */}
           <div>
             <div className="flex items-center gap-2 mb-1 pt-6">
-              <div className="w-3 h-px bg-[#1c69d4]/60" />
-              <h2 className="text-[10px] font-bold text-[#1c69d4]/60 uppercase tracking-[0.18em]">
+              <div className="w-3 h-px bg-[#1c69d4]/50" />
+              <h2 className="text-[10px] font-bold text-[#1c69d4]/50 uppercase tracking-[0.18em]">
                 Test Drive
               </h2>
             </div>
@@ -120,7 +144,7 @@ export function Landing() {
       </div>
 
       {/* Footer */}
-      <footer className="px-6 sm:px-10 py-5 border-t border-white/[0.04] flex items-center justify-between shrink-0">
+      <footer className="mt-auto px-4 sm:px-8 py-4 border-t border-white/[0.04] flex items-center justify-between shrink-0">
         <span className="text-[10px] text-white/10 tracking-[0.05em]">
           BMW Switzerland
         </span>

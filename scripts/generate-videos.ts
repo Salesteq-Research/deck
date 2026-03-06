@@ -24,8 +24,9 @@ const RUNWAY_BASE = "https://api.dev.runwayml.com";
 const RUNWAY_VERSION = "2024-11-06";
 const DASHSCOPE_BASE = "https://dashscope-intl.aliyuncs.com";
 
-const DATA_DIR = path.resolve(import.meta.dirname, "..", "data");
-const VIDEO_DIR = path.resolve(import.meta.dirname, "..", "frontend", "public", "videos");
+const SCRIPT_DIR = import.meta.dirname ?? path.dirname(new URL(import.meta.url).pathname);
+const DATA_DIR = path.resolve(SCRIPT_DIR, "..", "data");
+const VIDEO_DIR = path.resolve(SCRIPT_DIR, "..", "frontend", "public", "videos");
 const OUTPUT_JSON = path.join(DATA_DIR, "video_urls.json");
 
 const POLL_INTERVAL_MS = 10_000;
@@ -36,14 +37,14 @@ const DEFAULT_MODELS = ["i7", "i4-m50", "m3-limousine", "ix", "x5", "i7-m70"];
 
 // Motion prompts per model (cinematic, specific to the car)
 const MOTION_PROMPTS: Record<string, string> = {
-  "i7": "Luxury BMW i7 sedan driving smoothly through a modern city at dusk, reflections on wet road, cinematic lighting, shallow depth of field, 4K",
-  "i7-m70": "BMW i7 M70 performance sedan accelerating on a sweeping mountain highway, dramatic clouds, golden hour light, motion blur on background, cinematic",
-  "i4-m50": "BMW i4 M50 electric gran coupe cornering dynamically on a coastal road, ocean in background, sun flares, smooth camera tracking shot, cinematic",
-  "m3-limousine": "BMW M3 Competition sedan racing through alpine curves, aggressive stance, tire smoke, dramatic mountain backdrop, cinematic tracking shot",
-  "ix": "BMW iX electric SUV gliding silently through a futuristic tunnel with blue ambient lighting, reflections, smooth dolly shot, cinematic",
-  "x5": "BMW X5 SUV driving confidently on a desert highway at sunset, dust particles in golden light, wide cinematic shot, premium feel",
+  "i7": "Luxury BMW i7 sedan driving smoothly through a modern city at dusk, headlights on glowing bright, reflections on wet road, cinematic lighting, shallow depth of field, 4K",
+  "i7-m70": "BMW i7 M70 performance sedan accelerating on a sweeping mountain highway, headlights and DRL illuminated, dramatic clouds, golden hour light, motion blur on background, cinematic",
+  "i4-m50": "BMW i4 M50 electric gran coupe cornering dynamically on a coastal road, headlights on piercing through dusk, ocean in background, sun flares, smooth camera tracking shot, cinematic",
+  "m3-limousine": "BMW M3 Competition sedan racing through alpine curves, headlights blazing, aggressive stance, tire smoke, dramatic mountain backdrop, cinematic tracking shot",
+  "ix": "BMW iX electric SUV gliding silently through a futuristic tunnel, headlights on with blue ambient lighting, reflections, smooth dolly shot, cinematic",
+  "x5": "BMW X5 SUV driving confidently on a desert highway at sunset, headlights on glowing, dust particles in golden light, wide cinematic shot, premium feel",
 };
-const DEFAULT_PROMPT = "BMW car driving smoothly on a scenic road, cinematic lighting, professional automotive commercial, 4K quality";
+const DEFAULT_PROMPT = "BMW car driving smoothly on a scenic road, headlights on illuminated, cinematic lighting, professional automotive commercial, 4K quality";
 
 // ── Types ───────────────────────────────────────────────────────────
 

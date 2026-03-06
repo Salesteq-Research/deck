@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { ArrowUp, Zap, Fuel, Battery, Calendar, Play, X } from 'lucide-react'
+import { ArrowUp, Zap, Fuel, Battery, Calendar, Play, X, VolumeX } from 'lucide-react'
 import { TypingIndicator } from '../chat/TypingIndicator'
 import { MarkdownMessage } from '../chat/MarkdownMessage'
 import type { ChatMessage, VehicleCard } from '@/lib/types'
@@ -97,7 +97,66 @@ interface FeaturedModel {
   video?: string
 }
 
+/** NFS easter egg — triple-click BMW logo to toggle */
+function useNfsEasterEgg() {
+  const [playing, setPlaying] = useState(false)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const clickTimesRef = useRef<number[]>([])
+
+  useEffect(() => {
+    const audio = new Audio('/audio/nfs.mp3')
+    audio.loop = true
+    audio.volume = 0.6
+    audioRef.current = audio
+    audio.addEventListener('ended', () => setPlaying(false))
+    return () => { audio.pause(); audio.src = '' }
+  }, [])
+
+  const handleLogoClick = useCallback(() => {
+    const now = Date.now()
+    const times = clickTimesRef.current
+    times.push(now)
+    // Keep only clicks within last 600ms
+    while (times.length > 0 && now - times[0] > 600) times.shift()
+    if (times.length >= 3) {
+      times.length = 0
+      const audio = audioRef.current
+      if (!audio) return
+      if (playing) {
+        audio.pause()
+        setPlaying(false)
+      } else {
+        audio.currentTime = 0
+        audio.play().catch(() => {})
+        setPlaying(true)
+      }
+    }
+  }, [playing])
+
+  return { playing, handleLogoClick }
+}
+
+/** NFS speed icon — visible when easter egg is active */
+function NfsIcon({ playing, onClick }: { playing: boolean; onClick: () => void }) {
+  if (!playing) return null
+  return (
+    <button
+      onClick={onClick}
+      className="flex items-center gap-1.5 px-2 py-1 rounded-[4px] bg-orange-500/20 border border-orange-500/40 text-orange-400 text-[11px] font-bold uppercase tracking-wider animate-message-in hover:bg-orange-500/30 transition-all"
+      title="NFS Mode — click to stop"
+    >
+      <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current animate-pulse" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C6.48 2 2 6.48 2 12c0 3.05 1.37 5.78 3.53 7.62l1.41-1.41C5.16 16.66 4 14.46 4 12c0-4.42 3.58-8 8-8s8 3.58 8 8c0 2.46-1.16 4.66-2.94 6.21l1.41 1.41C20.63 17.78 22 15.05 22 12c0-5.52-4.48-10-10-10z" />
+        <path d="M12 6l-1.5 6.5L15 17l-3-11z" />
+      </svg>
+      <span className="hidden sm:inline">NFS</span>
+      <VolumeX className="w-3 h-3 opacity-60" />
+    </button>
+  )
+}
+
 export function TestDriveBooking() {
+  const nfs = useNfsEasterEgg()
   const [pageState, setPageState] = useState<PageState>('invite')
   const [lang, setLang] = useState<Lang>('de')
   const t = I18N[lang]
@@ -249,72 +308,75 @@ export function TestDriveBooking() {
         {/* Header */}
         <header className="px-4 sm:px-8 py-3.5 flex items-center justify-between shrink-0 border-b border-white/[0.06]">
           <div className="flex items-center gap-3">
-            <img src="/bmw-logo.png" alt="BMW" className="w-7 h-7" />
+            <img src="/bmw-logo.png" alt="BMW" className="w-7 h-7 cursor-pointer select-none" onClick={nfs.handleLogoClick} />
             <span className="w-px h-4 bg-white/15" />
             <span className="text-[12px] font-bold text-white/80 uppercase tracking-[0.12em]">{t.testDrive}</span>
           </div>
           <nav className="flex items-center gap-1">
-            <a href="/testdrive/inventory" className="px-3 py-1.5 text-[12px] font-bold text-white/60 uppercase tracking-[0.08em] hover:text-white transition-all">Modelle</a>
+            <NfsIcon playing={nfs.playing} onClick={nfs.handleLogoClick} />
+            <a href="/testdrive/inventory" className="hidden sm:block px-3 py-1.5 text-[12px] font-bold text-white/60 uppercase tracking-[0.08em] hover:text-white transition-all">Modelle</a>
             <a href="/" className="ml-1 w-7 h-7 rounded-[4px] flex items-center justify-center text-white/30 hover:text-white/70 hover:bg-white/[0.06] transition-all" title="Verlassen">
               <X className="w-3.5 h-3.5" strokeWidth={2} />
             </a>
           </nav>
         </header>
 
-        {/* Centered invite content */}
-        <div className="flex-1 flex flex-col items-center justify-center px-6 relative">
+        {/* Scrollable invite content */}
+        <div className="flex-1 overflow-y-auto overscroll-y-contain relative">
           {/* Ambient glow */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="w-[400px] h-[400px] rounded-full bg-[#1c69d4] animate-ambient-glow" />
           </div>
 
-          {/* BMW logo */}
-          <img src="/bmw-logo.png" alt="BMW" className="w-12 h-12 opacity-70 mb-6 animate-hero-in" />
+          <div className="flex flex-col items-center px-4 sm:px-6 py-8 sm:py-12 min-h-full justify-center">
+            {/* BMW logo */}
+            <img src="/bmw-logo.png" alt="BMW" className="w-10 h-10 sm:w-12 sm:h-12 opacity-70 mb-4 sm:mb-6 animate-hero-in" />
 
-          {/* Language picker */}
-          <div className="flex flex-wrap justify-center gap-1.5 mb-6 animate-hero-in [animation-delay:50ms] [animation-fill-mode:both]">
-            {LANGS.map((l) => (
+            {/* Language picker */}
+            <div className="flex flex-wrap justify-center gap-1 sm:gap-1.5 mb-4 sm:mb-6 animate-hero-in [animation-delay:50ms] [animation-fill-mode:both]">
+              {LANGS.map((l) => (
+                <button
+                  key={l.code}
+                  onClick={() => setLang(l.code)}
+                  className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-[4px] text-[12px] sm:text-[13px] transition-all active:scale-95 ${
+                    lang === l.code
+                      ? 'bg-[#1c69d4]/20 border border-[#1c69d4]/50 text-white'
+                      : 'bg-white/[0.04] border border-white/[0.08] text-white/50 hover:text-white/80 hover:border-white/[0.16]'
+                  }`}
+                >
+                  <span className="mr-1">{l.flag}</span>{l.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Headline */}
+            <h1 className="text-[1.5rem] sm:text-[3rem] font-extralight tracking-[0.01em] text-white text-center mb-6 sm:mb-10 animate-hero-in [animation-delay:100ms] [animation-fill-mode:both]">
+              {t.headline}
+            </h1>
+
+            {/* Centered input */}
+            <form onSubmit={handleSubmit} className="relative w-full max-w-xl mb-6 sm:mb-12 animate-hero-in [animation-delay:200ms] [animation-fill-mode:both]">
+              <input
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder={t.placeholder}
+                autoFocus
+                dir={lang === 'ar' ? 'rtl' : 'ltr'}
+                className="w-full bg-white/[0.06] border border-white/[0.12] rounded-[4px] pl-4 pr-12 py-4 sm:pl-5 sm:pr-14 sm:py-5 text-base sm:text-lg text-white placeholder:text-white/40 outline-none focus:border-[#1c69d4]/60 focus:bg-white/[0.08] transition-all duration-300 animate-input-glow"
+              />
               <button
-                key={l.code}
-                onClick={() => setLang(l.code)}
-                className={`px-2.5 py-1 rounded-[4px] text-[13px] transition-all active:scale-95 ${
-                  lang === l.code
-                    ? 'bg-[#1c69d4]/20 border border-[#1c69d4]/50 text-white'
-                    : 'bg-white/[0.04] border border-white/[0.08] text-white/50 hover:text-white/80 hover:border-white/[0.16]'
-                }`}
+                type="submit"
+                disabled={!input.trim()}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-[4px] bg-[#1c69d4] flex items-center justify-center disabled:opacity-15 transition-all duration-200 hover:bg-[#1a5db8] active:scale-95"
               >
-                <span className="mr-1">{l.flag}</span>{l.label}
+                <ArrowUp className="h-5 w-5 text-white" strokeWidth={2.5} />
               </button>
-            ))}
+            </form>
+
+            {/* 2x3 model pills */}
+            <ModelPillGrid onSelect={(name) => sendMessage(t.bookModel.replace('{name}', name))} />
           </div>
-
-          {/* Headline */}
-          <h1 className="text-[2rem] sm:text-[3rem] font-extralight tracking-[0.01em] text-white text-center mb-10 animate-hero-in [animation-delay:100ms] [animation-fill-mode:both]">
-            {t.headline}
-          </h1>
-
-          {/* Centered input */}
-          <form onSubmit={handleSubmit} className="relative w-full max-w-xl mb-12 animate-hero-in [animation-delay:200ms] [animation-fill-mode:both]">
-            <input
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder={t.placeholder}
-              autoFocus
-              dir={lang === 'ar' ? 'rtl' : 'ltr'}
-              className="w-full bg-white/[0.06] border border-white/[0.12] rounded-[4px] pl-5 pr-14 py-5 text-lg text-white placeholder:text-white/40 outline-none focus:border-[#1c69d4]/60 focus:bg-white/[0.08] transition-all duration-300 animate-input-glow"
-            />
-            <button
-              type="submit"
-              disabled={!input.trim()}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-[4px] bg-[#1c69d4] flex items-center justify-center disabled:opacity-15 transition-all duration-200 hover:bg-[#1a5db8] active:scale-95"
-            >
-              <ArrowUp className="h-5 w-5 text-white" strokeWidth={2.5} />
-            </button>
-          </form>
-
-          {/* 2x3 model pills */}
-          <ModelPillGrid onSelect={(name) => sendMessage(t.bookModel.replace('{name}', name))} />
         </div>
       </div>
     )
@@ -366,7 +428,7 @@ export function TestDriveBooking() {
             muted
             loop
             playsInline
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain sm:object-cover"
           />
           {/* Dark overlay so chat is readable */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/85 to-black/95" />
@@ -375,13 +437,14 @@ export function TestDriveBooking() {
       {/* Header */}
       <header className="px-4 sm:px-8 py-3.5 flex items-center justify-between shrink-0 border-b border-white/[0.06] relative z-10">
         <div className="flex items-center gap-3">
-          <img src="/bmw-logo.png" alt="BMW" className="w-7 h-7" />
+          <img src="/bmw-logo.png" alt="BMW" className="w-7 h-7 cursor-pointer select-none" onClick={nfs.handleLogoClick} />
           <span className="w-px h-4 bg-white/15" />
           <span className="text-[12px] font-bold text-white/80 uppercase tracking-[0.12em]">{t.testDrive}</span>
         </div>
         <nav className="flex items-center gap-1">
-          <a href="/testdrive" className="px-3 py-1.5 text-[12px] font-bold text-white/60 uppercase tracking-[0.08em] hover:text-white transition-all">Home</a>
-          <a href="/testdrive/inventory" className="px-3 py-1.5 text-[12px] font-bold text-white/60 uppercase tracking-[0.08em] hover:text-white transition-all">Modelle</a>
+          <NfsIcon playing={nfs.playing} onClick={nfs.handleLogoClick} />
+          <a href="/testdrive" className="hidden sm:block px-3 py-1.5 text-[12px] font-bold text-white/60 uppercase tracking-[0.08em] hover:text-white transition-all">Home</a>
+          <a href="/testdrive/inventory" className="hidden sm:block px-3 py-1.5 text-[12px] font-bold text-white/60 uppercase tracking-[0.08em] hover:text-white transition-all">Modelle</a>
           <a href="/" className="ml-1 w-7 h-7 rounded-[4px] flex items-center justify-center text-white/30 hover:text-white/70 hover:bg-white/[0.06] transition-all" title="Verlassen">
             <X className="w-3.5 h-3.5" strokeWidth={2} />
           </a>
@@ -676,16 +739,16 @@ function ModelPillGrid({ onSelect }: { onSelect: (name: string) => void }) {
 
   if (featured.length === 0) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full max-w-2xl animate-hero-in [animation-delay:400ms] [animation-fill-mode:both]">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 w-full max-w-2xl animate-hero-in [animation-delay:400ms] [animation-fill-mode:both]">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="h-[140px] rounded-[4px] bg-white/[0.03] animate-pulse" />
+          <div key={i} className="h-[110px] sm:h-[140px] rounded-[4px] bg-white/[0.03] animate-pulse" />
         ))}
       </div>
     )
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full max-w-2xl animate-hero-in [animation-delay:400ms] [animation-fill-mode:both]">
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 w-full max-w-2xl animate-hero-in [animation-delay:400ms] [animation-fill-mode:both]">
       {featured.slice(0, 6).map((m, i) => (
         <ModelPill key={m.id} model={m} videoSrc={videoMap[m.id]} onSelect={onSelect} delay={500 + i * 60} />
       ))}
@@ -727,7 +790,7 @@ function ModelPill({ model: m, videoSrc, onSelect, delay }: {
       style={{ animationDelay: `${delay}ms` }}
     >
       {/* Car image / video */}
-      <div className="w-full h-[90px] sm:h-[110px] relative flex items-center justify-center pt-3 overflow-hidden">
+      <div className="w-full h-[75px] sm:h-[110px] relative flex items-center justify-center pt-2 sm:pt-3 overflow-hidden">
         {m.image && (
           <img
             src={m.image}
@@ -766,8 +829,8 @@ function ModelPill({ model: m, videoSrc, onSelect, delay }: {
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[70%] h-[2px] bg-gradient-to-r from-transparent via-[#1c69d4]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
       {/* Name */}
-      <div className="w-full px-3 py-2.5 text-center">
-        <span className="text-[13px] text-white/80 group-hover:text-white transition-colors leading-tight block">{m.name.replace('BMW ', '')}</span>
+      <div className="w-full px-2 py-2 sm:px-3 sm:py-2.5 text-center">
+        <span className="text-[11px] sm:text-[13px] text-white/80 group-hover:text-white transition-colors leading-tight block">{m.name.replace('BMW ', '')}</span>
       </div>
     </button>
   )
@@ -777,7 +840,7 @@ function ModelPill({ model: m, videoSrc, onSelect, delay }: {
 /**
  * Cinematic video play badge overlay — CLICKABLE.
  * - hasVideo: click plays/pauses, glow ring pulses
- * - !hasVideo: click triggers shimmer "generating" effect
+ * - !hasVideo: click shows generating indicator with ~2 min ETA
  */
 function VideoPlayBadge({ hasVideo, isPlaying, size = 'md', onPlay }: {
   hasVideo: boolean
@@ -785,9 +848,25 @@ function VideoPlayBadge({ hasVideo, isPlaying, size = 'md', onPlay }: {
   size?: 'sm' | 'md'
   onPlay: () => void
 }) {
-  const [tapped, setTapped] = useState(false)
+  const [generating, setGenerating] = useState(false)
+  const [elapsed, setElapsed] = useState(0)
   const dim = size === 'sm' ? 'w-7 h-7' : 'w-9 h-9'
   const iconSize = size === 'sm' ? 'w-2.5 h-2.5' : 'w-3.5 h-3.5'
+
+  // Tick elapsed time while generating
+  useEffect(() => {
+    if (!generating) return
+    const interval = setInterval(() => setElapsed(e => e + 1), 1000)
+    return () => clearInterval(interval)
+  }, [generating])
+
+  // If video becomes available while generating, reset
+  useEffect(() => {
+    if (hasVideo && generating) {
+      setGenerating(false)
+      setElapsed(0)
+    }
+  }, [hasVideo, generating])
 
   const handleClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
@@ -795,9 +874,8 @@ function VideoPlayBadge({ hasVideo, isPlaying, size = 'md', onPlay }: {
     if (hasVideo) {
       onPlay()
     } else {
-      // Pulse effect for "not yet available"
-      setTapped(true)
-      setTimeout(() => setTapped(false), 1500)
+      setGenerating(true)
+      setElapsed(0)
     }
   }, [hasVideo, onPlay])
 
@@ -814,21 +892,42 @@ function VideoPlayBadge({ hasVideo, isPlaying, size = 'md', onPlay }: {
     )
   }
 
-  // No video — shimmer hint, tapped = "generating" pulse
+  // Generating state — progress ring + elapsed time
+  if (generating) {
+    const ETA_SECONDS = 120
+    const progress = Math.min(elapsed / ETA_SECONDS, 0.95)
+    const remaining = Math.max(0, Math.ceil((ETA_SECONDS - elapsed) / 60))
+    const r = 13
+    const circumference = 2 * Math.PI * r
+    const offset = circumference * (1 - progress)
+
+    return (
+      <div className="absolute bottom-2 left-2 flex items-center gap-1.5 animate-message-in">
+        {/* Progress ring */}
+        <div className="relative w-6 h-6 flex items-center justify-center">
+          <svg className="w-6 h-6 -rotate-90" viewBox="0 0 30 30">
+            <circle cx="15" cy="15" r={r} fill="none" stroke="white" strokeOpacity="0.1" strokeWidth="2" />
+            <circle cx="15" cy="15" r={r} fill="none" stroke="#7ab5ff" strokeWidth="2" strokeLinecap="round"
+              strokeDasharray={circumference} strokeDashoffset={offset}
+              className="transition-[stroke-dashoffset] duration-1000 ease-linear" />
+          </svg>
+        </div>
+        {/* ETA label */}
+        <span className="text-[10px] text-white/50 font-medium tabular-nums">
+          {remaining > 0 ? `~${remaining} min` : 'almost done'}
+        </span>
+      </div>
+    )
+  }
+
+  // Idle — subtle play hint on hover
   return (
     <div
       onClick={handleClick}
-      className={`absolute bottom-2.5 left-2.5 ${dim} rounded-full flex items-center justify-center overflow-hidden cursor-pointer hover:scale-110 active:scale-95 transition-all duration-300 ${tapped ? 'opacity-100 scale-100' : 'opacity-0 group-hover:opacity-70'}`}
+      className={`absolute bottom-2.5 left-2.5 ${dim} rounded-full flex items-center justify-center overflow-hidden cursor-pointer hover:scale-110 active:scale-95 transition-all duration-300 opacity-0 group-hover:opacity-70`}
     >
-      <div className={`absolute inset-0 rounded-full backdrop-blur-sm border transition-colors duration-300 ${tapped ? 'bg-[#1c69d4]/20 border-[#1c69d4]/40' : 'bg-white/[0.06] border-white/[0.10]'}`} />
-      <div className="absolute inset-0 rounded-full overflow-hidden">
-        <div className="absolute inset-0 w-[60%] h-full bg-gradient-to-r from-transparent via-white/20 to-transparent" style={{ animation: 'shimmer-scan 2.5s ease-in-out infinite' }} />
-      </div>
-      {tapped ? (
-        <span className="text-[8px] text-[#7ab5ff] font-bold relative z-10 tracking-wider">SOON</span>
-      ) : (
-        <Play className={`${iconSize} text-white/40 relative z-10 ml-[1px]`} strokeWidth={1.5} />
-      )}
+      <div className="absolute inset-0 rounded-full backdrop-blur-sm border bg-white/[0.06] border-white/[0.10]" />
+      <Play className={`${iconSize} text-white/40 relative z-10 ml-[1px]`} strokeWidth={1.5} />
     </div>
   )
 }
