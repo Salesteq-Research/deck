@@ -1,13 +1,20 @@
 Viktor Remennik
-viktor@salesteq.com | Zug, Switzerland
+viktor@salesteq.com
+Zug, Switzerland
 
 
-For the past two years I've been running Salesteq — an AI platform that handles dealership sales and service through autonomous agents. We deployed it at Naghi Group (BMW, MINI, Rolls Royce, six brands, 250K cars/year in Saudi Arabia). Voice AI in Arabic dialects, live inventory, test drive booking, thousands of calls a month. Before that I scaled a previous company to $10M revenue in year one.
+Hi,
 
-This role caught my attention because of the start-up focus. I've spent the last few years on the other side of the table — as a founder buying GCP credits, figuring out Vertex AI for production voice pipelines, making decisions about where to spend limited runway. That experience helps me understand what start-up teams actually care about when evaluating cloud and AI infrastructure.
+I'm applying for the AI Sales Lead for Start-Ups role based in Zurich.
 
-My sales approach has always been technical-first — show a working demo with real data before talking price. That's how we got BMW KSA to sign after a single PoC. I've built and led teams across engineering, sales, and customer success in Switzerland and the Middle East, and I think that hands-on mentality fits well with how Google Cloud should be working with start-ups.
+Quick context on me: I've been building and selling AI products for the last few years. Right now I run Salesteq, where we built an autonomous AI platform for automotive retail. We're live at Naghi Group in Saudi Arabia, thats BMW, MINI, Rolls Royce, six brands, 250K cars a year. The platform does voice calls in Arabic, books test drives, searches inventory, handles service inquiries. Runs 24/7 with no human in the loop. The whole thing runs on Google Cloud, Vertex AI, Gemini, Cloud Run.
 
-Based in Zurich. English and Russian native, German professional. Happy to walk through any of this in more detail.
+Before Salesteq I co-founded Lykke Business where I ran a 60 person sales org and we grew to $10M selling SaaS to banks and large corporates. Before that I was at Vontobel and Credit Suisse.
+
+The startup angle is what got me interested in this role specifically. I've been a founder for the last few years so I know what its like to evaluate cloud platforms with real constraints, limited budget, small team, need to ship fast. I also already work with the Google for Startups team here in Zurich and I'm in the NVIDIA Inception program so the ecosystem isnt new to me.
+
+I have an ML Masters from Hong Kong PolyU so I can go deep on the technical side when needed. Most of my career though has been selling, building teams and closing deals with large organizations.
+
+Happy to chat whenever works. I can also just show you the product if thats easier, its live.
 
 Viktor
