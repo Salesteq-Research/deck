@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salesteq — AI for Automotive Retail</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  @page { size: 16in 9in; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, sans-serif; color: #131314; background: #131314; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  /* ── Slide container ── */
+  .slide {
+    width: 1536px; height: 864px;
+    position: relative; overflow: hidden;
+    page-break-after: always;
+    padding: 44px 56px;
+  }
+  .slide:last-child { page-break-after: auto; }
+  .slide.cream { background: #faf9f0; }
+  .slide.dark { background: #131314; color: #faf9f0; }
+
+  /* ── Header ── */
+  .header { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .logo-mark svg { width: 28px; height: 28px; }
+  .wordmark { font-size: 16px; font-weight: 700; letter-spacing: 0.01em; }
+  .dark .wordmark { color: #faf9f0; }
+  .header-right { margin-left: auto; font-size: 9px; color: #3d3d3f; opacity: 0.35; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; }
+  .dark .header-right { color: #faf9f0; opacity: 0.2; }
+  .divider { border: none; border-top: 1px solid rgba(19,19,20,0.06); margin: 10px 0 16px; }
+  .dark .divider { border-top-color: rgba(250,249,240,0.06); }
+
+  /* ── Watermark ── */
+  .watermark { position: absolute; right: -20px; top: 50%; transform: translateY(-50%); opacity: 0.015; pointer-events: none; }
+  .watermark line { stroke-width: 6; stroke-linecap: round; }
+  .cream .watermark line { stroke: #131314; }
+  .dark .watermark line { stroke: #faf9f0; }
+
+  /* ── Section label ── */
+  .label { font-size: 10px; font-weight: 600; color: #d97757; letter-spacing: 0.1em; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; margin-bottom: 12px; }
+
+  /* ── Footer ── */
+  .footer { position: absolute; bottom: 24px; left: 56px; right: 56px; display: flex; justify-content: space-between; align-items: center; font-size: 9px; color: #3d3d3f; opacity: 0.3; }
+  .dark .footer { color: #faf9f0; opacity: 0.2; }
+  .footer-scurve { display: flex; align-items: center; gap: 8px; }
+  .footer-scurve svg { width: 16px; height: 16px; }
+
+  /* ── Typography ── */
+  h1 { font-size: 44px; font-weight: 800; letter-spacing: -0.025em; line-height: 1.08; }
+  h1 em { font-style: normal; color: #d97757; }
+  h2 { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; }
+  h2 em { font-style: normal; color: #d97757; }
+  h3 em { font-style: normal; color: #d97757; }
+  .subtitle { font-size: 16px; color: #3d3d3f; line-height: 1.6; max-width: 700px; }
+  .dark .subtitle { color: rgba(250,249,240,0.4); }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .terra { color: #d97757; }
+
+  /* ── Cards ── */
+  .card-dark { background: #131314; border-radius: 10px; padding: 18px 20px; color: #faf9f0; }
+  .card-light { border: 1px solid rgba(19,19,20,0.06); border-radius: 10px; padding: 18px 20px; background: #faf9f0; }
+  .card-elevated { background: #1e1e20; border-radius: 10px; padding: 18px 20px; color: #faf9f0; }
+
+  /* ── Accent strip ── */
+  .accent-strip { border-left: 3px solid #d97757; padding-left: 16px; }
+
+  /* ── Stats ── */
+  .stat-number { font-size: 36px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
+  .stat-label { font-size: 10px; color: #3d3d3f; opacity: 0.5; margin-top: 3px; }
+  .dark .stat-label { color: #faf9f0; opacity: 0.35; }
+  .stat-big { font-size: 52px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
+
+  /* ── Grid helpers ── */
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
+
+  /* ── Dept label ── */
+  .dept-label { font-size: 9.5px; font-weight: 600; color: #d97757; letter-spacing: 0.08em; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; margin-bottom: 8px; }
+
+  /* ── Terra bar ── */
+  .terra-bar { width: 100%; height: 2px; background: #d97757; margin: 8px 0; opacity: 0.5; }
+  .terra-bar-sm { width: 80px; height: 3px; background: #d97757; border-radius: 1.5px; }
+
+  /* ── Bullet list ── */
+  .bullet-list { list-style: none; }
+  .bullet-list li { font-size: 15px; line-height: 1.55; padding: 5px 0; padding-left: 18px; position: relative; }
+  .bullet-list li::before { content: '\2014'; position: absolute; left: 0; color: #d97757; font-weight: 700; }
+  .bullet-list li strong { color: #131314; }
+  .dark .bullet-list li strong { color: #faf9f0; }
+  .dark .bullet-list li { color: rgba(250,249,240,0.7); }
+
+  /* ── Table ── */
+  .comp-table { width: 100%; border-collapse: collapse; }
+  .comp-table th { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; font-family: 'JetBrains Mono', monospace; padding: 10px 14px; text-align: center; background: #131314; color: #faf9f0; }
+  .comp-table th:first-child { text-align: left; border-radius: 8px 0 0 0; }
+  .comp-table th:last-child { border-radius: 0 8px 0 0; }
+  .comp-table td { padding: 10px 14px; font-size: 14px; text-align: center; border-bottom: 1px solid rgba(19,19,20,0.04); }
+  .comp-table td:first-child { text-align: left; font-weight: 600; }
+  .comp-table tr.highlight { background: rgba(217,119,87,0.06); }
+  .comp-table tr.highlight td:first-child { color: #d97757; }
+  .check { color: #2e8b57; font-size: 18px; }
+  .cross { color: #cc3333; font-size: 18px; opacity: 0.5; }
+  .dash { color: #3d3d3f; opacity: 0.3; }
+
+  /* ── CTA bar ── */
+  .cta-bar { background: #131314; border-radius: 12px; padding: 20px 28px; display: flex; align-items: center; justify-content: space-between; }
+  .cta-bar h3 { color: #faf9f0; font-size: 16px; font-weight: 700; }
+  .cta-bar p { color: rgba(250,249,240,0.4); font-size: 11px; margin-top: 2px; }
+
+  /* ── Conversation mock ── */
+  .chat-bubble { border-radius: 12px; padding: 12px 16px; font-size: 13px; line-height: 1.5; max-width: 420px; margin-bottom: 8px; }
+  .chat-customer { background: rgba(250,249,240,0.1); color: #faf9f0; }
+  .chat-ai { background: #d97757; color: #faf9f0; margin-left: auto; }
+  .chat-meta { font-size: 9px; opacity: 0.3; margin-bottom: 2px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── Timeline ── */
+  .timeline-row { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 18px; }
+  .timeline-dot { width: 10px; height: 10px; border-radius: 50%; background: #d97757; margin-top: 5px; flex-shrink: 0; }
+  .timeline-line { position: relative; }
+  .timeline-line::before { content: ''; position: absolute; left: 4px; top: 15px; width: 2px; height: calc(100% + 8px); background: rgba(217,119,87,0.2); }
+  .timeline-row:last-child .timeline-line::before { display: none; }
+
+  /* ── Quote ── */
+  .quote-block { position: relative; padding: 24px 28px; border-left: 3px solid #d97757; }
+  .quote-block p { font-size: 15px; line-height: 1.65; font-style: italic; }
+  .quote-attr { font-size: 13px; font-weight: 600; margin-top: 12px; font-style: normal; }
+  .quote-role { font-size: 11px; opacity: 0.5; font-style: normal; }
+
+  /* ── Architecture box ── */
+  .arch-layer { border: 2px solid #d97757; border-radius: 10px; padding: 16px 20px; margin-bottom: 12px; }
+  .arch-layer-label { font-size: 9.5px; font-weight: 600; color: #d97757; letter-spacing: 0.08em; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; margin-bottom: 10px; }
+  .arch-box { background: rgba(250,249,240,0.06); border: 1px solid rgba(250,249,240,0.1); border-radius: 6px; padding: 10px 14px; text-align: center; font-size: 12px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 1 — TITLE                                           -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="slide dark">
+  <svg class="watermark" viewBox="0 0 200 500" width="300"><line x1="40" y1="400" x2="80" y2="50"/><line x1="90" y1="400" x2="130" y2="50"/><line x1="140" y1="400" x2="180" y2="50"/></svg>
+
+  <div class="header">
+    <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7" fill="#131314"/><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg></div>
+    <div class="wordmark">Salesteq</div>
+    <div class="header-right">AI for Automotive &middot; Confidential</div>
+  </div>
+  <hr class="divider">
+
+  <div style="margin-top: 36px;">
+    <div class="label">AI Agents for Sales &amp; Service</div>
+    <div class="terra-bar-sm" style="margin-bottom: 28px;"></div>
+
+    <h1 style="font-size: 54px; max-width: 1100px; margin-bottom: 20px;">
+      AI that sells cars, books service,<br>and never <em>misses a lead.</em>
+    </h1>
+
+    <p class="subtitle" style="margin-bottom: 44px; max-width: 800px;">
+      Autonomous AI agents for dealerships and OEM networks. Voice, chat, WhatsApp &mdash;<br>
+      in any language, 24/7. Already live at scale with BMW, MINI, Rolls Royce.
+    </p>
+
+    <div style="display: flex; gap: 40px; align-items: baseline;">
+      <div>
+        <div class="stat-big terra">&lt;5s</div>
+        <div class="stat-label" style="font-size: 12px; margin-top: 6px;">Lead response time</div>
+      </div>
+      <div style="border-left: 1px solid rgba(250,249,240,0.08); padding-left: 40px;">
+        <div class="stat-big terra">24/7</div>
+        <div class="stat-label" style="font-size: 12px; margin-top: 6px;">Every channel, every language</div>
+      </div>
+      <div style="border-left: 1px solid rgba(250,249,240,0.08); padding-left: 40px;">
+        <div class="stat-big terra">0</div>
+        <div class="stat-label" style="font-size: 12px; margin-top: 6px;">Human handoffs required</div>
+      </div>
+      <div style="border-left: 1px solid rgba(250,249,240,0.08); padding-left: 40px;">
+        <div style="font-size: 16px; color: rgba(250,249,240,0.4);">agent.salesteq.com</div>
+        <div class="stat-label" style="margin-top: 4px;">Elyon GmbH &middot; Zug, Switzerland</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-scurve">
+      <svg viewBox="0 0 32 32" fill="none"><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg>
+      <span>viktor@salesteq.com</span>
+    </div>
+    <span>Confidential</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 2 — NEW REALITY                                     -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="slide dark">
+  <svg class="watermark" viewBox="0 0 200 500" width="300"><line x1="40" y1="400" x2="80" y2="50"/><line x1="90" y1="400" x2="130" y2="50"/><line x1="140" y1="400" x2="180" y2="50"/></svg>
+
+  <div class="header">
+    <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7" fill="#131314" stroke="rgba(250,249,240,0.06)"/><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg></div>
+    <div class="wordmark">Salesteq</div>
+    <div class="header-right">AI for Automotive &middot; Confidential</div>
+  </div>
+  <hr class="divider">
+
+  <div class="label">New Reality</div>
+
+  <h1 style="margin-bottom: 28px; max-width: 1000px;">
+    Car buying moved online.<br>Your sales floor <em>didn't.</em>
+  </h1>
+
+  <div style="display: flex; gap: 32px;">
+    <div style="flex: 1;">
+      <p style="font-size: 17px; color: rgba(250,249,240,0.6); line-height: 1.7; margin-bottom: 28px;">
+        Over 80% of potential car buyers use online sources during their vehicle purchase journey. They research at 10pm. They compare on weekends. They message on WhatsApp expecting instant answers.
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div class="accent-strip" style="padding: 10px 0 10px 20px;">
+          <div class="stat-number terra" style="font-size: 28px;">78%</div>
+          <div style="font-size: 13px; opacity: 0.5; margin-top: 4px;">of buyers purchase from the <strong style="color: #faf9f0;">first dealer to respond</strong></div>
+        </div>
+        <div class="accent-strip" style="padding: 10px 0 10px 20px;">
+          <div class="stat-number terra" style="font-size: 28px;">4.2 hrs</div>
+          <div style="font-size: 13px; opacity: 0.5; margin-top: 4px;">average dealer response time to online leads</div>
+        </div>
+        <div class="accent-strip" style="padding: 10px 0 10px 20px;">
+          <div class="stat-number terra" style="font-size: 28px;">40%</div>
+          <div style="font-size: 13px; opacity: 0.5; margin-top: 4px;">of inquiries arrive <strong style="color: #faf9f0;">outside business hours</strong> &mdash; completely unserved</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex: 1;">
+      <div class="card-elevated" style="padding: 28px; margin-bottom: 14px;">
+        <div class="dept-label">The Dealer Problem</div>
+        <div class="terra-bar" style="opacity: 0.3;"></div>
+        <ul class="bullet-list" style="margin-top: 12px;">
+          <li>Multiple dealer groups = <strong>inconsistent</strong> service &amp; sales experiences</li>
+          <li><strong>High manual effort</strong> &mdash; leads, inquiries, appointment booking</li>
+          <li>Delays &amp; unreachability = <strong>lost sales opportunities</strong></li>
+          <li>BDC staff speaks 1&ndash;2 languages, works 8 hours</li>
+          <li><strong>55% of gross profit</strong> goes to personnel costs</li>
+        </ul>
+      </div>
+
+      <div style="padding: 16px 20px; border: 1px solid rgba(250,249,240,0.08); border-radius: 10px;">
+        <div style="font-size: 14px; opacity: 0.4; font-style: italic; line-height: 1.5;">"As a potential new customer, I would like to inquire about extended warranties for used vehicles. I'm rejected, with the explanation that there's no money to be made from the information."</div>
+        <div style="font-size: 11px; opacity: 0.25; margin-top: 6px;">&#9733; &mdash; Actual Google review, BMW dealer</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-scurve">
+      <svg viewBox="0 0 32 32" fill="none"><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg>
+      <span>Salesteq &middot; Elyon GmbH, Zug</span>
+    </div>
+    <span>Confidential</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 3 — THE 90-SECOND MOMENT                            -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="slide dark">
+  <svg class="watermark" viewBox="0 0 200 500" width="300"><line x1="40" y1="400" x2="80" y2="50"/><line x1="90" y1="400" x2="130" y2="50"/><line x1="140" y1="400" x2="180" y2="50"/></svg>
+
+  <div class="header">
+    <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7" fill="#131314" stroke="rgba(250,249,240,0.06)"/><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg></div>
+    <div class="wordmark">Salesteq</div>
+    <div class="header-right">AI for Automotive &middot; Confidential</div>
+  </div>
+  <hr class="divider">
+
+  <div class="label">The 90-Second Moment</div>
+
+  <h1 style="margin-bottom: 24px; max-width: 700px;">This happens<br><em>while your team sleeps.</em></h1>
+
+  <div style="display: flex; gap: 48px;">
+    <!-- Conversation mock -->
+    <div style="flex: 1; max-width: 480px;">
+      <div class="chat-meta" style="color: rgba(250,249,240,0.3);">11:47 PM &middot; WhatsApp &middot; Arabic</div>
+      <div class="chat-bubble chat-customer">
+        &#x0645;&#x0631;&#x062D;&#x0628;&#x0627;&#x060C; &#x0639;&#x0646;&#x062F;&#x0643;&#x0645; X5 &#x0623;&#x0628;&#x064A;&#x0636; &#x0645;&#x0639; M Sport Package&#x061F;
+      </div>
+
+      <div class="chat-meta" style="color: rgba(250,249,240,0.3); text-align: right;">Salesteq AI &middot; 2s</div>
+      <div class="chat-bubble chat-ai" style="margin-left: auto;">
+        &#x0623;&#x0647;&#x0644;&#x0627;&#x064B;! &#x0646;&#x0639;&#x0645; &#x0639;&#x0646;&#x062F;&#x0646;&#x0627; 3 X5 &#x0628;&#x064A;&#x0636;&#x0627;&#x0621; &#x0645;&#x0639; M Sport &#x0645;&#x062A;&#x0648;&#x0641;&#x0631;&#x0629; &#x062D;&#x0627;&#x0644;&#x064A;&#x0627;&#x064B;. &#x062E;&#x0644;&#x0646;&#x064A; &#x0623;&#x0639;&#x0631;&#x0636;&#x0647;&#x0645; &#x0644;&#x0643;:
+      </div>
+
+      <div class="chat-bubble chat-ai" style="margin-left: auto; background: #c46545;">
+        <div style="font-size: 11px; opacity: 0.7; margin-bottom: 4px;">BMW X5 xDrive40i M Sport</div>
+        <div style="font-weight: 600;">SAR 389,000</div>
+        <div style="font-size: 11px; opacity: 0.7;">Alpine White &middot; 2026 &middot; In stock</div>
+      </div>
+
+      <div class="chat-bubble chat-customer">
+        &#x0645;&#x0645;&#x062A;&#x0627;&#x0632;&#x060C; &#x0623;&#x0628;&#x063A;&#x0649; &#x0623;&#x062C;&#x0631;&#x0628;&#x0647;&#x0627; &#x0628;&#x0643;&#x0631;&#x0629;
+      </div>
+
+      <div class="chat-meta" style="color: rgba(250,249,240,0.3); text-align: right;">Salesteq AI &middot; 1s</div>
+      <div class="chat-bubble chat-ai" style="margin-left: auto;">
+        &#x062A;&#x0645;&#x0627;&#x0645;! &#x062D;&#x062C;&#x0632;&#x062A; &#x0644;&#x0643; &#x0645;&#x0648;&#x0639;&#x062F; &#x062A;&#x062C;&#x0631;&#x0628;&#x0629; &#x0642;&#x064A;&#x0627;&#x062F;&#x0629; &#x0628;&#x0643;&#x0631;&#x0629; &#x0627;&#x0644;&#x0633;&#x0627;&#x0639;&#x0629; 10 &#x0635;&#x0628;&#x0627;&#x062D;&#x0627;&#x064B;. &#x0633;&#x064A;&#x0635;&#x0644;&#x0643; &#x062A;&#x0623;&#x0643;&#x064A;&#x062F; SMS.
+      </div>
+    </div>
+
+    <!-- What just happened -->
+    <div style="flex: 1;">
+      <div style="font-size: 13px; font-weight: 600; color: #d97757; letter-spacing: 0.08em; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; margin-bottom: 16px;">What just happened</div>
+
+      <div class="timeline-row">
+        <div class="timeline-line"><div class="timeline-dot"></div></div>
+        <div>
+          <div style="font-size: 14px; font-weight: 600;">Customer inquiry at 11:47 PM</div>
+          <div style="font-size: 12px; opacity: 0.4; margin-top: 2px;">WhatsApp, Arabic, after hours</div>
+        </div>
+      </div>
+
+      <div class="timeline-row">
+        <div class="timeline-line"><div class="timeline-dot"></div></div>
+        <div>
+          <div style="font-size: 14px; font-weight: 600;">AI responds in 2 seconds</div>
+          <div style="font-size: 12px; opacity: 0.4; margin-top: 2px;">Understood Saudi Arabic, searched live inventory</div>
+        </div>
+      </div>
+
+      <div class="timeline-row">
+        <div class="timeline-line"><div class="timeline-dot"></div></div>
+        <div>
+          <div style="font-size: 14px; font-weight: 600;">3 matching vehicles found &amp; presented</div>
+          <div style="font-size: 12px; opacity: 0.4; margin-top: 2px;">Real-time stock locator integration, with photos &amp; prices</div>
+        </div>
+      </div>
+
+      <div class="timeline-row">
+        <div class="timeline-line"><div class="timeline-dot"></div></div>
+        <div>
+          <div style="font-size: 14px; font-weight: 600;">Test drive booked &amp; confirmed</div>
+          <div style="font-size: 12px; opacity: 0.4; margin-top: 2px;">Showroom calendar synced, SMS confirmation sent</div>
+        </div>
+      </div>
+
+      <div class="timeline-row">
+        <div class="timeline-line"><div class="timeline-dot"></div></div>
+        <div>
+          <div style="font-size: 14px; font-weight: 600;">Lead captured in CRM</div>
+          <div style="font-size: 12px; opacity: 0.4; margin-top: 2px;">Full context: vehicle interest, language, purchase timeline</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 16px; padding: 14px 18px; border: 1px solid rgba(250,249,240,0.08); border-radius: 10px;">
+        <div style="font-size: 28px; font-weight: 800; color: #d97757;">90 seconds. Inquiry to test drive.</div>
+        <div style="font-size: 13px; opacity: 0.4; margin-top: 4px;">Zero humans involved. This is already live in production.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-scurve">
+      <svg viewBox="0 0 32 32" fill="none"><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg>
+      <span>Salesteq &middot; Elyon GmbH, Zug</span>
+    </div>
+    <span>Confidential</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 4 — CONCRETE USE CASES                              -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="slide dark">
+  <svg class="watermark" viewBox="0 0 200 500" width="300"><line x1="40" y1="400" x2="80" y2="50"/><line x1="90" y1="400" x2="130" y2="50"/><line x1="140" y1="400" x2="180" y2="50"/></svg>
+
+  <div class="header">
+    <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7" fill="#131314" stroke="rgba(250,249,240,0.06)"/><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg></div>
+    <div class="wordmark">Salesteq</div>
+    <div class="header-right">AI for Automotive &middot; Confidential</div>
+  </div>
+  <hr class="divider">
+
+  <div class="label">Concrete Use Cases</div>
+
+  <h1 style="margin-bottom: 24px;">AI agents for <em>Sales &amp; Service.</em></h1>
+
+  <div class="grid-2" style="gap: 28px; margin-bottom: 24px;">
+    <div class="card-elevated" style="padding: 28px;">
+      <div style="font-size: 20px; font-weight: 800; color: #d97757; margin-bottom: 4px;">SALES</div>
+      <div class="terra-bar" style="opacity: 0.3; margin-bottom: 14px;"></div>
+      <ul class="bullet-list">
+        <li><strong>Lead qualification &amp; capture</strong> &mdash; instant, 24/7</li>
+        <li><strong>Model consultation &amp; inventory search</strong> &mdash; real-time stock</li>
+        <li><strong>Test drive booking</strong> &mdash; automated scheduling + SMS</li>
+        <li><strong>Showroom appointments</strong> &mdash; calendar integration</li>
+        <li><strong>Callback requests &amp; offer quotes</strong></li>
+        <li><strong>Financing pre-qualification</strong></li>
+        <li><strong>Autonomous follow-up sequences</strong></li>
+      </ul>
+    </div>
+    <div class="card-elevated" style="padding: 28px;">
+      <div style="font-size: 20px; font-weight: 800; color: #d97757; margin-bottom: 4px;">SERVICE</div>
+      <div class="terra-bar" style="opacity: 0.3; margin-bottom: 14px;"></div>
+      <ul class="bullet-list">
+        <li><strong>Service appointment booking</strong> &mdash; oil, tires, inspection</li>
+        <li><strong>Complaint registration</strong> &mdash; tracked &amp; escalated</li>
+        <li><strong>Service location search</strong> &mdash; nearest center</li>
+        <li><strong>Vehicle data &amp; manuals</strong> &mdash; technical Q&amp;A</li>
+        <li><strong>Recall &amp; maintenance reminders</strong></li>
+        <li><strong>Parts inquiry &amp; pricing</strong></li>
+        <li><strong>Warranty question handling</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="border-top: 1px solid rgba(250,249,240,0.06); padding-top: 14px;">
+    <div style="font-size: 14px; font-weight: 600; color: #d97757; margin-bottom: 6px;">Marketing &amp; Insights</div>
+    <div style="display: flex; gap: 32px; font-size: 13px; opacity: 0.5;">
+      <span>Real-time reporting for leads, inquiries, and KPI tracking</span>
+      <span>&middot;</span>
+      <span>Campaign support, customer retention &amp; upselling intelligence</span>
+      <span>&middot;</span>
+      <span>CIC/BDC coaching via call analysis</span>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-scurve">
+      <svg viewBox="0 0 32 32" fill="none"><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg>
+      <span>Salesteq &middot; Elyon GmbH, Zug</span>
+    </div>
+    <span>Confidential</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 5 — ARCHITECTURE                                    -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="slide dark">
+  <svg class="watermark" viewBox="0 0 200 500" width="300"><line x1="40" y1="400" x2="80" y2="50"/><line x1="90" y1="400" x2="130" y2="50"/><line x1="140" y1="400" x2="180" y2="50"/></svg>
+
+  <div class="header">
+    <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7" fill="#131314" stroke="rgba(250,249,240,0.06)"/><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg></div>
+    <div class="wordmark">Salesteq</div>
+    <div class="header-right">AI for Automotive &middot; Confidential</div>
+  </div>
+  <hr class="divider">
+
+  <div class="label">Architecture</div>
+
+  <h1 style="margin-bottom: 8px;">Truly autonomous AI. <em>The key is data.</em></h1>
+  <p class="subtitle" style="margin-bottom: 24px;">One platform connects every customer channel to every data source through intelligent AI agents.</p>
+
+  <div style="max-width: 1100px;">
+    <!-- Customer Channels -->
+    <div class="arch-layer">
+      <div class="arch-layer-label">Customer Channels</div>
+      <div style="display: flex; gap: 12px;">
+        <div class="arch-box" style="flex: 1;">Telephony / Voice</div>
+        <div class="arch-box" style="flex: 1;">Website Widget</div>
+        <div class="arch-box" style="flex: 1;">WhatsApp</div>
+        <div class="arch-box" style="flex: 1;">SMS</div>
+        <div class="arch-box" style="flex: 1;">Email</div>
+      </div>
+    </div>
+
+    <!-- AI Layer -->
+    <div style="text-align: center; padding: 4px 0;">
+      <svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 4 L10 16 M6 12 L10 16 L14 12" stroke="#d97757" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+    </div>
+
+    <div class="arch-layer" style="border-color: #d97757; background: rgba(217,119,87,0.04);">
+      <div class="arch-layer-label">AI Engine</div>
+      <div style="display: flex; gap: 12px;">
+        <div class="arch-box" style="flex: 2; background: rgba(217,119,87,0.15); border-color: rgba(217,119,87,0.3);">
+          <div style="font-size: 14px; font-weight: 700;">Nexus</div>
+          <div style="font-size: 10px; opacity: 0.5; margin-top: 2px;">AI Agents for Sales &amp; Service</div>
+        </div>
+        <div class="arch-box" style="flex: 1; background: rgba(217,119,87,0.15); border-color: rgba(217,119,87,0.3);">
+          <div style="font-size: 14px; font-weight: 700;">Salesteq Speech</div>
+          <div style="font-size: 10px; opacity: 0.5; margin-top: 2px;">Advanced Voice AI</div>
+        </div>
+        <div class="arch-box" style="flex: 1; background: rgba(217,119,87,0.15); border-color: rgba(217,119,87,0.3);">
+          <div style="font-size: 14px; font-weight: 700;">Cortex</div>
+          <div style="font-size: 10px; opacity: 0.5; margin-top: 2px;">Analytics &amp; Monitoring</div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 24px; margin-top: 10px; font-size: 10px; opacity: 0.4; font-family: 'JetBrains Mono', monospace;">
+        <span>LLM Agnostic</span>
+        <span>&middot;</span>
+        <span>Low Latency (&lt;400ms)</span>
+        <span>&middot;</span>
+        <span>Arabic &amp; 12+ Languages</span>
+        <span>&middot;</span>
+        <span>Flexible In-house Training</span>
+      </div>
+    </div>
+
+    <!-- Data Layer -->
+    <div style="text-align: center; padding: 4px 0;">
+      <svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 4 L10 16 M6 12 L10 16 L14 12" stroke="#d97757" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+    </div>
+
+    <div class="arch-layer">
+      <div class="arch-layer-label">Data</div>
+      <div style="display: flex; gap: 12px;">
+        <div class="arch-box" style="flex: 1;">Customer Data</div>
+        <div class="arch-box" style="flex: 1;">Vehicle / Stock Data</div>
+        <div class="arch-box" style="flex: 1;">Company Knowledge</div>
+        <div class="arch-box" style="flex: 1;">DMS / CRM</div>
+        <div class="arch-box" style="flex: 1;">Stock Locator</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-scurve">
+      <svg viewBox="0 0 32 32" fill="none"><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg>
+      <span>Salesteq &middot; Elyon GmbH, Zug</span>
+    </div>
+    <span>Confidential</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 6 — OMNICHANNEL                                     -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="slide cream">
+  <svg class="watermark" viewBox="0 0 200 500" width="300"><line x1="40" y1="400" x2="80" y2="50"/><line x1="90" y1="400" x2="130" y2="50"/><line x1="140" y1="400" x2="180" y2="50"/></svg>
+
+  <div class="header">
+    <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7" fill="#131314"/><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg></div>
+    <div class="wordmark">Salesteq</div>
+    <div class="header-right">AI for Automotive &middot; Confidential</div>
+  </div>
+  <hr class="divider">
+
+  <div class="label">Every Channel</div>
+
+  <h1 style="margin-bottom: 8px;">One AI brain. <em>Every touchpoint.</em></h1>
+  <p class="subtitle" style="margin-bottom: 22px;">Customers start on WhatsApp, continue on phone, finish on your website. The AI remembers everything.</p>
+
+  <div class="grid-3" style="gap: 16px; margin-bottom: 18px;">
+    <div class="card-dark" style="padding: 22px;">
+      <div style="font-size: 24px; margin-bottom: 6px;">&#x1F310;</div>
+      <div style="font-size: 16px; font-weight: 700; margin-bottom: 4px;">Website Widget</div>
+      <div style="font-size: 12px; opacity: 0.5; line-height: 1.5;">Embeds on your dealer website. Customizable to your brand. Instant inventory search, test drive booking, offer presentation &mdash; all without leaving the page.</div>
+    </div>
+    <div class="card-dark" style="padding: 22px;">
+      <div style="font-size: 24px; margin-bottom: 6px;">&#x1F4DE;</div>
+      <div style="font-size: 16px; font-weight: 700; margin-bottom: 4px;">Phone &amp; Voice AI</div>
+      <div style="font-size: 12px; opacity: 0.5; line-height: 1.5;">AI answers your phone line. Arabic with Saudi/Gulf dialects, German, French, English &mdash; 12+ languages. Sub-400ms latency. Callers can't tell it's AI.</div>
+    </div>
+    <div class="card-dark" style="padding: 22px;">
+      <div style="font-size: 24px; margin-bottom: 6px;">&#x1F4AC;</div>
+      <div style="font-size: 16px; font-weight: 700; margin-bottom: 4px;">WhatsApp &amp; Messengers</div>
+      <div style="font-size: 12px; opacity: 0.5; line-height: 1.5;">Meet customers where they are. Full conversational AI over WhatsApp, SMS, and messengers. Vehicle photos, pricing, booking confirmations.</div>
+    </div>
+  </div>
+
+  <div class="grid-4">
+    <div class="accent-strip">
+      <div class="stat-number">55+</div>
+      <div class="stat-label">AI tools integrated</div>
+    </div>
+    <div class="accent-strip">
+      <div class="stat-number">&lt;400ms</div>
+      <div class="stat-label">Voice response latency</div>
+    </div>
+    <div class="accent-strip">
+      <div class="stat-number">12+</div>
+      <div class="stat-label">Languages supported</div>
+    </div>
+    <div class="accent-strip">
+      <div class="stat-number">1 tag</div>
+      <div class="stat-label">Widget integration &mdash; minutes, not months</div>
+    </div>
+  </div>
+
+  <div class="footer"><span>Salesteq &middot; Elyon GmbH, Zug</span><span>Confidential</span></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 7 — CASE STUDY: NAGHI / BMW KSA                     -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="slide cream">
+  <svg class="watermark" viewBox="0 0 200 500" width="300"><line x1="40" y1="400" x2="80" y2="50"/><line x1="90" y1="400" x2="130" y2="50"/><line x1="140" y1="400" x2="180" y2="50"/></svg>
+
+  <div class="header">
+    <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7" fill="#131314"/><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg></div>
+    <div class="wordmark">Salesteq</div>
+    <div class="header-right">AI for Automotive &middot; Confidential</div>
+  </div>
+  <hr class="divider">
+
+  <div class="label">Live in Production</div>
+
+  <h1 style="margin-bottom: 6px;">Naghi Group: <em>250K cars/year, AI-powered.</em></h1>
+  <p class="subtitle" style="margin-bottom: 18px;">Mohamed Yousuf Naghi & Brothers &middot; Century-old Saudi conglomerate &middot; 15,000+ employees &middot; 6 automotive brands</p>
+
+  <div class="grid-2" style="gap: 28px;">
+    <div>
+      <div class="dept-label" style="color: #d97757;">What we deployed</div>
+      <div class="terra-bar" style="opacity: 0.3; margin-bottom: 12px;"></div>
+      <ul class="bullet-list">
+        <li><strong>AI sales &amp; service agents</strong> handling all inbound inquiries</li>
+        <li><strong>Voice AI</strong> with Saudi Arabic dialect &mdash; sub-400ms latency</li>
+        <li><strong>Real-time inventory</strong> search across 1,000+ vehicles</li>
+        <li><strong>Test drive &amp; service booking</strong> with SMS confirmation</li>
+        <li><strong>Six brands</strong> &mdash; BMW, Rolls Royce, MINI, Land Rover, Hyundai, Jaguar</li>
+      </ul>
+    </div>
+    <div>
+      <div class="dept-label" style="color: #d97757;">Results</div>
+      <div class="terra-bar" style="opacity: 0.3; margin-bottom: 16px;"></div>
+      <div style="display: grid; grid-template-columns: 100px 1fr; gap: 8px 16px; align-items: baseline;">
+        <div class="stat-number">300</div><div class="stat-label" style="font-size: 14px; opacity: 1; color: #131314;">daily autonomous interactions</div>
+        <div class="stat-number">4,000</div><div class="stat-label" style="font-size: 14px; opacity: 1; color: #131314;">voice calls handled per month</div>
+        <div class="stat-number">1M</div><div class="stat-label" style="font-size: 14px; opacity: 1; color: #131314;">monthly website visits served</div>
+        <div class="stat-number">24/7</div><div class="stat-label" style="font-size: 14px; opacity: 1; color: #131314;">fully autonomous &mdash; zero human handoff</div>
+        <div class="stat-number">&lt;5s</div><div class="stat-label" style="font-size: 14px; opacity: 1; color: #131314;">average first response time</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-bar" style="margin-top: 14px;">
+    <div>
+      <h3>Running in production since 2025. <em>Zero human handoff.</em></h3>
+      <p>Same platform. Same AI. Ready for your dealership network.</p>
+    </div>
+  </div>
+
+  <div class="footer"><span>Salesteq &middot; Elyon GmbH, Zug</span><span>Confidential</span></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 8 — BMW KSA TESTIMONIAL                             -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="slide cream">
+  <svg class="watermark" viewBox="0 0 200 500" width="300"><line x1="40" y1="400" x2="80" y2="50"/><line x1="90" y1="400" x2="130" y2="50"/><line x1="140" y1="400" x2="180" y2="50"/></svg>
+
+  <div class="header">
+    <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7" fill="#131314"/><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg></div>
+    <div class="wordmark">Salesteq</div>
+    <div class="header-right">AI for Automotive &middot; Confidential</div>
+  </div>
+  <hr class="divider">
+
+  <div class="label">Voice of the Customer</div>
+
+  <h1 style="margin-bottom: 28px;">Feedback on Voice PoC <em>from BMW KSA.</em></h1>
+
+  <div style="display: flex; gap: 40px;">
+    <div style="flex: 2;">
+      <div class="quote-block" style="background: rgba(19,19,20,0.02); border-radius: 10px;">
+        <p style="font-size: 16px; line-height: 1.75; color: #131314;">
+          &ldquo;We have seen the Voice PoC with Salesteq, covering both English and <strong style="color: #d97757;">Arabic dialects</strong>. They were able to demonstrate strong alignment with our operational requirements, handling customer queries across sales, aftersales, and general enquiries.
+        </p>
+        <p style="font-size: 16px; line-height: 1.75; color: #131314; margin-top: 12px;">
+          Response accuracy, intent recognition, and switching between languages performed at <strong style="color: #d97757;">a level suitable for production-scale use</strong>.
+        </p>
+        <p style="font-size: 16px; line-height: 1.75; color: #131314; margin-top: 12px;">
+          This capability has clear value for elevating our customers experience. The <strong style="color: #d97757;">voice agent</strong> can reliably manage after-hours calls, support prospecting and cold-calling workflows, and ensure consistent first-line handling without dependency on agent availability.
+        </p>
+        <p style="font-size: 16px; line-height: 1.75; color: #131314; margin-top: 12px;">
+          We see <strong style="color: #d97757;">this PoC as a solid foundation for expanding into a full Voice AI rollout</strong>, subject to the next phase of technical scoping and integration readiness.&rdquo;
+        </p>
+      </div>
+    </div>
+    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+      <div style="width: 140px; height: 140px; border-radius: 50%; background: #e8e6dd; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+        <div style="font-size: 48px; font-weight: 800; color: #3d3d3f;">AA</div>
+      </div>
+      <div style="font-size: 18px; font-weight: 700; text-align: center;">Alawi AlAlawi</div>
+      <div style="font-size: 13px; color: #3d3d3f; text-align: center; margin-top: 4px;">Digitalization Manager</div>
+      <div style="font-size: 13px; color: #d97757; font-weight: 600; text-align: center; margin-top: 2px;">BMW KSA</div>
+    </div>
+  </div>
+
+  <div class="footer"><span>Salesteq &middot; Elyon GmbH, Zug</span><span>Confidential</span></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 9 — ROI                                             -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="slide cream">
+  <svg class="watermark" viewBox="0 0 200 500" width="300"><line x1="40" y1="400" x2="80" y2="50"/><line x1="90" y1="400" x2="130" y2="50"/><line x1="140" y1="400" x2="180" y2="50"/></svg>
+
+  <div class="header">
+    <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7" fill="#131314"/><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg></div>
+    <div class="wordmark">Salesteq</div>
+    <div class="header-right">AI for Automotive &middot; Confidential</div>
+  </div>
+  <hr class="divider">
+
+  <div class="label">ROI at a Glance</div>
+
+  <h1 style="margin-bottom: 22px;">More leads, less cost, <em>better experience.</em></h1>
+
+  <div class="grid-3" style="margin-bottom: 20px;">
+    <div class="card-dark" style="padding: 24px; text-align: center;">
+      <div style="font-size: 48px; font-weight: 800; color: #d97757;">+5&ndash;10%</div>
+      <div style="font-size: 14px; opacity: 0.5; margin-top: 6px;">More customer interactions &amp; leads</div>
+      <div class="terra-bar" style="opacity: 0.3; margin-top: 12px;"></div>
+      <div style="font-size: 12px; opacity: 0.35; margin-top: 8px;">24/7 availability captures leads that were previously lost to after-hours, weekends, and language barriers</div>
+    </div>
+    <div class="card-dark" style="padding: 24px; text-align: center;">
+      <div style="font-size: 48px; font-weight: 800; color: #d97757;">1 FTE</div>
+      <div style="font-size: 14px; opacity: 0.5; margin-top: 6px;">Saved per dealer group</div>
+      <div class="terra-bar" style="opacity: 0.3; margin-top: 12px;"></div>
+      <div style="font-size: 12px; opacity: 0.35; margin-top: 8px;">CHF 50&ndash;100K / year in additional capacity for sales and service without hiring</div>
+    </div>
+    <div class="card-dark" style="padding: 24px; text-align: center;">
+      <div style="font-size: 48px; font-weight: 800; color: #d97757;">CX</div>
+      <div style="font-size: 14px; opacity: 0.5; margin-top: 6px;">Unified, consistent customer experience</div>
+      <div class="terra-bar" style="opacity: 0.3; margin-top: 12px;"></div>
+      <div style="font-size: 12px; opacity: 0.35; margin-top: 8px;">Enabling &ldquo;New Retail&rdquo; strategy &mdash; consistent brand experience across all locations</div>
+    </div>
+  </div>
+
+  <table class="comp-table">
+    <thead>
+      <tr>
+        <th style="width: 30%;">Metric</th>
+        <th>Before Salesteq</th>
+        <th>After Salesteq</th>
+        <th>Impact</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Lead response time</td>
+        <td>4.2 hours avg</td>
+        <td style="color: #d97757; font-weight: 600;">&lt; 5 seconds</td>
+        <td style="color: #2e8b57; font-weight: 600;">3,000x faster</td>
+      </tr>
+      <tr>
+        <td>After-hours capture</td>
+        <td>0%</td>
+        <td style="color: #d97757; font-weight: 600;">100%</td>
+        <td style="color: #2e8b57; font-weight: 600;">+40% leads</td>
+      </tr>
+      <tr>
+        <td>Languages</td>
+        <td>1&ndash;2</td>
+        <td style="color: #d97757; font-weight: 600;">12+</td>
+        <td style="color: #2e8b57; font-weight: 600;">Full coverage</td>
+      </tr>
+      <tr>
+        <td>Lead-to-appointment</td>
+        <td>12&ndash;18%</td>
+        <td style="color: #d97757; font-weight: 600;">28&ndash;35%</td>
+        <td style="color: #2e8b57; font-weight: 600;">2x conversion</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="footer"><span>Salesteq &middot; Elyon GmbH, Zug</span><span>Confidential</span></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 10 — DEPLOYMENT                                     -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="slide dark">
+  <svg class="watermark" viewBox="0 0 200 500" width="300"><line x1="40" y1="400" x2="80" y2="50"/><line x1="90" y1="400" x2="130" y2="50"/><line x1="140" y1="400" x2="180" y2="50"/></svg>
+
+  <div class="header">
+    <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7" fill="#131314" stroke="rgba(250,249,240,0.06)"/><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg></div>
+    <div class="wordmark">Salesteq</div>
+    <div class="header-right">AI for Automotive &middot; Confidential</div>
+  </div>
+  <hr class="divider">
+
+  <div class="label">Deployment</div>
+
+  <h1 style="margin-bottom: 28px;">Minimal effort for dealers. <em>Ready instantly.</em></h1>
+
+  <div style="display: flex; gap: 32px;">
+    <div style="flex: 1;">
+      <div class="card-elevated" style="padding: 24px; margin-bottom: 14px;">
+        <div class="dept-label">Technical Requirements</div>
+        <div class="terra-bar" style="opacity: 0.3;"></div>
+        <ul class="bullet-list" style="margin-top: 12px;">
+          <li><strong>Minimal dealer effort</strong> &mdash; immediately operational</li>
+          <li><strong>Widget tag</strong> integration on website (one line of code)</li>
+          <li><strong>Central CRM / email</strong> integration for lead capture</li>
+          <li><strong>Stock locator</strong> connection for live inventory</li>
+          <li><strong>Phone number</strong> routing (or we provision one)</li>
+        </ul>
+      </div>
+
+      <div class="card-elevated" style="padding: 24px;">
+        <div class="dept-label">Resources &amp; Support</div>
+        <div class="terra-bar" style="opacity: 0.3;"></div>
+        <ul class="bullet-list" style="margin-top: 12px;">
+          <li>AI operates <strong>autonomously, 24/7</strong></li>
+          <li>Salesteq provides <strong>technical support, updates, onboarding</strong></li>
+          <li><strong>1&ndash;2 hours</strong> dealer onboarding time</li>
+          <li>Ongoing optimization from every conversation</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="flex: 1;">
+      <div class="timeline-row">
+        <div class="timeline-line"><div class="timeline-dot"></div></div>
+        <div>
+          <div style="font-size: 18px; font-weight: 700;">Day 1&ndash;2: Connect</div>
+          <div style="font-size: 13px; opacity: 0.4; margin-top: 4px; line-height: 1.5;">Connect DMS/stock locator. Configure brand voice, languages, business rules. Set up widget and phone.</div>
+        </div>
+      </div>
+
+      <div class="timeline-row">
+        <div class="timeline-line"><div class="timeline-dot"></div></div>
+        <div>
+          <div style="font-size: 18px; font-weight: 700;">Day 3&ndash;4: Train &amp; Test</div>
+          <div style="font-size: 13px; opacity: 0.4; margin-top: 4px; line-height: 1.5;">AI learns inventory, pricing, promotions, service menu. Internal team testing and refinement.</div>
+        </div>
+      </div>
+
+      <div class="timeline-row">
+        <div class="timeline-line"><div class="timeline-dot"></div></div>
+        <div>
+          <div style="font-size: 18px; font-weight: 700;">Day 5: Go Live</div>
+          <div style="font-size: 13px; opacity: 0.4; margin-top: 4px; line-height: 1.5;">AI starts handling real customers. Full monitoring dashboard. Escalation rules active.</div>
+        </div>
+      </div>
+
+      <div class="timeline-row">
+        <div class="timeline-line"><div class="timeline-dot"></div></div>
+        <div>
+          <div style="font-size: 18px; font-weight: 700;">Week 2+: Scale</div>
+          <div style="font-size: 13px; opacity: 0.4; margin-top: 4px; line-height: 1.5;">Roll out to additional brands, locations, and channels across the dealer network.</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 20px; padding: 16px 20px; border: 1px solid rgba(250,249,240,0.08); border-radius: 10px; text-align: center;">
+        <div style="font-size: 22px; font-weight: 800; color: #d97757;">Live in 5 days. Not 6 months.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-scurve">
+      <svg viewBox="0 0 32 32" fill="none"><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg>
+      <span>Salesteq &middot; Elyon GmbH, Zug</span>
+    </div>
+    <span>Confidential</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 11 — WHY SALESTEQ                                   -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="slide dark">
+  <svg class="watermark" viewBox="0 0 200 500" width="300"><line x1="40" y1="400" x2="80" y2="50"/><line x1="90" y1="400" x2="130" y2="50"/><line x1="140" y1="400" x2="180" y2="50"/></svg>
+
+  <div class="header">
+    <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7" fill="#131314" stroke="rgba(250,249,240,0.06)"/><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg></div>
+    <div class="wordmark">Salesteq</div>
+    <div class="header-right">AI for Automotive &middot; Confidential</div>
+  </div>
+  <hr class="divider">
+
+  <div class="label">Why Salesteq</div>
+
+  <h1 style="margin-bottom: 28px;">Battle-tested. <em>Automotive-native.</em></h1>
+
+  <div style="display: flex; gap: 28px; margin-bottom: 24px;">
+    <div class="card-elevated" style="padding: 24px; flex: 1;">
+      <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Existing Infrastructure</div>
+      <div style="font-size: 13px; opacity: 0.5; line-height: 1.6;">Built on production systems already running for BMW KSA &mdash; 250K cars/year, 6 brands. Not a prototype. Not a demo. Real infrastructure serving real customers.</div>
+    </div>
+    <div class="card-elevated" style="padding: 24px; flex: 1;">
+      <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Time-to-Market Advantage</div>
+      <div style="font-size: 13px; opacity: 0.5; line-height: 1.6;">Go live in days, not months. Widget tag deployment. No heavy IT projects. No DMS migration. AI works alongside your existing systems.</div>
+    </div>
+    <div class="card-elevated" style="padding: 24px; flex: 1;">
+      <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Deep AI + Automotive Expertise</div>
+      <div style="font-size: 13px; opacity: 0.5; line-height: 1.6;">Our CTO invented Vosk &mdash; the world's most deployed speech engine. Our team combines frontier AI research with automotive retail operations.</div>
+    </div>
+    <div class="card-elevated" style="padding: 24px; flex: 1;">
+      <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">We Are Local</div>
+      <div style="font-size: 13px; opacity: 0.5; line-height: 1.6;">Swiss company, Swiss engineering. On-the-ground support. GDPR compliant. Data stays in your region. Direct relationship, not a reseller.</div>
+    </div>
+  </div>
+
+  <!-- Customer strip -->
+  <div style="border-top: 1px solid rgba(250,249,240,0.06); padding-top: 16px;">
+    <div style="font-size: 9.5px; font-weight: 600; color: rgba(250,249,240,0.3); letter-spacing: 0.08em; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; margin-bottom: 10px;">Our Customers</div>
+    <div style="display: flex; gap: 40px; align-items: center;">
+      <div>
+        <div style="font-size: 16px; font-weight: 700;">Naghi Group</div>
+        <div style="font-size: 11px; color: #d97757;">Automotive</div>
+        <div style="font-size: 10px; opacity: 0.3;">BMW, Rolls Royce, Land Rover, Hyundai, Jaguar</div>
+      </div>
+      <div style="opacity: 0.15; font-size: 24px;">&middot;</div>
+      <div>
+        <div style="font-size: 16px; font-weight: 700;">Emaar</div>
+        <div style="font-size: 11px; color: #d97757;">Real Estate</div>
+      </div>
+      <div style="opacity: 0.15; font-size: 24px;">&middot;</div>
+      <div>
+        <div style="font-size: 16px; font-weight: 700;">Allianz</div>
+        <div style="font-size: 11px; color: #d97757;">Insurance</div>
+      </div>
+      <div style="opacity: 0.15; font-size: 24px;">&middot;</div>
+      <div>
+        <div style="font-size: 16px; font-weight: 700;">Suhner</div>
+        <div style="font-size: 11px; color: #d97757;">Manufacturing &amp; Robotics</div>
+      </div>
+    </div>
+    <div style="margin-top: 14px; padding: 12px 16px; border: 1px solid rgba(250,249,240,0.06); border-radius: 8px; display: inline-block;">
+      <div style="font-size: 12px; font-style: italic; opacity: 0.5; line-height: 1.5;">&ldquo;Quara Holding is committed to investing in the future and exploring new technologies that will transform the way we do business. We believe Salesteq can play a key role in making this a reality.&rdquo;</div>
+      <div style="font-size: 11px; font-weight: 600; margin-top: 6px;">Ziad El Chaar <span style="opacity: 0.4;">&mdash; Vice Chairman, Quara Holding</span></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-scurve">
+      <svg viewBox="0 0 32 32" fill="none"><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg>
+      <span>Salesteq &middot; Elyon GmbH, Zug</span>
+    </div>
+    <span>Confidential</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 12 — THE TEAM                                       -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="slide cream">
+  <svg class="watermark" viewBox="0 0 200 500" width="300"><line x1="40" y1="400" x2="80" y2="50"/><line x1="90" y1="400" x2="130" y2="50"/><line x1="140" y1="400" x2="180" y2="50"/></svg>
+
+  <div class="header">
+    <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7" fill="#131314"/><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg></div>
+    <div class="wordmark">Salesteq</div>
+    <div class="header-right">AI for Automotive &middot; Confidential</div>
+  </div>
+  <hr class="divider">
+
+  <div class="label">The Team</div>
+
+  <h1 style="margin-bottom: 6px;">We know how to do it. <em>And we've done it.</em></h1>
+  <p class="subtitle" style="margin-bottom: 24px;">Automotive, AI, and Data Engineering. Systems that scaled, replaced human effort, and ran in production.</p>
+
+  <div class="grid-6" style="gap: 16px; margin-bottom: 20px;">
+    <div style="text-align: center;">
+      <div style="width: 120px; height: 120px; border-radius: 8px; background: #e8e6dd; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center;">
+        <div style="font-size: 32px; font-weight: 800; color: #3d3d3f;">R</div>
+      </div>
+      <div style="font-size: 15px; font-weight: 700;">Roman</div>
+      <div style="font-size: 10px; color: #d97757; font-family: 'JetBrains Mono', monospace; margin-top: 2px; line-height: 1.4;">Automotive Growth<br>Lead Sales &amp; Distribution</div>
+    </div>
+    <div style="text-align: center;">
+      <div style="width: 120px; height: 120px; border-radius: 8px; background: #e8e6dd; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center;">
+        <div style="font-size: 32px; font-weight: 800; color: #3d3d3f;">V</div>
+      </div>
+      <div style="font-size: 15px; font-weight: 700;">Viktor</div>
+      <div style="font-size: 10px; color: #d97757; font-family: 'JetBrains Mono', monospace; margin-top: 2px; line-height: 1.4;">Machine Learning,<br>Product &amp; AI System Design</div>
+    </div>
+    <div style="text-align: center;">
+      <div style="width: 120px; height: 120px; border-radius: 8px; background: #e8e6dd; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center;">
+        <div style="font-size: 32px; font-weight: 800; color: #3d3d3f;">M</div>
+      </div>
+      <div style="font-size: 15px; font-weight: 700;">Milan</div>
+      <div style="font-size: 10px; color: #d97757; font-family: 'JetBrains Mono', monospace; margin-top: 2px; line-height: 1.4;">Chief AI Scientist<br>Frontier AI Research</div>
+    </div>
+    <div style="text-align: center;">
+      <div style="width: 120px; height: 120px; border-radius: 8px; background: #e8e6dd; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center;">
+        <div style="font-size: 32px; font-weight: 800; color: #3d3d3f;">A</div>
+      </div>
+      <div style="font-size: 15px; font-weight: 700;">Andrey</div>
+      <div style="font-size: 10px; color: #d97757; font-family: 'JetBrains Mono', monospace; margin-top: 2px; line-height: 1.4;">CTO<br>Data Infrastructure</div>
+    </div>
+    <div style="text-align: center;">
+      <div style="width: 120px; height: 120px; border-radius: 8px; background: #e8e6dd; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center;">
+        <div style="font-size: 32px; font-weight: 800; color: #3d3d3f;">N</div>
+      </div>
+      <div style="font-size: 15px; font-weight: 700;">Nick</div>
+      <div style="font-size: 10px; color: #d97757; font-family: 'JetBrains Mono', monospace; margin-top: 2px; line-height: 1.4;">Inventor of Vosk<br>Speech AI Pioneer</div>
+    </div>
+    <div style="text-align: center;">
+      <div style="width: 120px; height: 120px; border-radius: 8px; background: #e8e6dd; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center;">
+        <div style="font-size: 32px; font-weight: 800; color: #3d3d3f;">V</div>
+      </div>
+      <div style="font-size: 15px; font-weight: 700;">Viktor</div>
+      <div style="font-size: 10px; color: #d97757; font-family: 'JetBrains Mono', monospace; margin-top: 2px; line-height: 1.4;">Frontier AI Models<br>Data Engineer, EPFL</div>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 20px;">
+    <div class="card-dark" style="flex: 1; padding: 16px 20px;">
+      <div style="font-size: 13px;"><strong>Dr. Milan Jelisavcic</strong> &mdash; Invented Universal Transfer Learning algorithms</div>
+    </div>
+    <div class="card-dark" style="flex: 1; padding: 16px 20px;">
+      <div style="font-size: 13px;"><strong>Viktor Andreas</strong> &mdash; 2x founder, scaled to $10M revenue in 1 year</div>
+    </div>
+    <div class="card-dark" style="flex: 1; padding: 16px 20px;">
+      <div style="font-size: 13px;"><strong>Dr. Nickolay Shmyrev</strong> &mdash; Creator of Vosk, world's most deployed open-source speech engine</div>
+    </div>
+  </div>
+
+  <div style="margin-top: 14px;">
+    <div class="accent-strip">
+      <div style="font-size: 13px;"><strong>Elyon GmbH, Zug, Switzerland</strong> <span style="opacity: 0.4;">&middot; NVIDIA Inception Member &middot; Swiss engineering, enterprise DNA, production-first</span></div>
+    </div>
+  </div>
+
+  <div class="footer"><span>Salesteq &middot; Elyon GmbH, Zug</span><span>Confidential</span></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 13 — PRICING                                        -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="slide dark">
+  <svg class="watermark" viewBox="0 0 200 500" width="300"><line x1="40" y1="400" x2="80" y2="50"/><line x1="90" y1="400" x2="130" y2="50"/><line x1="140" y1="400" x2="180" y2="50"/></svg>
+
+  <div class="header">
+    <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7" fill="#131314" stroke="rgba(250,249,240,0.06)"/><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg></div>
+    <div class="wordmark">Salesteq</div>
+    <div class="header-right">AI for Automotive &middot; Confidential</div>
+  </div>
+  <hr class="divider">
+
+  <div class="label">Pricing</div>
+
+  <h1 style="margin-bottom: 28px;">Group-level approach. <em>Maximum economies of scale.</em></h1>
+
+  <div class="grid-3" style="gap: 20px; margin-bottom: 24px;">
+    <div class="card-elevated" style="padding: 26px;">
+      <div class="dept-label">Single Dealer</div>
+      <div style="display: flex; align-items: baseline; gap: 4px;">
+        <div style="font-size: 42px; font-weight: 800; color: #d97757; letter-spacing: -0.03em;">CHF 500</div>
+        <div style="font-size: 15px; opacity: 0.4;">/mo</div>
+      </div>
+      <div style="font-size: 11px; font-family: 'JetBrains Mono', monospace; opacity: 0.35; margin-top: 2px; margin-bottom: 12px;">Per partner location</div>
+      <div class="terra-bar" style="opacity: 0.3;"></div>
+      <ul class="bullet-list" style="margin-top: 12px;">
+        <li>AI Sales &amp; Service Agent</li>
+        <li>Website widget</li>
+        <li>Inventory integration</li>
+        <li>Test drive &amp; service booking</li>
+        <li>Multi-language (DE/FR/EN/IT)</li>
+      </ul>
+    </div>
+    <div class="card-elevated" style="padding: 26px; border: 1px solid rgba(217,119,87,0.3);">
+      <div class="dept-label">Group-Level</div>
+      <div style="display: flex; align-items: baseline; gap: 4px;">
+        <div style="font-size: 42px; font-weight: 800; color: #d97757; letter-spacing: -0.03em;">CHF 500</div>
+        <div style="font-size: 15px; opacity: 0.4;">/mo</div>
+      </div>
+      <div style="font-size: 11px; font-family: 'JetBrains Mono', monospace; opacity: 0.35; margin-top: 2px; margin-bottom: 12px;">Per partner group, incl. all locations</div>
+      <div class="terra-bar" style="opacity: 0.3;"></div>
+      <ul class="bullet-list" style="margin-top: 12px;">
+        <li>Everything in Single Dealer</li>
+        <li>All locations covered</li>
+        <li>Centralized dashboard</li>
+        <li>Group-wide analytics</li>
+        <li>Priority support</li>
+      </ul>
+      <div style="margin-top: 12px; padding: 8px 12px; background: rgba(217,119,87,0.1); border-radius: 6px; text-align: center;">
+        <div style="font-size: 11px; color: #d97757; font-weight: 600;">BEST VALUE</div>
+      </div>
+    </div>
+    <div class="card-elevated" style="padding: 26px;">
+      <div class="dept-label">OEM / National</div>
+      <div style="display: flex; align-items: baseline; gap: 4px;">
+        <div style="font-size: 42px; font-weight: 800; color: #d97757; letter-spacing: -0.03em;">Custom</div>
+      </div>
+      <div style="font-size: 11px; font-family: 'JetBrains Mono', monospace; opacity: 0.35; margin-top: 2px; margin-bottom: 12px;">National rollout pricing</div>
+      <div class="terra-bar" style="opacity: 0.3;"></div>
+      <ul class="bullet-list" style="margin-top: 12px;">
+        <li>OEM-wide deployment</li>
+        <li>Voice AI + phone channel</li>
+        <li>NSC co-branding</li>
+        <li>Custom integrations</li>
+        <li>Dedicated success team</li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 20px;">
+    <div style="flex: 1; padding: 14px 20px; border: 1px solid rgba(250,249,240,0.08); border-radius: 10px;">
+      <div style="font-size: 13px; opacity: 0.4;"><strong style="color: #d97757;">Setup:</strong> CHF 1,500&ndash;2,500 per group (one-time)</div>
+    </div>
+    <div style="flex: 2; padding: 14px 20px; border: 1px solid rgba(250,249,240,0.08); border-radius: 10px;">
+      <div style="font-size: 13px; opacity: 0.4;"><strong style="color: #d97757;">Compare:</strong> 1 FTE costs CHF 50&ndash;100K/year. Salesteq replaces that capacity for CHF 6K/year &mdash; across all locations, all hours, all languages.</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-scurve">
+      <svg viewBox="0 0 32 32" fill="none"><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg>
+      <span>Salesteq &middot; Elyon GmbH, Zug</span>
+    </div>
+    <span>Confidential</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 14 — CLOSING / CTA                                  -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="slide dark">
+  <svg class="watermark" viewBox="0 0 200 500" width="300"><line x1="40" y1="400" x2="80" y2="50"/><line x1="90" y1="400" x2="130" y2="50"/><line x1="140" y1="400" x2="180" y2="50"/></svg>
+
+  <div class="header">
+    <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7" fill="#131314" stroke="rgba(250,249,240,0.06)"/><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg></div>
+    <div class="wordmark">Salesteq</div>
+    <div class="header-right">AI for Automotive &middot; Confidential</div>
+  </div>
+  <hr class="divider">
+
+  <div style="margin-top: 60px; text-align: center;">
+    <div class="label" style="text-align: center;">Next Step</div>
+    <div class="terra-bar-sm" style="margin: 0 auto 32px;"></div>
+
+    <h1 style="font-size: 50px; margin-bottom: 20px; max-width: 1000px; margin-left: auto; margin-right: auto;">
+      Pick one rooftop. Give us 30 days.<br><em>Measure the difference.</em>
+    </h1>
+
+    <p class="subtitle" style="margin: 0 auto 20px; text-align: center; max-width: 700px;">
+      Zero-risk pilot. We handle every after-hours lead on one location. You see the results before committing. No results, no contract.
+    </p>
+
+    <div style="display: inline-flex; gap: 16px; margin-bottom: 48px;">
+      <div style="padding: 12px 20px; border: 1px solid rgba(217,119,87,0.4); border-radius: 8px;">
+        <div style="font-size: 13px; color: #d97757; font-weight: 600;">Live Demo</div>
+        <div style="font-size: 11px; opacity: 0.3; margin-top: 2px;">See the AI in action on your brand</div>
+      </div>
+      <div style="padding: 12px 20px; border: 1px solid rgba(217,119,87,0.4); border-radius: 8px;">
+        <div style="font-size: 13px; color: #d97757; font-weight: 600;">30-Day Pilot</div>
+        <div style="font-size: 11px; opacity: 0.3; margin-top: 2px;">One location, full AI, zero risk</div>
+      </div>
+      <div style="padding: 12px 20px; border: 1px solid rgba(217,119,87,0.4); border-radius: 8px;">
+        <div style="font-size: 13px; color: #d97757; font-weight: 600;">Network Rollout</div>
+        <div style="font-size: 11px; opacity: 0.3; margin-top: 2px;">Scale across all locations</div>
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: center; gap: 48px; align-items: baseline;">
+      <div>
+        <div style="font-size: 18px; font-weight: 600;">Viktor Remennik</div>
+        <div style="font-size: 14px; color: #d97757; margin-top: 4px;">viktor@salesteq.com</div>
+      </div>
+      <div style="border-left: 1px solid rgba(250,249,240,0.08); padding-left: 48px;">
+        <div style="font-size: 18px; font-weight: 600;">agent.salesteq.com</div>
+        <div style="font-size: 14px; opacity: 0.4; margin-top: 4px;">Live demo available</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-scurve">
+      <svg viewBox="0 0 32 32" fill="none"><path d="M20.5 6 C11.5 6, 10.5 10.5, 16 16 C21.5 21.5, 20.5 26, 11.5 26" stroke="#d97757" stroke-width="4.5" stroke-linecap="round"/></svg>
+      <span>Elyon GmbH &middot; Zug, Switzerland</span>
+    </div>
+    <span>Confidential</span>
+  </div>
+</div>
+
+
+</body>
+</html>
