@@ -1,0 +1,15 @@
+Viktor Remennik
+viktor@salesteq.com | Zug, Switzerland
+
+
+I built the thing Google Cloud is trying to sell.
+
+For the past two years I've been running Salesteq — an AI platform that replaces dealership sales teams with autonomous agents. We deployed it at Naghi Group (BMW, MINI, Rolls Royce, six brands, 250K cars/year in Saudi Arabia). Voice AI in Arabic dialects, live inventory, test drive booking, thousands of calls a month, no human handoff. Before that I scaled a previous company to $10M revenue in year one.
+
+That background is why this role makes sense. Most cloud sales people have sold software *to* companies. I've also been the start-up founder buying GCP credits at 2am, arguing about Vertex AI latency, deciding where to spend limited runway. When I sit across from a founder, I'm not guessing what keeps them up at night.
+
+My sales approach has always been technical-first — show a working demo in the prospect's language with their real data before talking price. That's how we got BMW KSA to sign after a single PoC. I've built and led teams across engineering, sales, and CS in Switzerland and the Middle East. I think the "prove it first" mentality maps well to selling AI to start-ups who are naturally skeptical of vendor promises.
+
+Based in Zurich. English and Russian native, German professional. Happy to walk through any of this — or I can just show you the product. It's live.
+
+Viktor
