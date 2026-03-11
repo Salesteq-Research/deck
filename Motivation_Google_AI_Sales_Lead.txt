@@ -1,0 +1,13 @@
+Viktor Remennik
+viktor@salesteq.com | Zug, Switzerland
+
+
+For the past two years I've been running Salesteq — an AI platform that handles dealership sales and service through autonomous agents. We deployed it at Naghi Group (BMW, MINI, Rolls Royce, six brands, 250K cars/year in Saudi Arabia). Voice AI in Arabic dialects, live inventory, test drive booking, thousands of calls a month. Before that I scaled a previous company to $10M revenue in year one.
+
+This role caught my attention because of the start-up focus. I've spent the last few years on the other side of the table — as a founder buying GCP credits, figuring out Vertex AI for production voice pipelines, making decisions about where to spend limited runway. That experience helps me understand what start-up teams actually care about when evaluating cloud and AI infrastructure.
+
+My sales approach has always been technical-first — show a working demo with real data before talking price. That's how we got BMW KSA to sign after a single PoC. I've built and led teams across engineering, sales, and customer success in Switzerland and the Middle East, and I think that hands-on mentality fits well with how Google Cloud should be working with start-ups.
+
+Based in Zurich. English and Russian native, German professional. Happy to walk through any of this in more detail.
+
+Viktor
