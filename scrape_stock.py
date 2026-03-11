@@ -272,6 +272,49 @@ def main():
 
     print(f"\nExported to {OUTPUT}")
 
+    # Deploy to server if --deploy flag
+    if "--deploy" in sys.argv:
+        deploy()
+
+
+def deploy():
+    """Deploy updated data to experiments server and restart backend."""
+    import subprocess
+
+    SERVER = "root@89.167.77.26"
+    SSH_KEY = "~/.ssh/id_bmw"
+    REMOTE_DIR = "/root/bmw-chat"
+    ssh = f"ssh -i {SSH_KEY} {SERVER}"
+    scp = f"scp -i {SSH_KEY}"
+
+    steps = [
+        (f"{scp} data/vehicles.json {SERVER}:{REMOTE_DIR}/data/vehicles.json", "Uploading vehicles.json"),
+        (f"{scp} data/inventory_meta.json {SERVER}:{REMOTE_DIR}/data/inventory_meta.json", "Uploading inventory_meta.json"),
+        (f"{ssh} 'systemctl restart bmw-backend'", "Restarting backend"),
+    ]
+
+    for cmd, label in steps:
+        print(f"  {label}...")
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"    FAILED: {result.stderr.strip()}")
+            sys.exit(1)
+
+    # Wait for backend to be ready
+    print("  Waiting for backend...")
+    import time as t
+    t.sleep(10)
+    result = subprocess.run(
+        f"{ssh} 'curl -sf http://localhost:8080/health'",
+        shell=True, capture_output=True, text=True,
+    )
+    if result.returncode == 0:
+        print("  Backend is healthy!")
+    else:
+        print("  WARNING: Health check failed, check logs on server")
+
+    print("\nDeployment complete.")
+
 
 if __name__ == "__main__":
     main()

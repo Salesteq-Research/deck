@@ -122,7 +122,7 @@ export function StockDashboard() {
             BMW Switzerland Inventory
             {stats?.last_updated && (
               <span className="ml-2 text-xs opacity-60">
-                — Last updated {new Date(stats.last_updated).toLocaleDateString('de-CH', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                — Last updated {new Date(stats.last_updated).toLocaleString('de-CH', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
               </span>
             )}
           </p>
