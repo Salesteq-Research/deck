@@ -1,5 +1,8 @@
 """Inventory API endpoints for stock dashboard."""
 
+import json
+from pathlib import Path
+
 from fastapi import APIRouter, Depends
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -8,6 +11,8 @@ from ..database import get_db
 from ..models.vehicle import Vehicle
 
 router = APIRouter(prefix="/api/inventory", tags=["inventory"])
+
+INVENTORY_META_PATH = Path(__file__).resolve().parent.parent.parent / "data" / "inventory_meta.json"
 
 
 @router.get("/stats")
@@ -40,6 +45,15 @@ def get_stats(db: Session = Depends(get_db)):
     price_max = db.query(func.max(Vehicle.price_offer)).filter(Vehicle.price_offer.isnot(None)).scalar()
     price_avg = db.query(func.avg(Vehicle.price_offer)).filter(Vehicle.price_offer.isnot(None)).scalar()
 
+    # Read last-updated from metadata file
+    last_updated = None
+    if INVENTORY_META_PATH.exists():
+        try:
+            meta = json.loads(INVENTORY_META_PATH.read_text())
+            last_updated = meta.get("last_updated")
+        except Exception:
+            pass
+
     return {
         "total_vehicles": total,
         "dealer_count": dealer_count,
@@ -50,6 +64,7 @@ def get_stats(db: Session = Depends(get_db)):
             "max": price_max,
             "avg": round(price_avg, 2) if price_avg else None,
         },
+        "last_updated": last_updated,
     }
 
 

@@ -65,6 +65,7 @@ export interface InventoryStats {
     max: number | null
     avg: number | null
   }
+  last_updated: string | null
 }
 
 export interface Dealer {

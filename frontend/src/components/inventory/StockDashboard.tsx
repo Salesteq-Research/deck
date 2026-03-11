@@ -120,6 +120,11 @@ export function StockDashboard() {
           <h1 className="text-xl font-bold">Stock Overview</h1>
           <p className="text-sm text-muted-foreground">
             BMW Switzerland Inventory
+            {stats?.last_updated && (
+              <span className="ml-2 text-xs opacity-60">
+                — Last updated {new Date(stats.last_updated).toLocaleDateString('de-CH', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+              </span>
+            )}
           </p>
         </div>
         <nav className="flex items-center gap-1">
