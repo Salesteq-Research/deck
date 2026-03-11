@@ -5,6 +5,7 @@ import { MarkdownMessage } from './MarkdownMessage'
 import { InlineProductRow } from './InlineProductRow'
 import { VehicleSpotlight } from './VehicleSpotlight'
 import { sendChatMessageStream, getChatSuggestions, pollCustomerMessages } from '@/lib/api'
+import { matchVideoForVehicle } from '@/lib/video-match'
 import type { ChatMessage, VehicleCard } from '@/lib/types'
 
 const suggestions = [
@@ -43,12 +44,9 @@ export function ChatInterface() {
     if (!bgVideo) {
       for (const msg of messages) {
         if (msg.vehicles?.length) {
-          const name = msg.vehicles[0].name.toLowerCase()
-          const matchedId = Object.keys(videoMap).find(id =>
-            name.includes(id.replace(/-/g, ' ').replace('limousine', '').trim())
-          )
-          if (matchedId && videoMap[matchedId]) {
-            setBgVideo(videoMap[matchedId])
+          const matched = matchVideoForVehicle(msg.vehicles[0].name, videoMap)
+          if (matched) {
+            setBgVideo(matched)
             break
           }
         }
@@ -175,11 +173,7 @@ export function ChatInterface() {
   }, [sendMessage])
 
   const getVideoForVehicle = useCallback((name: string) => {
-    const lower = name.toLowerCase()
-    const matchedId = Object.keys(videoMap).find(id =>
-      lower.includes(id.replace(/-/g, ' ').replace('limousine', '').trim())
-    )
-    return matchedId ? videoMap[matchedId] : undefined
+    return matchVideoForVehicle(name, videoMap)
   }, [videoMap])
 
   const toolCallLabel = (name: string) => {
@@ -392,7 +386,7 @@ export function ChatInterface() {
               placeholder="Message BMW Sales Advisor …"
               disabled={isLoading}
               autoFocus
-              className="w-full bg-white/[0.06] border border-white/[0.10] rounded-[4px] pl-5 pr-12 py-3.5 text-[14px] text-white placeholder:text-white/40 outline-none focus:border-[#1c69d4]/50 focus:bg-white/[0.08] transition-all duration-200 disabled:opacity-40"
+              className="w-full bg-white/[0.06] border border-white/[0.10] rounded-[4px] pl-4 pr-12 py-3 text-[16px] sm:text-[14px] text-white placeholder:text-white/40 outline-none focus:border-[#1c69d4]/50 focus:bg-white/[0.08] transition-all duration-200 disabled:opacity-40"
             />
             <button
               type="submit"

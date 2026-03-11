@@ -32,6 +32,7 @@ export async function sendChatMessageStream(
   onVehicles: (vehicles: VehicleCard[]) => void,
   onToolCall?: (name: string) => void,
   onHumanMode?: () => void,
+  options?: { language?: string; dealer_name?: string },
 ): Promise<void> {
   const response = await fetch(`${API_BASE}/chat/stream`, {
     method: 'POST',
@@ -40,6 +41,8 @@ export async function sendChatMessageStream(
       message,
       conversation_history: conversationHistory,
       session_id: sessionId,
+      ...(options?.language && { language: options.language }),
+      ...(options?.dealer_name && { dealer_name: options.dealer_name }),
     }),
   })
   if (!response.ok) throw new Error('Chat stream failed')

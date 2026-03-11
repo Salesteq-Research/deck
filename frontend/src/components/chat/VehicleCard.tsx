@@ -2,15 +2,36 @@ import { useRef, useState, useCallback } from 'react'
 import { Zap, Fuel, Battery, Play } from 'lucide-react'
 import type { VehicleCard as VehicleCardType } from '@/lib/types'
 
+type Lang = 'de' | 'fr' | 'it' | 'en'
+
+const FUEL_LABELS: Record<string, Record<Lang, string>> = {
+  GASOLINE:  { de: 'Benzin', fr: 'Essence', it: 'Benzina', en: 'Gasoline' },
+  DIESEL:    { de: 'Diesel', fr: 'Diesel', it: 'Diesel', en: 'Diesel' },
+  ELECTRIC:  { de: 'Elektrisch', fr: 'Électrique', it: 'Elettrico', en: 'Electric' },
+  BEV:       { de: 'Elektrisch', fr: 'Électrique', it: 'Elettrico', en: 'Electric' },
+  PHEV:      { de: 'Plug-in-Hybrid', fr: 'Hybride rechargeable', it: 'Ibrido plug-in', en: 'Plug-in Hybrid' },
+  HYBRID:    { de: 'Hybrid', fr: 'Hybride', it: 'Ibrido', en: 'Hybrid' },
+}
+
+function fuelLabel(fuelType: string, lang: Lang): string {
+  const key = fuelType.toUpperCase()
+  if (FUEL_LABELS[key]) return FUEL_LABELS[key][lang]
+  if (key.includes('ELECTRI')) return FUEL_LABELS['ELECTRIC'][lang]
+  if (key.includes('HYBRID')) return FUEL_LABELS['HYBRID'][lang]
+  return fuelType
+}
+
 interface VehicleCardProps {
   vehicle: VehicleCardType
   videoSrc?: string
+  lang?: Lang
   onSelect?: (vehicle: VehicleCardType) => void
 }
 
-export function VehicleCard({ vehicle: v, videoSrc, onSelect }: VehicleCardProps) {
+export function VehicleCard({ vehicle: v, videoSrc, lang = 'en', onSelect }: VehicleCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
+  const playTapRef = useRef(false)
 
   const handleMouseEnter = useCallback(() => {
     if (videoSrc && videoRef.current) {
@@ -25,8 +46,10 @@ export function VehicleCard({ vehicle: v, videoSrc, onSelect }: VehicleCardProps
     if (videoRef.current) videoRef.current.pause()
   }, [])
 
-  const handlePlayClick = useCallback((e: React.MouseEvent) => {
+  const handlePlayClick = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation()
+    e.preventDefault()
+    playTapRef.current = true
     if (!videoSrc || !videoRef.current) return
     if (isPlaying) {
       setIsPlaying(false)
@@ -38,10 +61,16 @@ export function VehicleCard({ vehicle: v, videoSrc, onSelect }: VehicleCardProps
     }
   }, [videoSrc, isPlaying])
 
+  const handleCardClick = useCallback(() => {
+    // Skip card action if play badge was just tapped (mobile)
+    if (playTapRef.current) { playTapRef.current = false; return }
+    onSelect ? onSelect(v) : v.url && window.open(v.url, '_blank')
+  }, [v, onSelect])
+
   return (
     <div
-      className="flex-shrink-0 w-[240px] sm:w-[280px] flex flex-col rounded-[4px] border border-white/[0.10] bg-white/[0.05] overflow-hidden cursor-pointer transition-all duration-200 hover:border-white/[0.20] hover:bg-white/[0.08] active:scale-[0.98] group animate-card-in"
-      onClick={() => onSelect ? onSelect(v) : v.url && window.open(v.url, '_blank')}
+      className="flex-shrink-0 w-[200px] sm:w-[280px] flex flex-col rounded-[4px] border border-white/[0.10] bg-white/[0.05] overflow-hidden cursor-pointer transition-all duration-200 hover:border-white/[0.20] hover:bg-white/[0.08] active:scale-[0.98] group animate-card-in"
+      onClick={handleCardClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -75,7 +104,8 @@ export function VehicleCard({ vehicle: v, videoSrc, onSelect }: VehicleCardProps
         {videoSrc && (
           <div
             onClick={handlePlayClick}
-            className={`absolute bottom-2.5 left-2.5 w-9 h-9 rounded-full flex items-center justify-center cursor-pointer transition-all duration-500 hover:scale-110 active:scale-95 ${isPlaying ? 'opacity-0 scale-75 pointer-events-none' : 'opacity-100 scale-100'}`}
+            onTouchEnd={handlePlayClick}
+            className={`absolute bottom-2 left-2 w-10 h-10 sm:w-9 sm:h-9 rounded-full flex items-center justify-center cursor-pointer transition-all duration-500 hover:scale-110 active:scale-95 ${isPlaying ? 'opacity-0 scale-75 pointer-events-none' : 'opacity-100 scale-100'}`}
           >
             <div className="absolute inset-0 rounded-full border border-[#1c69d4]/40" style={{ animation: 'play-ring-pulse 3s ease-in-out infinite' }} />
             <div className="absolute inset-0 rounded-full bg-black/50 backdrop-blur-md" />
@@ -95,7 +125,7 @@ export function VehicleCard({ vehicle: v, videoSrc, onSelect }: VehicleCardProps
             {v.fuel_type.includes('Electri') || v.fuel_type === 'BEV' ? <Zap className="w-2.5 h-2.5" /> :
              v.fuel_type.includes('Hybrid') || v.fuel_type === 'PHEV' ? <Battery className="w-2.5 h-2.5" /> :
              <Fuel className="w-2.5 h-2.5" />}
-            {v.fuel_type}
+            {fuelLabel(v.fuel_type, lang)}
           </div>
         )}
       </div>
@@ -119,7 +149,7 @@ export function VehicleCard({ vehicle: v, videoSrc, onSelect }: VehicleCardProps
           ) : <span />}
           {v.monthly_installment && (
             <span className="text-[10px] text-white/40">
-              CHF {v.monthly_installment.toLocaleString('de-CH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}/mo
+              CHF {v.monthly_installment.toLocaleString('de-CH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}/{lang === 'de' ? 'Mt.' : lang === 'fr' ? 'mois' : lang === 'it' ? 'mese' : 'mo'}
             </span>
           )}
         </div>

@@ -2,22 +2,74 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { X, Zap, Fuel, Battery, ChevronLeft, ChevronRight, Gauge, Palette, MapPin, Cog } from 'lucide-react'
 import type { VehicleCard } from '@/lib/types'
 
+type Lang = 'de' | 'fr' | 'it' | 'en'
+
 interface VehicleSpotlightProps {
   vehicle: VehicleCard
   videoSrc?: string
+  lang?: Lang
   onClose: () => void
   onAction: (message: string) => void
 }
 
-const actions = [
-  { label: 'Tell me more', message: 'Tell me more about the {name}' },
-  { label: 'Financing options', message: 'What are the financing and leasing options for the {name}?' },
-  { label: 'Compare models', message: 'Compare the {name} with similar models in stock' },
-  { label: 'Book test drive', message: 'I would like to book a test drive with the {name}' },
-  { label: 'Service appointment', message: 'I need to book a service appointment' },
-]
+const actionsByLang: Record<Lang, { label: string; message: string }[]> = {
+  de: [
+    { label: 'Mehr erfahren', message: 'Erzählen Sie mir mehr über den {name}' },
+    { label: 'Finanzierung', message: 'Welche Finanzierungs- und Leasingoptionen gibt es für den {name}?' },
+    { label: 'Modelle vergleichen', message: 'Vergleichen Sie den {name} mit ähnlichen Modellen im Bestand' },
+    { label: 'Probefahrt buchen', message: 'Ich möchte eine Probefahrt mit dem {name} buchen' },
+    { label: 'Service-Termin', message: 'Ich möchte einen Service-Termin buchen' },
+  ],
+  fr: [
+    { label: 'En savoir plus', message: 'Parlez-moi davantage du {name}' },
+    { label: 'Options de financement', message: 'Quelles sont les options de financement et de leasing pour le {name} ?' },
+    { label: 'Comparer les modèles', message: 'Comparez le {name} avec des modèles similaires en stock' },
+    { label: 'Essai routier', message: 'Je souhaite réserver un essai routier avec le {name}' },
+    { label: 'Rendez-vous service', message: 'Je souhaite prendre un rendez-vous de service' },
+  ],
+  it: [
+    { label: 'Scopri di più', message: 'Raccontatemi di più sulla {name}' },
+    { label: 'Opzioni di finanziamento', message: 'Quali sono le opzioni di finanziamento e leasing per la {name}?' },
+    { label: 'Confronta modelli', message: 'Confrontate la {name} con modelli simili in stock' },
+    { label: 'Prenota test drive', message: 'Vorrei prenotare un test drive con la {name}' },
+    { label: 'Appuntamento assistenza', message: 'Vorrei prenotare un appuntamento di assistenza' },
+  ],
+  en: [
+    { label: 'Tell me more', message: 'Tell me more about the {name}' },
+    { label: 'Financing options', message: 'What are the financing and leasing options for the {name}?' },
+    { label: 'Compare models', message: 'Compare the {name} with similar models in stock' },
+    { label: 'Book test drive', message: 'I would like to book a test drive with the {name}' },
+    { label: 'Service appointment', message: 'I need to book a service appointment' },
+  ],
+}
 
-export function VehicleSpotlight({ vehicle: v, videoSrc, onClose, onAction }: VehicleSpotlightProps) {
+const specLabels: Record<string, Record<Lang, string>> = {
+  series:     { de: 'Serie', fr: 'Série', it: 'Serie', en: 'Series' },
+  powertrain: { de: 'Antrieb', fr: 'Motorisation', it: 'Propulsione', en: 'Powertrain' },
+  body:       { de: 'Karosserie', fr: 'Carrosserie', it: 'Carrozzeria', en: 'Body' },
+  color:      { de: 'Farbe', fr: 'Couleur', it: 'Colore', en: 'Color' },
+  dealer:     { de: 'Händler', fr: 'Concessionnaire', it: 'Concessionario', en: 'Dealer' },
+  continue:   { de: 'Gespräch fortsetzen', fr: 'Continuer la conversation', it: 'Continua la conversazione', en: 'Continue the conversation' },
+}
+
+const FUEL_LABELS: Record<string, Record<Lang, string>> = {
+  GASOLINE: { de: 'Benzin', fr: 'Essence', it: 'Benzina', en: 'Gasoline' },
+  DIESEL:   { de: 'Diesel', fr: 'Diesel', it: 'Diesel', en: 'Diesel' },
+  ELECTRIC: { de: 'Elektrisch', fr: 'Électrique', it: 'Elettrico', en: 'Electric' },
+  BEV:      { de: 'Elektrisch', fr: 'Électrique', it: 'Elettrico', en: 'Electric' },
+  PHEV:     { de: 'Plug-in-Hybrid', fr: 'Hybride rechargeable', it: 'Ibrido plug-in', en: 'Plug-in Hybrid' },
+  HYBRID:   { de: 'Hybrid', fr: 'Hybride', it: 'Ibrido', en: 'Hybrid' },
+}
+
+function fuelLabel(fuelType: string, lang: Lang): string {
+  const key = fuelType.toUpperCase()
+  if (FUEL_LABELS[key]) return FUEL_LABELS[key][lang]
+  if (key.includes('ELECTRI')) return FUEL_LABELS['ELECTRIC'][lang]
+  if (key.includes('HYBRID')) return FUEL_LABELS['HYBRID'][lang]
+  return fuelType
+}
+
+export function VehicleSpotlight({ vehicle: v, videoSrc, lang = 'en', onClose, onAction }: VehicleSpotlightProps) {
   const [imageIndex, setImageIndex] = useState(0)
   const [entering, setEntering] = useState(true)
   const [leaving, setLeaving] = useState(false)
@@ -151,7 +203,7 @@ export function VehicleSpotlight({ vehicle: v, videoSrc, onClose, onAction }: Ve
               )}
               {v.monthly_installment && (
                 <span className="text-[12px] text-white/40">
-                  CHF {v.monthly_installment.toLocaleString('de-CH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}/mo
+                  CHF {v.monthly_installment.toLocaleString('de-CH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}/{lang === 'de' ? 'Mt.' : lang === 'fr' ? 'mois' : lang === 'it' ? 'mese' : 'mo'}
                 </span>
               )}
             </div>
@@ -160,27 +212,27 @@ export function VehicleSpotlight({ vehicle: v, videoSrc, onClose, onAction }: Ve
           {/* Spec grid */}
           <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 mb-5">
             {v.series && (
-              <SpecItem icon={<Cog className="w-3 h-3" />} label="Series" value={v.series} />
+              <SpecItem icon={<Cog className="w-3 h-3" />} label={specLabels.series[lang]} value={v.series} />
             )}
             {v.fuel_type && (
-              <SpecItem icon={fuelIcon} label="Powertrain" value={v.fuel_type.replace(/_/g, ' ')} />
+              <SpecItem icon={fuelIcon} label={specLabels.powertrain[lang]} value={fuelLabel(v.fuel_type, lang)} />
             )}
             {v.body_type && (
-              <SpecItem icon={<Gauge className="w-3 h-3" />} label="Body" value={v.body_type.replace(/_/g, ' ')} />
+              <SpecItem icon={<Gauge className="w-3 h-3" />} label={specLabels.body[lang]} value={v.body_type.replace(/_/g, ' ')} />
             )}
             {v.color && (
-              <SpecItem icon={<Palette className="w-3 h-3" />} label="Color" value={v.color.replace(/_/g, ' ')} />
+              <SpecItem icon={<Palette className="w-3 h-3" />} label={specLabels.color[lang]} value={v.color.replace(/_/g, ' ')} />
             )}
             {v.dealer_name && (
-              <SpecItem icon={<MapPin className="w-3 h-3" />} label="Dealer" value={v.dealer_name} className="col-span-2" />
+              <SpecItem icon={<MapPin className="w-3 h-3" />} label={specLabels.dealer[lang]} value={v.dealer_name} className="col-span-2" />
             )}
           </div>
 
           {/* Action chips */}
           <div className="space-y-2">
-            <p className="text-[10px] text-white/25 uppercase tracking-[0.12em] font-bold">Continue the conversation</p>
+            <p className="text-[10px] text-white/25 uppercase tracking-[0.12em] font-bold">{specLabels.continue[lang]}</p>
             <div className="flex flex-wrap gap-2">
-              {actions.map((a) => (
+              {(actionsByLang[lang] || actionsByLang.en).map((a) => (
                 <button
                   key={a.label}
                   onClick={() => handleAction(a.message)}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { MessageSquare, BarChart3, Globe, CalendarCheck, Warehouse, ArrowRight } from 'lucide-react'
+import { MessageSquare, BarChart3, Globe, CalendarCheck, Warehouse, ArrowRight, Car } from 'lucide-react'
 
 const API_BASE = '/api'
 
@@ -13,6 +13,7 @@ const HERO_MODEL_ID = 'i7'
 
 const dealershipModules = [
   { title: 'Sales Advisor', desc: 'AI-powered customer dialogue', href: '/chat', icon: MessageSquare },
+  { title: 'Dealer Demo', desc: 'Live preview for dealers', href: '/dealer', icon: Car },
   { title: 'Stock', desc: 'Dealer inventory management', href: '/inventory', icon: Warehouse },
   { title: 'Cockpit', desc: 'Leads & operations', href: '/backoffice', icon: BarChart3 },
   { title: 'Network', desc: 'Group analytics', href: '/network', icon: Globe },

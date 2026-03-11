@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .database import init_db, import_vehicles_from_json
 from .services.rag_service import RAGService
 from .database import SessionLocal
-from .api import vehicles_router, admin_router, chat_router, inventory_router, backoffice_router, network_router, testdrive_router
+from .api import vehicles_router, admin_router, chat_router, inventory_router, backoffice_router, network_router, testdrive_router, dealer_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -34,6 +34,7 @@ app.include_router(inventory_router)
 app.include_router(backoffice_router)
 app.include_router(network_router)
 app.include_router(testdrive_router)
+app.include_router(dealer_router)
 
 
 @app.on_event("startup")

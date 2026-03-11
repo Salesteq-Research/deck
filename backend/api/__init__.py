@@ -7,6 +7,7 @@ from .inventory import router as inventory_router
 from .backoffice import router as backoffice_router
 from .network import router as network_router
 from .testdrive import router as testdrive_router
+from .dealer import router as dealer_router
 
 __all__ = [
     "vehicles_router",
@@ -16,4 +17,5 @@ __all__ = [
     "backoffice_router",
     "network_router",
     "testdrive_router",
+    "dealer_router",
 ]

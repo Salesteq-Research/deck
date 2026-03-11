@@ -136,6 +136,55 @@ class ServiceRequest(Base):
         return f"<ServiceRequest(id={self.id}, type='{self.service_type}', status='{self.status}')>"
 
 
+class Appointment(Base):
+    """A unified appointment — test drives, service, trade-in requests from dealer demo."""
+
+    __tablename__ = "appointments"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    session_id = Column(String(100), index=True)
+    booking_ref = Column(String(30), unique=True)  # e.g. TD-2026-0042, SV-2026-0007, TI-2026-0003
+
+    # Type
+    appointment_type = Column(String(30), nullable=False, index=True)  # test_drive / service / trade_in
+
+    # Vehicle
+    vin = Column(String(50))
+    vehicle_name = Column(String(500))
+
+    # Customer
+    first_name = Column(String(200))
+    last_name = Column(String(200))
+    email = Column(String(300))
+    phone = Column(String(100))
+
+    # Appointment
+    preferred_date = Column(String(200))
+    time_preference = Column(String(50))  # morning/midday/afternoon/evening
+    dealer_name = Column(String(300))
+
+    # Service-specific
+    service_type = Column(String(50))  # maintenance/repair/tire_change/inspection/recall/other
+    description = Column(Text)
+
+    # Trade-in-specific
+    trade_in_vehicle = Column(String(500))  # e.g. "BMW 320i 2019, 85'000 km"
+    trade_in_mileage = Column(String(100))
+
+    # Status & lang
+    language = Column(String(5), default="de")
+    status = Column(String(30), default="pending")  # pending/confirmed/completed/cancelled
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    __table_args__ = (
+        Index("ix_appointment_type_status", "appointment_type", "status"),
+    )
+
+    def __repr__(self):
+        return f"<Appointment(id={self.id}, ref='{self.booking_ref}', type='{self.appointment_type}', status='{self.status}')>"
+
+
 class TestDriveBooking(Base):
     """A test drive booking request — mirrors BMW Switzerland booking flow."""
 

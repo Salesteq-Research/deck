@@ -33,18 +33,39 @@ const POLL_INTERVAL_MS = 10_000;
 const MAX_POLL_MS = 600_000; // 10 min — video gen is slow
 
 // Featured models to generate by default
-const DEFAULT_MODELS = ["i7", "i4-m50", "m3-limousine", "ix", "x5", "i7-m70"];
+const DEFAULT_MODELS = [
+  // Priority batch — dramatic headlight videos for main pages
+  "xm", "x7", "7er-limousine", "m2", "m4-coupe", "m5", "x5-m", "x6-m",
+  "ix-m70", "i5-m60", "3er-limousine", "5er-limousine", "x3", "z4",
+];
 
 // Motion prompts per model (cinematic, specific to the car)
 const MOTION_PROMPTS: Record<string, string> = {
+  // ── Existing (keep) ──
   "i7": "Luxury BMW i7 sedan driving smoothly through a modern city at dusk, headlights on glowing bright, reflections on wet road, cinematic lighting, shallow depth of field, 4K",
   "i7-m70": "BMW i7 M70 performance sedan accelerating on a sweeping mountain highway, headlights and DRL illuminated, dramatic clouds, golden hour light, motion blur on background, cinematic",
   "i4-m50": "BMW i4 M50 electric gran coupe cornering dynamically on a coastal road, headlights on piercing through dusk, ocean in background, sun flares, smooth camera tracking shot, cinematic",
   "m3-limousine": "BMW M3 Competition sedan racing through alpine curves, headlights blazing, aggressive stance, tire smoke, dramatic mountain backdrop, cinematic tracking shot",
   "ix": "BMW iX electric SUV gliding silently through a futuristic tunnel, headlights on with blue ambient lighting, reflections, smooth dolly shot, cinematic",
   "x5": "BMW X5 SUV driving confidently on a desert highway at sunset, headlights on glowing, dust particles in golden light, wide cinematic shot, premium feel",
+  // ── New batch — headlights blazing, night/dusk cinematic ──
+  "xm": "BMW XM super-SUV prowling through a rain-soaked city at night, massive illuminated kidney grille glowing intensely, laser headlights cutting through darkness, reflections on wet asphalt, neon city lights in background, cinematic slow-motion tracking shot, 4K",
+  "x7": "BMW X7 luxury SUV cruising down a wide boulevard at twilight, split headlights and DRL light signature blazing white-blue, illuminated large kidney grille, wet road reflections, premium atmosphere, smooth cinematic dolly shot, 4K",
+  "7er-limousine": "BMW 7 Series luxury sedan gliding through an upscale city at night, crystal headlights fully illuminated with sharp DRL light bars, Iconic Glow kidney grille lit up, reflections on polished road surface, executive presence, cinematic tracking shot, 4K",
+  "m2": "BMW M2 coupe launching aggressively from a dark tunnel into city lights at night, headlights blazing intensely, DRL signature sharp and bright, low aggressive stance, tire smoke, dramatic lighting contrast, cinematic action shot, 4K",
+  "m4-coupe": "BMW M4 Competition coupe drifting through a sweeping corner at dusk, quad headlights and angular DRL fully lit piercing through low fog, aggressive front fascia, sparks of light, dynamic camera tracking, cinematic automotive commercial, 4K",
+  "m5": "BMW M5 performance sedan accelerating hard on a rain-slicked highway at night, full LED headlights and laser high-beams cutting through rain droplets, kidney grille illuminated, speed blur, dramatic reflections, cinematic slow-motion, 4K",
+  "m5-touring": "BMW M5 Touring estate car powering through a mountain pass at blue hour, headlights blazing bright white beams into mist, DRL light bars sharp and defined, long sleek silhouette, dramatic alpine backdrop, cinematic wide tracking shot, 4K",
+  "x5-m": "BMW X5 M Competition SUV charging through a dark forest road at night, massive headlights fully on casting bright white beams, aggressive M front bumper lit up, leaves swirling, raw power, cinematic low-angle tracking shot, 4K",
+  "x6-m": "BMW X6 M Competition coupe-SUV carving through coastal cliffs at twilight, sharp LED headlights and DRL signature blazing, muscular silhouette, ocean spray, dramatic sky, cinematic sweeping aerial-to-ground shot, 4K",
+  "ix-m70": "BMW iX M70 electric SUV surging silently through a futuristic cityscape at night, ultra-slim headlights with intense blue-white DRL glow, illuminated kidney grille, electric blue ambient reflections on glass buildings, cinematic sci-fi atmosphere, 4K",
+  "i5-m60": "BMW i5 M60 electric sedan racing along a lakeside highway at dusk, sleek headlights blazing with crystalline DRL light signature, kidney grille with subtle illumination, mirror-like water reflections, serene yet powerful, cinematic tracking shot, 4K",
+  "3er-limousine": "BMW 3 Series sedan driving confidently through a European city center at night, sharp LED headlights fully illuminated with distinctive DRL L-shape, warm streetlight reflections on dark paint, elegant and sporty, cinematic smooth tracking, 4K",
+  "5er-limousine": "BMW 5 Series sedan cruising along a modern waterfront promenade at twilight, crystal headlights with dual-beam LEDs blazing, elongated DRL light bars, sophisticated presence, city skyline in background, cinematic dolly shot, 4K",
+  "x3": "BMW X3 SUV navigating a scenic mountain road at golden hour turning to dusk, headlights switching on bright and sharp, LED DRL signature glowing, rugged yet refined, dramatic peaks behind, cinematic sweeping tracking shot, 4K",
+  "z4": "BMW Z4 roadster with top down speeding along a coastal highway at sunset into twilight, twin circular headlights blazing intensely, DRL halos glowing, wind motion in hair, ocean golden light fading to blue hour, cinematic low-angle tracking shot, 4K",
 };
-const DEFAULT_PROMPT = "BMW car driving smoothly on a scenic road, headlights on illuminated, cinematic lighting, professional automotive commercial, 4K quality";
+const DEFAULT_PROMPT = "BMW car driving on a scenic road at night, headlights fully on blazing bright white beams, DRL light signature glowing, reflections on road, cinematic automotive commercial lighting, 4K quality";
 
 // ── Types ───────────────────────────────────────────────────────────
 

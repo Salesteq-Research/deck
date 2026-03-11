@@ -6,6 +6,7 @@ import { BackofficeLayout } from './components/backoffice/BackofficeLayout'
 import { NetworkDashboard } from './components/network/NetworkDashboard'
 import { TestDriveBooking } from './components/testdrive/TestDriveBooking'
 import { TestDriveInventory } from './components/testdrive/TestDriveInventory'
+import { DealerProduct } from './components/dealer/DealerProduct'
 
 function App() {
   const [path, setPath] = useState(window.location.pathname)
@@ -15,6 +16,10 @@ function App() {
     window.addEventListener('popstate', onPopState)
     return () => window.removeEventListener('popstate', onPopState)
   }, [])
+
+  if (path === '/dealer') {
+    return <DealerProduct />
+  }
 
   if (path === '/chat') {
     return <ChatInterface />

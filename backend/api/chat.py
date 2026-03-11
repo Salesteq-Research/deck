@@ -80,6 +80,8 @@ def chat_stream(request: ChatRequest, db: Session = Depends(get_db)):
         for event in agent.chat_stream(
             message=request.message,
             conversation_history=conversation_history,
+            language=request.language,
+            dealer_name=request.dealer_name,
         ):
             if event["type"] == "tool_call":
                 yield f"data: {json.dumps({'type': 'tool_call', 'name': event['name']})}\n\n"
@@ -152,6 +154,8 @@ def chat(request: ChatRequest, db: Session = Depends(get_db)):
     result = agent.chat(
         message=request.message,
         conversation_history=conversation_history,
+        language=request.language,
+        dealer_name=request.dealer_name,
     )
 
     clean_text = result["message"]

@@ -86,6 +86,7 @@ class ChatRequest(BaseModel):
     conversation_history: List[ChatMessage] = []
     session_id: Optional[str] = None
     language: Optional[str] = None
+    dealer_name: Optional[str] = None
 
 
 class ChatResponse(BaseModel):

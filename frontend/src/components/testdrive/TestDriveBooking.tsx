@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { ArrowUp, Zap, Fuel, Battery, Calendar, Play, X, VolumeX } from 'lucide-react'
 import { TypingIndicator } from '../chat/TypingIndicator'
 import { MarkdownMessage } from '../chat/MarkdownMessage'
+import { matchVideoForVehicle } from '@/lib/video-match'
 import type { ChatMessage, VehicleCard } from '@/lib/types'
 
 const API_BASE = '/api'
@@ -219,12 +220,9 @@ export function TestDriveBooking() {
     if (pageState === 'invite') {
       // Try to match a video for the selected car
       const lowerMsg = userMessage.toLowerCase()
-      const matchedId = Object.keys(videoMap).find(id => {
-        const normalized = id.replace(/-/g, ' ').replace('limousine', '').trim()
-        return lowerMsg.includes(normalized)
-      })
-      if (matchedId && videoMap[matchedId]) {
-        setBgVideo(videoMap[matchedId])
+      const matchedVideo = matchVideoForVehicle(lowerMsg, videoMap)
+      if (matchedVideo) {
+        setBgVideo(matchedVideo)
       }
       setPageState('conversation')
     }
@@ -540,7 +538,7 @@ export function TestDriveBooking() {
               disabled={isLoading}
               autoFocus
               dir={lang === 'ar' ? 'rtl' : 'ltr'}
-              className="w-full bg-white/[0.06] border border-white/[0.10] rounded-[4px] pl-5 pr-12 py-3.5 text-[14px] text-white placeholder:text-white/40 outline-none focus:border-[#1c69d4]/50 focus:bg-white/[0.08] transition-all duration-200 disabled:opacity-40"
+              className="w-full bg-white/[0.06] border border-white/[0.10] rounded-[4px] pl-4 pr-12 py-3 text-[16px] sm:text-[14px] text-white placeholder:text-white/40 outline-none focus:border-[#1c69d4]/50 focus:bg-white/[0.08] transition-all duration-200 disabled:opacity-40"
             />
             <button
               type="submit"
@@ -587,11 +585,7 @@ function VehicleRevealCards({ vehicles, onSelect, disabled, interactive = true, 
     <div className="mt-3 pt-3">
       <div className="flex gap-3 overflow-x-auto py-2 px-0.5 scrollbar-hide">
         {vehicles.map((v, i) => {
-          // Match vehicle to video by finding model id in the name
-          const videoId = Object.keys(videoMap).find(id =>
-            v.name.toLowerCase().includes(id.replace(/-/g, ' ').replace('limousine', '').trim())
-          )
-          const videoSrc = videoId ? videoMap[videoId] : undefined
+          const videoSrc = matchVideoForVehicle(v.name, videoMap)
 
           return (
             <VehicleVideoCard
