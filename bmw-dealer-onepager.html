@@ -9,54 +9,67 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --black: #000000;
-    --deep: #050508;
-    --text: #ffffff;
-    --text-high: rgba(255,255,255,0.92);
-    --text-mid: rgba(255,255,255,0.55);
-    --text-low: rgba(255,255,255,0.30);
-    --blue: #1c69d4;
-    --blue-dim: rgba(28,105,212,0.08);
-    --rule: rgba(255,255,255,0.07);
+    --bg: #0a0a0e;
+    --white: #ffffff;
+    --soft: rgba(255,255,255,0.52);
+    --faint: rgba(255,255,255,0.24);
+    --accent: #3b82d6;
+    --accent-line: rgba(59,130,214,0.18);
+    --accent-fill: rgba(59,130,214,0.06);
+    --rule: rgba(255,255,255,0.06);
   }
 
   html, body {
-    background: var(--black);
-    color: var(--text);
+    background: #000;
+    color: var(--white);
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
 
   body {
     width: 210mm;
-    height: 297mm;
     margin: 0 auto;
-    overflow: hidden;
-    position: relative;
-    background: var(--deep);
   }
 
-  body::before {
-    content: '';
-    position: absolute;
-    top: -60mm;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 180mm;
-    height: 160mm;
-    background: radial-gradient(ellipse, rgba(28,105,212,0.06) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
+  /* ── PAGE FRAME ── */
   .page {
-    position: relative;
-    z-index: 1;
-    padding: 22mm 26mm 18mm 26mm;
+    width: 210mm;
     height: 297mm;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+    padding: 22mm 28mm 18mm 28mm;
     display: flex;
     flex-direction: column;
+  }
+
+  .page:last-child {
+    page-break-after: auto;
+  }
+
+  /* Subtle top glow */
+  .page::before {
+    content: '';
+    position: absolute;
+    top: -40mm;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 140mm;
+    height: 100mm;
+    background: radial-gradient(ellipse, rgba(59,130,214,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* Thin accent line at top */
+  .page::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 28mm;
+    right: 28mm;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent-line), transparent);
   }
 
   /* ── HEADER ── */
@@ -64,224 +77,204 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 18mm;
+    margin-bottom: 20mm;
+    position: relative;
+    z-index: 1;
   }
 
-  .logo-group {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  .brand {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.38);
   }
 
-  .roundel {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    border: 1.5px solid rgba(255,255,255,0.18);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .badge {
     font-size: 7px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    color: rgba(255,255,255,0.50);
-  }
-
-  .header-pipe {
-    width: 1px;
-    height: 14px;
-    background: rgba(255,255,255,0.10);
-  }
-
-  .header-brand {
-    font-size: 9.5px;
     font-weight: 600;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.32);
-  }
-
-  .header-badge {
-    font-size: 7.5px;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--blue);
-    border: 1px solid rgba(28,105,212,0.20);
-    padding: 3.5px 10px;
+    color: var(--accent);
+    border: 1px solid var(--accent-line);
+    padding: 3px 9px;
     border-radius: 2px;
   }
 
   /* ── HERO ── */
   .hero {
-    margin-bottom: 14mm;
+    margin-bottom: 16mm;
+    position: relative;
+    z-index: 1;
   }
 
   .hero h1 {
-    font-size: 36px;
+    font-size: 34px;
     font-weight: 200;
-    letter-spacing: -0.03em;
-    line-height: 1.2;
-    color: var(--text);
+    letter-spacing: -0.025em;
+    line-height: 1.22;
   }
 
-  .hero h1 span {
-    color: var(--blue);
+  .hero h1 em {
+    font-style: normal;
+    color: var(--accent);
   }
 
-  .hero-pain {
+  .hero-body {
     margin-top: 5mm;
-    font-size: 13.5px;
+    font-size: 12.5px;
     font-weight: 300;
-    color: var(--text-mid);
-    line-height: 1.55;
-    max-width: 400px;
+    color: var(--soft);
+    line-height: 1.6;
+    max-width: 380px;
   }
 
   /* ── CAPABILITIES ── */
-  .capabilities {
-    padding: 6mm 0;
+  .caps {
+    padding: 5.5mm 0;
     border-top: 1px solid var(--rule);
     border-bottom: 1px solid var(--rule);
-    margin-bottom: 12mm;
+    margin-bottom: 14mm;
+    position: relative;
+    z-index: 1;
   }
 
   .cap-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 3mm 18mm;
+    gap: 2.8mm 20mm;
   }
 
-  .cap-item {
-    font-size: 12px;
+  .cap {
+    font-size: 11.5px;
     font-weight: 300;
-    color: rgba(255,255,255,0.72);
+    color: var(--soft);
     line-height: 1.45;
-    padding-left: 13px;
+    padding-left: 12px;
     position: relative;
   }
 
-  .cap-item::before {
+  .cap::before {
     content: '';
     position: absolute;
     left: 0;
-    top: 6.5px;
-    width: 4.5px;
-    height: 4.5px;
+    top: 6px;
+    width: 4px;
+    height: 4px;
     border-radius: 50%;
-    background: var(--blue);
+    background: var(--accent);
   }
 
   /* ── OFFER ── */
   .offer {
     display: flex;
     align-items: center;
-    gap: 10mm;
-    margin-bottom: 10mm;
+    gap: 9mm;
+    margin-bottom: 12mm;
+    position: relative;
+    z-index: 1;
   }
 
   .offer-price {
     flex-shrink: 0;
   }
 
-  .price-currency {
-    display: block;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-mid);
-    letter-spacing: 0.14em;
+  .price-label {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--soft);
+    letter-spacing: 0.10em;
     margin-bottom: 0.5mm;
   }
 
-  .price-figure {
-    font-size: 76px;
+  .price-num {
+    font-size: 72px;
     font-weight: 100;
-    color: var(--text);
     line-height: 0.85;
     letter-spacing: -0.04em;
   }
 
-  .price-period {
-    font-size: 13px;
+  .price-sub {
+    font-size: 12px;
     font-weight: 300;
-    color: var(--text-mid);
+    color: var(--soft);
     margin-top: 1.5mm;
   }
 
-  .price-setup {
-    font-size: 10px;
-    color: var(--text-low);
+  .price-note {
+    font-size: 9.5px;
+    color: var(--faint);
     margin-top: 3mm;
   }
 
-  .offer-divider {
+  .offer-sep {
     width: 1px;
-    height: 65px;
+    height: 58px;
     background: var(--rule);
     flex-shrink: 0;
   }
 
-  .offer-details {
+  .offer-body {
     flex: 1;
   }
 
-  .offer-label {
-    font-size: 7.5px;
+  .offer-tag {
+    font-size: 7px;
     font-weight: 700;
     letter-spacing: 0.20em;
     text-transform: uppercase;
-    color: var(--blue);
-    margin-bottom: 3.5mm;
+    color: var(--accent);
+    margin-bottom: 3mm;
   }
 
-  .offer-line {
-    font-size: 12.5px;
+  .offer-text {
+    font-size: 12px;
     font-weight: 300;
-    color: rgba(255,255,255,0.60);
-    line-height: 1.65;
+    color: var(--soft);
+    line-height: 1.7;
   }
 
-  .offer-line strong {
+  .offer-text strong {
     font-weight: 500;
-    color: rgba(255,255,255,0.85);
+    color: rgba(255,255,255,0.82);
   }
 
-  /* ── PROOF STRIP ── */
-  .proof {
-    background: var(--blue-dim);
-    border: 1px solid rgba(28,105,212,0.12);
+  /* ── LANGUAGES STRIP ── */
+  .langs {
+    background: var(--accent-fill);
+    border: 1px solid var(--accent-line);
     border-radius: 3px;
-    padding: 4.5mm 6mm;
+    padding: 4mm 5mm;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 0;
+    justify-content: center;
+    gap: 4mm;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
   }
 
-  .proof-item {
-    text-align: center;
-    flex: 1;
+  .lang-item {
+    font-size: 10.5px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.70);
+    letter-spacing: 0.03em;
   }
 
-  .proof-value {
-    font-size: 15px;
-    font-weight: 300;
-    color: var(--text-high);
-    letter-spacing: 0.01em;
-  }
-
-  .proof-label {
-    font-size: 8px;
-    color: var(--text-low);
-    margin-top: 0.8mm;
-    letter-spacing: 0.04em;
-  }
-
-  .proof-sep {
-    width: 1px;
-    height: 24px;
-    background: rgba(28,105,212,0.15);
+  .lang-dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
     flex-shrink: 0;
+  }
+
+  .lang-label {
+    font-size: 8px;
+    text-align: center;
+    color: var(--faint);
+    margin-top: 2.5mm;
+    letter-spacing: 0.06em;
   }
 
   /* ── FOOTER ── */
@@ -292,18 +285,19 @@
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
+    position: relative;
+    z-index: 1;
   }
 
   .cta-url {
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 300;
-    color: var(--blue);
-    letter-spacing: 0.01em;
+    color: var(--accent);
   }
 
-  .cta-hint {
-    font-size: 9.5px;
-    color: var(--text-low);
+  .cta-sub {
+    font-size: 9px;
+    color: var(--faint);
     margin-top: 1.5mm;
   }
 
@@ -311,116 +305,171 @@
     text-align: right;
   }
 
-  .footer-company {
-    font-size: 8.5px;
+  .footer-co {
+    font-size: 8px;
     font-weight: 600;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.28);
+    color: rgba(255,255,255,0.24);
   }
 
-  .footer-email {
-    font-size: 8.5px;
-    color: var(--text-low);
+  .footer-mail {
+    font-size: 8px;
+    color: var(--faint);
     margin-top: 0.5mm;
   }
 
   /* ── PRINT ── */
   @media print {
-    html, body {
-      width: 210mm;
-      height: 297mm;
-      background: #000 !important;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-    body::before { display: block !important; }
+    html, body { background: #000 !important; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { page-break-inside: avoid; }
   }
 </style>
 </head>
 <body>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- PAGE 1 — DEUTSCH                            -->
+<!-- ════════════════════════════════════════════ -->
 <div class="page">
 
-  <!-- HEADER -->
   <header class="header">
-    <div class="logo-group">
-      <div class="roundel">BMW</div>
-      <div class="header-pipe"></div>
-      <span class="header-brand">Salesteq</span>
-    </div>
-    <div class="header-badge">Bereits live bei BMW Partnern in der Schweiz</div>
+    <div class="brand">Salesteq</div>
+    <div class="badge">Bereits live bei BMW Partnern</div>
   </header>
 
-  <!-- HERO -->
   <section class="hero">
-    <h1>Ihre Website verliert Kunden.<br><span>Wir ändern das.</span></h1>
-    <p class="hero-pain">Jede Anfrage ausserhalb der Öffnungszeiten ist ein verlorener Lead. Unser KI-Verkaufsberater arbeitet mit Ihrem Bestand — rund um die Uhr, in allen Landessprachen, auf allen Kanälen.</p>
+    <h1>Ihre Website verliert Kunden.<br><em>Wir ändern das.</em></h1>
+    <p class="hero-body">Jede Anfrage ausserhalb der Öffnungszeiten ist ein verlorener Lead. Unser KI-Verkaufsberater arbeitet mit Ihrem Bestand — rund um die Uhr, auf allen Kanälen.</p>
   </section>
 
-  <!-- CAPABILITIES -->
-  <section class="capabilities">
+  <section class="caps">
     <div class="cap-grid">
-      <div class="cap-item">Kundenberatung zu jedem Fahrzeug im Bestand</div>
-      <div class="cap-item">Inzahlungnahme &amp; Lead-Erfassung ins CRM</div>
-      <div class="cap-item">Probefahrt &amp; Service-Termine buchen</div>
-      <div class="cap-item">Website · Telefon · WhatsApp</div>
-      <div class="cap-item">Fahrzeugvergleich auf Knopfdruck</div>
-      <div class="cap-item">DE · FR · IT · EN — automatisch</div>
+      <div class="cap">Kundenberatung zu jedem Fahrzeug im Bestand</div>
+      <div class="cap">Inzahlungnahme &amp; Lead-Erfassung ins CRM</div>
+      <div class="cap">Probefahrt &amp; Service-Termine buchen</div>
+      <div class="cap">Website · Telefon · WhatsApp</div>
+      <div class="cap">Fahrzeugvergleich auf Knopfdruck</div>
+      <div class="cap">Erledigt Aufgaben komplett autonom</div>
     </div>
   </section>
 
-  <!-- OFFER -->
   <section class="offer">
     <div class="offer-price">
-      <span class="price-currency">CHF</span>
-      <div class="price-figure">500</div>
-      <div class="price-period">pro Monat</div>
-      <div class="price-setup">Setup: CHF 1'500 – 2'500 einmalig</div>
+      <div class="price-label">CHF</div>
+      <div class="price-num">500</div>
+      <div class="price-sub">pro Monat</div>
+      <div class="price-note">Setup: CHF 1'500 – 2'500 einmalig</div>
     </div>
-    <div class="offer-divider"></div>
-    <div class="offer-details">
-      <div class="offer-label">Ohne Risiko starten</div>
-      <div class="offer-line"><strong>30 Tage kostenlos testen.</strong><br>Keine Vertragsbindung. Jederzeit kündbar.</div>
-      <div class="offer-line" style="margin-top: 2.5mm;"><strong>Wir übernehmen alles.</strong><br>Einrichtung, Integration, laufende Optimierung.</div>
-      <div class="offer-line" style="margin-top: 2.5mm;"><strong>Wir sind in der Schweiz.</strong> Wir kommen zu Ihnen.</div>
-    </div>
-  </section>
-
-  <!-- PROOF STRIP -->
-  <section class="proof">
-    <div class="proof-item">
-      <div class="proof-value">24/7</div>
-      <div class="proof-label">Verfügbar</div>
-    </div>
-    <div class="proof-sep"></div>
-    <div class="proof-item">
-      <div class="proof-value">4 Sprachen</div>
-      <div class="proof-label">Automatisch erkannt</div>
-    </div>
-    <div class="proof-sep"></div>
-    <div class="proof-item">
-      <div class="proof-value">3 Kanäle</div>
-      <div class="proof-label">Website · Telefon · WhatsApp</div>
-    </div>
-    <div class="proof-sep"></div>
-    <div class="proof-item">
-      <div class="proof-value">Ihr Bestand</div>
-      <div class="proof-label">Bereits importiert</div>
+    <div class="offer-sep"></div>
+    <div class="offer-body">
+      <div class="offer-tag">Ohne Risiko starten</div>
+      <div class="offer-text">
+        <strong>30 Tage kostenlos testen.</strong> Keine Vertragsbindung.<br>
+        <strong>Wir übernehmen alles.</strong> Einrichtung, Integration, Optimierung.<br>
+        <strong>Wir sind in der Schweiz.</strong> Wir kommen zu Ihnen.
+      </div>
     </div>
   </section>
 
-  <!-- FOOTER -->
+  <section class="langs">
+    <span class="lang-item">Deutsch</span><span class="lang-dot"></span>
+    <span class="lang-item">Français</span><span class="lang-dot"></span>
+    <span class="lang-item">Italiano</span><span class="lang-dot"></span>
+    <span class="lang-item">English</span><span class="lang-dot"></span>
+    <span class="lang-item">Português</span><span class="lang-dot"></span>
+    <span class="lang-item">Español</span><span class="lang-dot"></span>
+    <span class="lang-item">Shqip</span><span class="lang-dot"></span>
+    <span class="lang-item">Srpski</span><span class="lang-dot"></span>
+    <span class="lang-item">Türkçe</span><span class="lang-dot"></span>
+    <span class="lang-item">العربية</span>
+  </section>
+  <div class="lang-label">Automatische Spracherkennung — Ihr Kunde spricht, der Agent antwortet</div>
+
   <footer class="footer">
     <div>
       <div class="cta-url">bmw.salesteq.com</div>
-      <div class="cta-hint">Ihr Bestand ist bereits geladen. Antworten Sie auf diese E-Mail — wir melden uns.</div>
+      <div class="cta-sub">Ihr Bestand ist bereits geladen. Antworten Sie auf diese E-Mail — wir melden uns.</div>
     </div>
     <div class="footer-right">
-      <div class="footer-company">Salesteq</div>
-      <div class="footer-email">info@salesteq.com</div>
+      <div class="footer-co">Salesteq</div>
+      <div class="footer-mail">info@salesteq.com</div>
     </div>
   </footer>
 
 </div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- PAGE 2 — FRANÇAIS                           -->
+<!-- ════════════════════════════════════════════ -->
+<div class="page">
+
+  <header class="header">
+    <div class="brand">Salesteq</div>
+    <div class="badge">Déjà actif chez des partenaires BMW</div>
+  </header>
+
+  <section class="hero">
+    <h1>Votre site perd des clients.<br><em>Nous changeons cela.</em></h1>
+    <p class="hero-body">Chaque demande en dehors des heures d'ouverture est un prospect perdu. Notre conseiller de vente IA travaille avec votre stock — 24h/24, sur tous les canaux.</p>
+  </section>
+
+  <section class="caps">
+    <div class="cap-grid">
+      <div class="cap">Conseil client pour chaque véhicule en stock</div>
+      <div class="cap">Reprise &amp; capture de leads vers le CRM</div>
+      <div class="cap">Réservation d'essais routiers &amp; rendez-vous service</div>
+      <div class="cap">Site web · Téléphone · WhatsApp</div>
+      <div class="cap">Comparaison de véhicules instantanée</div>
+      <div class="cap">Exécute les tâches de manière entièrement autonome</div>
+    </div>
+  </section>
+
+  <section class="offer">
+    <div class="offer-price">
+      <div class="price-label">CHF</div>
+      <div class="price-num">500</div>
+      <div class="price-sub">par mois</div>
+      <div class="price-note">Mise en place: CHF 1'500 – 2'500 unique</div>
+    </div>
+    <div class="offer-sep"></div>
+    <div class="offer-body">
+      <div class="offer-tag">Démarrez sans risque</div>
+      <div class="offer-text">
+        <strong>30 jours d'essai gratuit.</strong> Sans engagement.<br>
+        <strong>Nous nous occupons de tout.</strong> Installation, intégration, optimisation.<br>
+        <strong>Nous sommes en Suisse.</strong> Nous venons chez vous.
+      </div>
+    </div>
+  </section>
+
+  <section class="langs">
+    <span class="lang-item">Deutsch</span><span class="lang-dot"></span>
+    <span class="lang-item">Français</span><span class="lang-dot"></span>
+    <span class="lang-item">Italiano</span><span class="lang-dot"></span>
+    <span class="lang-item">English</span><span class="lang-dot"></span>
+    <span class="lang-item">Português</span><span class="lang-dot"></span>
+    <span class="lang-item">Español</span><span class="lang-dot"></span>
+    <span class="lang-item">Shqip</span><span class="lang-dot"></span>
+    <span class="lang-item">Srpski</span><span class="lang-dot"></span>
+    <span class="lang-item">Türkçe</span><span class="lang-dot"></span>
+    <span class="lang-item">العربية</span>
+  </section>
+  <div class="lang-label">Détection automatique de la langue — votre client parle, l'agent répond</div>
+
+  <footer class="footer">
+    <div>
+      <div class="cta-url">bmw.salesteq.com</div>
+      <div class="cta-sub">Votre stock est déjà chargé. Répondez à cet e-mail — nous vous contactons.</div>
+    </div>
+    <div class="footer-right">
+      <div class="footer-co">Salesteq</div>
+      <div class="footer-mail">info@salesteq.com</div>
+    </div>
+  </footer>
+
+</div>
+
 </body>
 </html>
