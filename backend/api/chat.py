@@ -13,6 +13,7 @@ from ..services.lead_service import upsert_lead, upsert_conversation
 from ..models.vehicle import Vehicle
 from ..models.backoffice import Conversation, ConversationMessage
 from ..models.schemas import ChatRequest, ChatResponse, VehicleCardResponse
+from .dealer import _get_group_members
 
 logger = logging.getLogger(__name__)
 
@@ -93,9 +94,12 @@ def chat_stream(request: ChatRequest, db: Session = Depends(get_db)):
             elif event["type"] == "vehicles":
                 vins = event["vins"]
                 cards = []
+                allowed_dealers = _get_group_members(request.dealer_name) if request.dealer_name else None
                 for vin in vins[:5]:
                     v = db.query(Vehicle).filter(Vehicle.vin == vin).first()
                     if v:
+                        if allowed_dealers and v.dealer_name not in allowed_dealers:
+                            continue
                         cards.append(_vehicle_card(v))
                         shown_vins.append(vin)
                 yield f"data: {json.dumps({'type': 'vehicles', 'vehicles': cards})}\n\n"
@@ -163,10 +167,13 @@ def chat(request: ChatRequest, db: Session = Depends(get_db)):
     all_vins = result["all_vehicle_vins"]
 
     card_vins = recommended_vins if recommended_vins else all_vins[:5]
+    allowed_dealers = _get_group_members(request.dealer_name) if request.dealer_name else None
     vehicle_cards = []
     for vin in card_vins:
         v = db.query(Vehicle).filter(Vehicle.vin == vin).first()
         if v:
+            if allowed_dealers and v.dealer_name not in allowed_dealers:
+                continue
             vehicle_cards.append(VehicleCardResponse(**_vehicle_card(v)))
 
     # Capture lead

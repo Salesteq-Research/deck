@@ -15,6 +15,7 @@ const LANG_LABELS: Record<Lang, string> = { de: 'DE', fr: 'FR', it: 'IT', en: 'E
 const i18n: Record<string, Record<Lang, string>> = {
   preparedFor:      { de: 'Vorbereitet für', fr: 'Préparé pour', it: 'Preparato per', en: 'Prepared for' },
   vehiclesReady:    { de: 'Fahrzeuge', fr: 'Véhicules', it: 'Veicoli', en: 'Vehicles' },
+  vehiclesSingular: { de: 'Fahrzeug', fr: 'Véhicule', it: 'Veicolo', en: 'Vehicle' },
   modelSeries:      { de: 'Modellreihen', fr: 'Séries', it: 'Serie', en: 'Series' },
   fromCHF:          { de: 'Ab CHF', fr: 'Dès CHF', it: 'Da CHF', en: 'From CHF' },
   electric:         { de: 'Elektrisch', fr: 'Électrique', it: 'Elettrico', en: 'Electric' },
@@ -58,22 +59,28 @@ const i18n: Record<string, Record<Lang, string>> = {
   browseAll:            { de: 'Alle Autohäuser anzeigen', fr: 'Parcourir tous les concessionnaires', it: 'Mostra tutte le concessionarie', en: 'Browse all dealerships' },
   // Picker
   aiSalesChannel:       { de: 'Commercial OS', fr: 'Commercial OS', it: 'Commercial OS', en: 'Commercial OS' },
-  selectDealership:     { de: 'Wählen Sie Ihr Autohaus', fr: 'Sélectionnez votre concession', it: 'Selezionate la concessionaria', en: 'Select Your Dealership' },
+  selectDealership:     { de: 'Willkommen', fr: 'Bienvenue', it: 'Benvenuti', en: 'Welcome' },
+  pickerSubtitle:       { de: 'Geben Sie den Namen Ihres Autohauses ein, um Ihre persönliche Demo zu starten.', fr: 'Saisissez le nom de votre concession pour lancer votre démo personnalisée.', it: 'Inserite il nome della vostra concessionaria per avviare la demo personalizzata.', en: 'Enter your dealership name to start your personalized demo.' },
   vehiclesAcross:       { de: 'Fahrzeuge bei', fr: 'véhicules chez', it: 'veicoli presso', en: 'vehicles across' },
   dealerships:          { de: 'Autohäusern', fr: 'concessionnaires', it: 'concessionarie', en: 'dealerships' },
-  searchDealership:     { de: 'Autohaus suchen …', fr: 'Rechercher un concessionnaire …', it: 'Cerca concessionaria …', en: 'Search dealership…' },
+  searchDealership:     { de: 'Ihr Autohaus eingeben …', fr: 'Entrez votre concession …', it: 'Inserite la concessionaria …', en: 'Enter your dealership …' },
   loadingDealerships:   { de: 'Autohäuser werden geladen …', fr: 'Chargement des concessionnaires …', it: 'Caricamento concessionarie …', en: 'Loading dealerships…' },
   noDealerFound:        { de: 'Kein Autohaus gefunden für', fr: 'Aucun concessionnaire trouvé pour', it: 'Nessuna concessionaria trovata per', en: 'No dealership found for' },
+  keepTyping:           { de: 'Bitte geben Sie mehr Buchstaben ein …', fr: 'Veuillez saisir plus de lettres …', it: 'Inserite più lettere …', en: 'Please type more letters …' },
   pickerVehicles:       { de: 'Fahrzeuge', fr: 'véhicules', it: 'veicoli', en: 'vehicles' },
+  pickerVehicleSingular:{ de: 'Fahrzeug', fr: 'véhicule', it: 'veicolo', en: 'vehicle' },
   pickerLocations:      { de: 'Standorte', fr: 'sites', it: 'sedi', en: 'locations' },
   loading:              { de: 'Wird geladen …', fr: 'Chargement …', it: 'Caricamento …', en: 'Loading…' },
+  backToAll:            { de: 'Zurück', fr: 'Retour', it: 'Indietro', en: 'Back' },
+  bmwSwitzerland:       { de: 'BMW Schweiz', fr: 'BMW Suisse', it: 'BMW Svizzera', en: 'BMW Switzerland' },
+  comingSoon:           { de: 'Demnächst', fr: 'Bientôt', it: 'Prossimamente', en: 'Coming soon' },
 }
 
 const suggestionsByLang: Record<Lang, string[]> = {
-  de: ['Zeigen Sie mir alle SUV-Modelle', 'Welche Elektrofahrzeuge haben Sie?', 'Was gibt es unter CHF 60\'000?'],
-  fr: ['Montrez-moi tous les SUV', 'Quels véhicules électriques avez-vous ?', 'Qu\'avez-vous sous CHF 60\'000 ?'],
-  it: ['Mostratemi tutti i SUV', 'Quali veicoli elettrici avete?', 'Cosa c\'è sotto CHF 60\'000?'],
-  en: ['Show me all SUV vehicles', 'What electric cars do you have?', "What's available under CHF 60,000?"],
+  de: ['Familien-SUV empfehlen', 'X5 vs X7 vergleichen', 'Probefahrt buchen', 'Beste Elektro-Optionen?'],
+  fr: ['Recommander un SUV familial', 'Comparer X5 vs X7', 'Réserver un essai', 'Meilleures options électriques ?'],
+  it: ['Consigliare un SUV familiare', 'Confrontare X5 vs X7', 'Prenotare un test drive', 'Migliori opzioni elettriche?'],
+  en: ['Recommend a family SUV', 'Compare X5 vs X7', 'Book a test drive', 'Best electric options?'],
 }
 
 function t(key: string, lang: Lang): string {
@@ -126,14 +133,44 @@ interface DealerInfo {
   }[]
 }
 
-export function DealerProduct() {
+/** Slugify a dealer name: lowercase, umlauts, strip special chars, spaces to hyphens */
+function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue')
+    .replace(/é/g, 'e').replace(/è/g, 'e').replace(/ê/g, 'e')
+    .replace(/à/g, 'a').replace(/â/g, 'a')
+    .replace(/ô/g, 'o').replace(/î/g, 'i').replace(/ù/g, 'u').replace(/û/g, 'u')
+    .replace(/ç/g, 'c').replace(/ñ/g, 'n').replace(/ß/g, 'ss')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
+/** Extract dealer slug from /d/SLUG path pattern */
+function getDealerSlugFromPath(): string {
+  const match = window.location.pathname.match(/^\/d\/(.+)$/)
+  return match ? decodeURIComponent(match[1]) : ''
+}
+
+/** Get initial dealer from URL: prefer /d/slug path, fall back to ?d= query param */
+function getInitialDealerParam(): string {
+  const slug = getDealerSlugFromPath()
+  if (slug) return slug // will be resolved against API groups later
   const params = new URLSearchParams(window.location.search)
-  const dealerParam = params.get('d') || ''
+  return params.get('d') || ''
+}
+
+export function DealerProduct() {
+  const initialParam = getInitialDealerParam()
+  const isSlugUrl = !!getDealerSlugFromPath()
 
   const [dealerInfo, setDealerInfo] = useState<DealerInfo | null>(null)
   const [loading, setLoading] = useState(true)
-  const [phase, setPhase] = useState<'picker' | 'dealer'>(dealerParam ? 'dealer' : 'picker')
-  const [selectedDealer, setSelectedDealer] = useState(dealerParam)
+  const [phase, setPhase] = useState<'picker' | 'dealer'>(initialParam ? 'dealer' : 'picker')
+  const [selectedDealer, setSelectedDealer] = useState(initialParam)
+  const [dealerSlugResolved, setDealerSlugResolved] = useState(!isSlugUrl) // false if we need to resolve slug → name
   const [lang, setLang] = useState<Lang>('de')
 
   // Chat state
@@ -156,9 +193,28 @@ export function DealerProduct() {
 
   const hasConversation = messages.length > 0 || isLoading
 
+  // Resolve slug URL → real dealer name via groups API
+  useEffect(() => {
+    if (dealerSlugResolved || !isSlugUrl || !selectedDealer) return
+    fetch('/api/dealer/groups')
+      .then(r => r.json())
+      .then((groups: DealerGroup[]) => {
+        const slug = selectedDealer.toLowerCase()
+        const match = groups.find(g => slugify(g.name) === slug)
+        if (match) {
+          setSelectedDealer(match.name)
+          setDealerSlugResolved(true)
+        } else {
+          // No match found — try using the slug as-is (API might still find it)
+          setDealerSlugResolved(true)
+        }
+      })
+      .catch(() => setDealerSlugResolved(true))
+  }, [selectedDealer, dealerSlugResolved, isSlugUrl])
+
   // Load dealer info
   useEffect(() => {
-    if (!selectedDealer) { setLoading(false); return }
+    if (!selectedDealer || !dealerSlugResolved) { if (!selectedDealer) setLoading(false); return }
     setLoading(true)
     fetch(`/api/dealer/info?name=${encodeURIComponent(selectedDealer)}`)
       .then((r) => r.json())
@@ -166,6 +222,11 @@ export function DealerProduct() {
         setDealerInfo(data)
         if (data.found) {
           setPhase('dealer')
+          // Update URL to clean slug form
+          const slug = slugify(data.dealer_name || selectedDealer)
+          if (window.location.pathname !== `/d/${slug}`) {
+            window.history.replaceState(null, '', `/d/${slug}`)
+          }
           if (data.language && ['de', 'fr', 'it', 'en'].includes(data.language)) {
             setLang(data.language as Lang)
           }
@@ -173,7 +234,7 @@ export function DealerProduct() {
       })
       .catch(console.error)
       .finally(() => setLoading(false))
-  }, [selectedDealer])
+  }, [selectedDealer, dealerSlugResolved])
 
   // Load video map
   useEffect(() => {
@@ -277,7 +338,11 @@ export function DealerProduct() {
 
   // ── PICKER PHASE ──
   if (phase === 'picker') {
-    return <DealerPicker lang={lang} onLangChange={setLang} onSelect={(name) => setSelectedDealer(name)} />
+    return <DealerPicker lang={lang} onLangChange={setLang} onSelect={(name) => {
+      setSelectedDealer(name)
+      setDealerSlugResolved(true)
+      window.history.pushState(null, '', `/d/${slugify(name)}`)
+    }} />
   }
 
   // ── LOADING ──
@@ -300,7 +365,7 @@ export function DealerProduct() {
           <img src="/bmw-logo.png" alt="BMW" className="w-14 h-14 mx-auto mb-6 opacity-60" />
           <h1 className="text-2xl font-extralight text-white/80 mb-3">{t('dealerNotFound', lang)}</h1>
           <p className="text-sm text-white/40 max-w-sm mx-auto">{t('dealerNotFoundDesc', lang)}</p>
-          <button onClick={() => { setSelectedDealer(''); setDealerInfo(null); setPhase('picker') }}
+          <button onClick={() => { setSelectedDealer(''); setDealerInfo(null); setPhase('picker'); window.history.pushState(null, '', '/') }}
             className="mt-6 px-5 py-2 rounded-[4px] text-[13px] text-white/60 bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.10] transition-all">
             {t('browseAll', lang)}
           </button>
@@ -309,7 +374,24 @@ export function DealerProduct() {
     )
   }
 
-  const info = dealerInfo!
+  // If dealerInfo is null and we're past loading/not-found, show error state
+  if (!dealerInfo) {
+    return (
+      <div className="min-h-[100dvh] bg-black flex items-center justify-center">
+        <div className="text-center px-6">
+          <img src="/bmw-logo.png" alt="BMW" className="w-14 h-14 mx-auto mb-6 opacity-60" />
+          <h1 className="text-2xl font-extralight text-white/80 mb-3">{t('dealerNotFound', lang)}</h1>
+          <p className="text-sm text-white/40 max-w-sm mx-auto">{t('dealerNotFoundDesc', lang)}</p>
+          <button onClick={() => { setSelectedDealer(''); setDealerInfo(null); setPhase('picker'); window.history.pushState(null, '', '/') }}
+            className="mt-6 px-5 py-2 rounded-[4px] text-[13px] text-white/60 bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.10] transition-all">
+            {t('browseAll', lang)}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  const info = dealerInfo
   const electricCount = info.fuel_types['ELECTRIC'] || info.fuel_types['BEV'] || 0
 
   // Hero video
@@ -363,9 +445,10 @@ export function DealerProduct() {
               </button>
             ))}
           </div>
-          <button onClick={() => { setSelectedDealer(''); setDealerInfo(null); setPhase('picker'); setMessages([]); setBgVideo(null) }}
-            className="text-[10px] text-white/25 hover:text-white/50 transition-colors ml-2">
-            <ChevronRight className="w-3 h-3 rotate-180 inline" />
+          <button onClick={() => { setSelectedDealer(''); setDealerInfo(null); setPhase('picker'); setMessages([]); setBgVideo(null); window.history.pushState(null, '', '/') }}
+            className="text-[12px] text-white/50 hover:text-white/70 transition-colors ml-2 flex items-center gap-1 sm:w-[70px] justify-end">
+            <ChevronRight className="w-3.5 h-3.5 rotate-180" />
+            <span className="hidden sm:inline">{t('backToAll', lang)}</span>
           </button>
         </div>
       </header>
@@ -390,37 +473,38 @@ export function DealerProduct() {
             <div className="flex items-center gap-6 sm:gap-8 mb-6 animate-hero-in [animation-delay:150ms] [animation-fill-mode:both]">
               <div className="text-center">
                 <span className="text-[1.4rem] sm:text-[1.8rem] font-extralight text-white">{info.vehicle_count}</span>
-                <span className="text-[10px] text-white/40 uppercase tracking-wider ml-1.5">{t('vehiclesReady', lang)}</span>
+                <span className="text-[10px] text-white/70 uppercase tracking-wider ml-1.5">{info.vehicle_count === 1 ? t('vehiclesSingular', lang) : t('vehiclesReady', lang)}</span>
               </div>
-              <span className="w-px h-6 bg-white/[0.08]" />
+              <span className="w-px h-6 bg-white/[0.15]" />
               <div className="text-center">
                 <span className="text-[1.4rem] sm:text-[1.8rem] font-extralight text-white">{info.series.length}</span>
-                <span className="text-[10px] text-white/40 uppercase tracking-wider ml-1.5">{t('modelSeries', lang)}</span>
+                <span className="text-[10px] text-white/70 uppercase tracking-wider ml-1.5">{t('modelSeries', lang)}</span>
               </div>
               {electricCount > 0 && (
                 <>
-                  <span className="w-px h-6 bg-white/[0.08] hidden sm:block" />
-                  <div className="text-center hidden sm:flex items-baseline">
+                  <span className="w-px h-6 bg-white/[0.15]" />
+                  <div className="text-center flex items-baseline">
                     <span className="text-[1.4rem] sm:text-[1.8rem] font-extralight text-white">{electricCount}</span>
-                    <span className="text-[10px] text-white/40 uppercase tracking-wider ml-1.5">{t('electric', lang)}</span>
+                    <span className="text-[10px] text-white/70 uppercase tracking-wider ml-1.5">{t('electric', lang)}</span>
                   </div>
                 </>
               )}
             </div>
 
             {/* Headline */}
-            <p className="text-[13px] sm:text-[15px] font-extralight text-white/60 text-center max-w-lg leading-relaxed animate-hero-in [animation-delay:250ms] [animation-fill-mode:both]">
+            <p className="text-[14px] sm:text-[16px] font-light text-white/80 text-center max-w-lg leading-relaxed animate-hero-in [animation-delay:250ms] [animation-fill-mode:both]">
               {t('heroTitle', lang)}
             </p>
           </div>
         </div>
 
-        {/* Vehicle strip — always visible */}
+        {/* Vehicle strip — always visible (hidden if no sample vehicles) */}
+        {info.sample_vehicles.length > 0 && (
         <div className={`transition-all duration-500 ${hasConversation ? 'pt-3 pb-2' : 'pt-2 pb-4'}`}>
           {!hasConversation && (
             <div className="flex items-center gap-2 justify-center mb-3 animate-hero-in [animation-delay:350ms] [animation-fill-mode:both]">
               <div className="h-px w-12 bg-gradient-to-r from-transparent to-white/[0.06]" />
-              <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.15em]">{t('clickToExplore', lang)}</span>
+              <span className="text-[9px] font-bold text-white/40 uppercase tracking-[0.15em]">{t('clickToExplore', lang)}</span>
               <div className="h-px w-12 bg-gradient-to-l from-transparent to-white/[0.06]" />
             </div>
           )}
@@ -451,6 +535,7 @@ export function DealerProduct() {
             })}
           </div>
         </div>
+        )}
 
         {/* Conversation area */}
         <div className="px-4 sm:px-6">
@@ -573,9 +658,9 @@ export function DealerProduct() {
                 <span className="text-[#7ab5ff]/50">+41 44 505 52 62</span>
               </a>
               <span className="w-px h-2.5 bg-white/[0.06] shrink-0" />
-              <span className="flex items-center gap-1 shrink-0"><Users className="w-2.5 h-2.5" /> Leads</span>
-              <span className="hidden sm:flex items-center gap-1 shrink-0"><Radio className="w-2.5 h-2.5" /> Monitor</span>
-              <span className="hidden sm:flex items-center gap-1 shrink-0"><BarChart3 className="w-2.5 h-2.5" /> Analytics</span>
+              <span className="flex items-center gap-1 shrink-0 opacity-40 cursor-default" title={t('comingSoon', lang)}><Users className="w-2.5 h-2.5" /> Leads</span>
+              <span className="hidden sm:flex items-center gap-1 shrink-0 opacity-40 cursor-default" title={t('comingSoon', lang)}><Radio className="w-2.5 h-2.5" /> Monitor</span>
+              <span className="hidden sm:flex items-center gap-1 shrink-0 opacity-40 cursor-default" title={t('comingSoon', lang)}><BarChart3 className="w-2.5 h-2.5" /> Analytics</span>
             </div>
             <span className="text-[9px] text-white/10 ml-auto shrink-0">Salesteq</span>
           </div>
@@ -739,7 +824,6 @@ function HeroVehicleCard({
         {videoSrc && (
           <div
             onClick={handlePlayTap}
-            onTouchEnd={handlePlayTap}
             className={`absolute bottom-1.5 left-1.5 w-8 h-8 sm:w-6 sm:h-6 rounded-full flex items-center justify-center cursor-pointer transition-all duration-500 hover:scale-110 active:scale-95 ${isPlaying ? 'opacity-0 scale-75 pointer-events-none' : 'opacity-100 scale-100'}`}
           >
             <div className="absolute inset-0 rounded-full border border-[#1c69d4]/40" style={{ animation: 'play-ring-pulse 3s ease-in-out infinite' }} />
@@ -787,19 +871,16 @@ function DealerPicker({ lang, onLangChange, onSelect }: { lang: Lang; onLangChan
     }).catch(() => {})
   }, [])
 
-  const filtered = search ? groups.filter((g) => g.name.toLowerCase().includes(search.toLowerCase())) : groups
-  const totalVehicles = groups.reduce((sum, g) => sum + g.vehicle_count, 0)
+  const matches = search.length >= 3 ? groups.filter((g) => g.name.toLowerCase().includes(search.toLowerCase())) : []
+  const filtered = matches.length <= 5 ? matches : []
 
   return (
     <div className="min-h-[100dvh] bg-black flex flex-col relative overflow-hidden" style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
       {videoSrc && (
         <div className="fixed inset-0 z-0 pointer-events-none">
-          <video src={videoSrc} autoPlay muted loop playsInline className="w-full h-full object-cover opacity-[0.12]" />
+          <video src={videoSrc} autoPlay muted loop playsInline className="w-full h-full object-cover opacity-[0.25]" />
         </div>
       )}
-      <div className="fixed inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-[400px] h-[400px] rounded-full bg-[#1c69d4] animate-ambient-glow" />
-      </div>
 
       <header className="px-4 sm:px-8 py-3.5 flex items-center justify-between shrink-0 border-b border-white/[0.06] relative z-10">
         <div className="flex items-center gap-3">
@@ -828,8 +909,8 @@ function DealerPicker({ lang, onLangChange, onSelect }: { lang: Lang; onLangChan
           <h1 className="text-[1.8rem] sm:text-[3rem] font-extralight text-white tracking-[-0.02em] leading-[1.05] mb-3">
             {t('selectDealership', lang)}
           </h1>
-          <p className="text-[11px] sm:text-[12px] text-white/50 tracking-[0.1em] uppercase max-w-md mx-auto">
-            {totalVehicles > 0 ? `${totalVehicles.toLocaleString('de-CH')} ${t('vehiclesAcross', lang)} ${groups.length} ${t('dealerships', lang)}` : t('loading', lang)}
+          <p className="text-[14px] sm:text-[16px] font-light text-white/50 max-w-lg mx-auto leading-relaxed min-h-[3rem]">
+            {t('pickerSubtitle', lang)}
           </p>
         </div>
       </div>
@@ -856,12 +937,11 @@ function DealerPicker({ lang, onLangChange, onSelect }: { lang: Lang; onLangChan
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-[13px] font-bold text-white/90 uppercase tracking-[0.06em] truncate">{group.name}</div>
-                  <div className="text-[11px] text-white/35 mt-0.5">
-                    {group.vehicle_count} {t('pickerVehicles', lang)}
-                    {group.location_count > 1 && (
-                      <span className="inline-flex items-center gap-0.5 ml-1.5"><MapPin className="w-2.5 h-2.5" />{group.location_count} {t('pickerLocations', lang)}</span>
-                    )}
-                  </div>
+                  {group.location_count > 1 && (
+                    <div className="text-[11px] text-white/35 mt-0.5 inline-flex items-center gap-0.5">
+                      <MapPin className="w-2.5 h-2.5" />{group.location_count} {t('pickerLocations', lang)}
+                    </div>
+                  )}
                 </div>
                 <ChevronRight className="w-3.5 h-3.5 text-white/0 group-hover:text-white/30 group-hover:translate-x-1 transition-all duration-300 shrink-0" />
               </button>
@@ -869,15 +949,15 @@ function DealerPicker({ lang, onLangChange, onSelect }: { lang: Lang; onLangChan
           </div>
         )}
 
-        {!loading && filtered.length === 0 && search && (
+        {!loading && filtered.length === 0 && search.length >= 3 && (
           <div className="text-center py-12">
-            <p className="text-[13px] text-white/40">{t('noDealerFound', lang)} &ldquo;{search}&rdquo;</p>
+            <p className="text-[13px] text-white/40">{matches.length > 5 ? t('keepTyping', lang) : `${t('noDealerFound', lang)} \u201C${search}\u201D`}</p>
           </div>
         )}
       </div>
 
       <footer className="mt-auto px-4 sm:px-8 py-4 border-t border-white/[0.04] flex items-center justify-between shrink-0 relative z-10">
-        <span className="text-[10px] text-white/10 tracking-[0.05em]">BMW Switzerland</span>
+        <span className="text-[10px] text-white/10 tracking-[0.05em]">{t('bmwSwitzerland', lang)}</span>
         <span className="text-[10px] text-white/10 tracking-[0.05em]">Powered by Salesteq</span>
       </footer>
     </div>

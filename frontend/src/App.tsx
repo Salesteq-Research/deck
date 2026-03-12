@@ -17,10 +17,6 @@ function App() {
     return () => window.removeEventListener('popstate', onPopState)
   }, [])
 
-  if (path === '/dealer') {
-    return <DealerProduct />
-  }
-
   if (path === '/chat') {
     return <ChatInterface />
   }
@@ -45,7 +41,15 @@ function App() {
     return <TestDriveInventory />
   }
 
-  return <Landing />
+  if (path === '/internal') {
+    return <Landing />
+  }
+
+  if (path.startsWith('/d/')) {
+    return <DealerProduct />
+  }
+
+  return <DealerProduct />
 }
 
 export default App

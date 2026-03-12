@@ -104,7 +104,6 @@ export function VehicleCard({ vehicle: v, videoSrc, lang = 'en', onSelect }: Veh
         {videoSrc && (
           <div
             onClick={handlePlayClick}
-            onTouchEnd={handlePlayClick}
             className={`absolute bottom-2 left-2 w-10 h-10 sm:w-9 sm:h-9 rounded-full flex items-center justify-center cursor-pointer transition-all duration-500 hover:scale-110 active:scale-95 ${isPlaying ? 'opacity-0 scale-75 pointer-events-none' : 'opacity-100 scale-100'}`}
           >
             <div className="absolute inset-0 rounded-full border border-[#1c69d4]/40" style={{ animation: 'play-ring-pulse 3s ease-in-out infinite' }} />

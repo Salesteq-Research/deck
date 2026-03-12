@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from ..config import OPENAI_API_KEY, SPARKPOST_API_KEY, SPARKPOST_FROM
 from ..models.vehicle import Vehicle
 from ..models.backoffice import Appointment, ActivityLog
+from ..api.dealer import _get_group_members
 
 logger = logging.getLogger(__name__)
 
@@ -662,13 +663,13 @@ class CustomerAgentService:
     def _execute_tool(self, name: str, input: Dict[str, Any], language: str = None, dealer_name: str = None) -> Any:
         try:
             if name == "search_inventory":
-                return self._search_inventory(input)
+                return self._search_inventory(input, dealer_name=dealer_name)
             elif name == "get_vehicle_details":
                 return self._get_vehicle_details(input)
             elif name == "compare_vehicles":
                 return self._compare_vehicles(input)
             elif name == "get_inventory_overview":
-                return self._get_inventory_overview()
+                return self._get_inventory_overview(dealer_name=dealer_name)
             elif name == "book_appointment":
                 return self._book_appointment(input, language=language, dealer_name=dealer_name)
             # Legacy tool names — redirect
@@ -684,8 +685,12 @@ class CustomerAgentService:
             logger.error(f"Tool {name} error: {e}")
             return {"error": str(e)}
 
-    def _search_inventory(self, input: Dict) -> Dict:
+    def _search_inventory(self, input: Dict, dealer_name: str = None) -> Dict:
         query = self.db.query(Vehicle)
+        # Scope to dealer when in dealer context (group-aware)
+        if dealer_name:
+            members = _get_group_members(dealer_name)
+            query = query.filter(Vehicle.dealer_name.in_(members))
         if input.get("series"):
             query = query.filter(Vehicle.series == input["series"])
         if input.get("fuel_type"):
@@ -723,14 +728,18 @@ class CustomerAgentService:
                 vehicles.append({"vin": v.vin, "name": v.name, "series": v.series, "body_type": v.body_type, "fuel_type": v.fuel_type, "drive_type": v.drive_type, "color": v.color, "price_chf": v.price_offer, "power_hp": v.power_hp, "monthly_installment": v.monthly_installment, "dealer": v.dealer_name})
         return {"vehicles": vehicles}
 
-    def _get_inventory_overview(self) -> Dict:
-        total = self.db.query(Vehicle).count()
-        fuel_rows = self.db.query(Vehicle.fuel_type, func.count(Vehicle.vin)).group_by(Vehicle.fuel_type).all()
+    def _get_inventory_overview(self, dealer_name: str = None) -> Dict:
+        base = self.db.query(Vehicle)
+        if dealer_name:
+            members = _get_group_members(dealer_name)
+            base = base.filter(Vehicle.dealer_name.in_(members))
+        total = base.count()
+        fuel_rows = base.with_entities(Vehicle.fuel_type, func.count(Vehicle.vin)).group_by(Vehicle.fuel_type).all()
         fuel = {f: c for f, c in fuel_rows if f}
-        series_rows = self.db.query(Vehicle.series, func.count(Vehicle.vin)).group_by(Vehicle.series).order_by(func.count(Vehicle.vin).desc()).limit(10).all()
+        series_rows = base.with_entities(Vehicle.series, func.count(Vehicle.vin)).group_by(Vehicle.series).order_by(func.count(Vehicle.vin).desc()).limit(10).all()
         top_series = {s: c for s, c in series_rows if s}
-        price_min = self.db.query(func.min(Vehicle.price_offer)).filter(Vehicle.price_offer > 0).scalar()
-        price_max = self.db.query(func.max(Vehicle.price_offer)).scalar()
+        price_min = base.with_entities(func.min(Vehicle.price_offer)).filter(Vehicle.price_offer > 0).scalar()
+        price_max = base.with_entities(func.max(Vehicle.price_offer)).scalar()
         return {"total_vehicles": total, "fuel_types": fuel, "top_series": top_series, "price_range_chf": {"cheapest": round(price_min) if price_min else None, "most_expensive": round(price_max) if price_max else None}}
 
     def _book_appointment(self, input: Dict, language: str = None, dealer_name: str = None) -> Dict:

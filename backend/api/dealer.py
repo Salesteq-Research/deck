@@ -1,6 +1,7 @@
 """Dealer-specific API for the dealer product page."""
 
 import json
+import re
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, Query
@@ -9,6 +10,21 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..models.vehicle import Vehicle
+
+# Video patterns — only models with actual generated video files
+VIDEO_PATTERNS = [
+    re.compile(r'\bi7\s*m70\b', re.I),          # i7-m70.mp4
+    re.compile(r'\bi4\s*m50\b', re.I),          # i4-m50.mp4
+    re.compile(r'\bm3\b(?!4).*\blimousine\b', re.I),  # m3-limousine.mp4
+    re.compile(r'\bi7\b', re.I),                # i7.mp4
+    re.compile(r'\biX\b(?!\d)', re.I),          # ix.mp4
+    re.compile(r'\bx5\b', re.I),                # x5.mp4
+]
+
+
+def _has_video(name: str) -> bool:
+    """Check if a vehicle name matches any video pattern."""
+    return any(p.search(name) for p in VIDEO_PATTERNS)
 
 router = APIRouter(prefix="/api/dealer", tags=["dealer"])
 
@@ -21,6 +37,7 @@ def _detect_language(lat: float | None, lon: float | None, dealer_name: str) -> 
     Swiss language regions:
     - Italian (Ticino): south of Alps, lon > 8.0 and lat < 46.5
     - French (Romandie): western Switzerland, lon < 7.2
+    - French (Valais): Rhone valley, lat < 46.5 and 7.2 <= lon < 7.6
     - German: everything else (default)
     """
     if lat and lon:
@@ -30,9 +47,16 @@ def _detect_language(lat: float | None, lon: float | None, dealer_name: str) -> 
         # Romandie — French (Geneva, Lausanne, Neuchâtel, western Fribourg/Valais)
         if lon < 7.2:
             return "fr"
+        # French-speaking Valais — Rhone valley (Sion, Sierre, Martigny, Monthey)
+        # lat < 46.5 avoids catching Bern (~46.95) while covering the valley
+        if lat < 46.5 and lon < 7.6:
+            return "fr"
     # Name heuristics for border cases
     name_lower = dealer_name.lower()
-    if any(w in name_lower for w in ["genève", "geneve", "lausanne", "fribourg", "sion", "neuchâtel", "neuchatel"]):
+    if any(w in name_lower for w in [
+        "genève", "geneve", "lausanne", "fribourg", "sion", "neuchâtel", "neuchatel",
+        "facchinetti", "urfer", "monthey", "sierre", "martigny", "brig",
+    ]):
         return "fr"
     if any(w in name_lower for w in ["bellinzona", "lugano", "locarno", "minusio", "biasca", "chiasso", "torretta"]):
         return "it"
@@ -55,6 +79,10 @@ DEALER_GROUPS = {
     "Sepp Fässler": [
         "Sepp Fässler AG",
         "Sepp Fässler (Wil) AG",
+    ],
+    "Facchinetti": [
+        "Facchinetti Automobiles",
+        "Facchinetti Automobiles SA",
     ],
 }
 
@@ -97,9 +125,9 @@ def get_dealer_info(name: str = Query(..., description="Dealer or group name"), 
     if vehicle_count == 0:
         return {"found": False, "dealer_name": display_name}
 
-    # Locations
+    # Locations — distinct on dealer_id to avoid lat/lon duplicates
     location_rows = (
-        db.query(Vehicle.dealer_name, Vehicle.dealer_id, Vehicle.dealer_latitude, Vehicle.dealer_longitude)
+        db.query(Vehicle.dealer_name, Vehicle.dealer_id)
         .filter(Vehicle.dealer_name.in_(members))
         .distinct()
         .all()
@@ -107,10 +135,14 @@ def get_dealer_info(name: str = Query(..., description="Dealer or group name"), 
     locations = [{"name": r.dealer_name, "id": r.dealer_id} for r in location_rows]
 
     # Detect language from first location's coordinates
-    first_loc = location_rows[0] if location_rows else None
+    first_coords = (
+        db.query(Vehicle.dealer_latitude, Vehicle.dealer_longitude)
+        .filter(Vehicle.dealer_name.in_(members), Vehicle.dealer_latitude.isnot(None))
+        .first()
+    )
     language = _detect_language(
-        first_loc.dealer_latitude if first_loc else None,
-        first_loc.dealer_longitude if first_loc else None,
+        first_coords.dealer_latitude if first_coords else None,
+        first_coords.dealer_longitude if first_coords else None,
         display_name,
     )
 
@@ -140,14 +172,33 @@ def get_dealer_info(name: str = Query(..., description="Dealer or group name"), 
         Vehicle.dealer_name.in_(members), Vehicle.price_offer.isnot(None)
     ).scalar()
 
-    # Sample vehicles (top 6 by price, with images)
-    samples = (
+    # Sample vehicles — prioritize models with cinematic videos, then by price
+    all_dealer_vehicles = (
         db.query(Vehicle)
         .filter(Vehicle.dealer_name.in_(members), Vehicle.image.isnot(None), Vehicle.image != "")
         .order_by(Vehicle.price_offer.desc().nullslast())
-        .limit(6)
         .all()
     )
+    with_video = [v for v in all_dealer_vehicles if _has_video(v.name)]
+    without_video = [v for v in all_dealer_vehicles if not _has_video(v.name)]
+    # Deduplicate by model name — pick one per unique model for variety
+    seen_models = set()
+    samples = []
+    for v in with_video + without_video:
+        # Normalize: strip VIN-like suffixes, use base model name
+        model_key = v.name.strip().lower()
+        if model_key not in seen_models:
+            seen_models.add(model_key)
+            samples.append(v)
+        if len(samples) >= 6:
+            break
+    # If not enough unique models, fill with remaining
+    if len(samples) < 6:
+        for v in with_video + without_video:
+            if v not in samples:
+                samples.append(v)
+            if len(samples) >= 6:
+                break
 
     sample_vehicles = [
         {
