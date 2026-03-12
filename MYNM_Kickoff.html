@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MYNM AI - Project Kickoff</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #0a0a0f;
+    color: #e0e0e0;
+  }
+
+  .slide {
+    width: 1280px;
+    height: 720px;
+    margin: 40px auto;
+    background: #111118;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 48px 56px;
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+  }
+
+  .slide::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #1c69d4, #4a9eff, #1c69d4);
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+  }
+
+  .logo {
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 1px;
+  }
+
+  .logo span { color: #1c69d4; }
+
+  .date {
+    font-size: 13px;
+    color: #666;
+    font-weight: 400;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 300;
+    color: #ffffff;
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+  }
+
+  h1 strong {
+    font-weight: 600;
+    color: #4a9eff;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 28px;
+    font-weight: 400;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 6px;
+    padding: 18px 20px;
+  }
+
+  .card h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #4a9eff;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+
+  .card ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .card ul li {
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: #ccc;
+    padding-left: 14px;
+    position: relative;
+  }
+
+  .card ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #1c69d4;
+  }
+
+  .milestone-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+  }
+
+  .milestone-table th {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #888;
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .milestone-table td {
+    font-size: 12.5px;
+    color: #ccc;
+    padding: 9px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: top;
+  }
+
+  .milestone-table tr:hover td {
+    background: rgba(28,105,212,0.05);
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .tag-blue { background: rgba(28,105,212,0.15); color: #4a9eff; }
+  .tag-green { background: rgba(34,197,94,0.15); color: #4ade80; }
+  .tag-amber { background: rgba(245,158,11,0.15); color: #fbbf24; }
+
+  .payment-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 12.5px;
+  }
+
+  .payment-row .amount {
+    font-weight: 600;
+    color: #4ade80;
+  }
+
+  .total-row {
+    border-top: 1px solid rgba(255,255,255,0.1);
+    margin-top: 4px;
+    padding-top: 8px;
+  }
+
+  .total-row .amount {
+    color: #ffffff;
+    font-size: 15px;
+  }
+
+  .footer {
+    position: absolute;
+    bottom: 20px;
+    left: 56px;
+    right: 56px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #444;
+  }
+
+  .needs-box {
+    background: rgba(245,158,11,0.06);
+    border: 1px solid rgba(245,158,11,0.15);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin-top: 12px;
+  }
+
+  .needs-box h3 {
+    font-size: 12px;
+    font-weight: 600;
+    color: #fbbf24;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  .needs-box ul li::before {
+    background: #f59e0b;
+  }
+
+  .timeline-bar {
+    display: flex;
+    gap: 2px;
+    margin-top: 16px;
+    margin-bottom: 12px;
+    height: 28px;
+  }
+
+  .timeline-segment {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 500;
+    color: #fff;
+    border-radius: 3px;
+    position: relative;
+  }
+
+  .seg-m1 { background: #1c69d4; flex: 1; }
+  .seg-m2 { background: #1557b0; flex: 1; }
+  .seg-m3 { background: #1c69d4; flex: 1; }
+  .seg-m4 { background: #2d7ce0; flex: 1; }
+  .seg-m5 { background: #1557b0; flex: 1; }
+  .seg-m6 { background: #1c69d4; flex: 1; }
+
+  .month-labels {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 4px;
+  }
+
+  .month-labels span {
+    flex: 1;
+    text-align: center;
+    font-size: 10px;
+    color: #666;
+  }
+
+  @media print {
+    body { background: #111118; }
+    .slide { margin: 0; border: none; border-radius: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SLIDE 1: Project Overview & Scope -->
+<div class="slide">
+  <div class="header">
+    <div class="logo">Salesteq <span>x</span> MYNM</div>
+    <div class="date">Project Kickoff / March 2026</div>
+  </div>
+
+  <h1>MYNM AI Platform <strong>Kickoff</strong></h1>
+  <div class="subtitle">Software Development Agreement, effective 1 March 2026. Contract value: $372,842 USD.</div>
+
+  <div class="grid-2" style="margin-bottom: 16px;">
+    <div class="card">
+      <h3>3.1 Inbound AI Agent</h3>
+      <ul>
+        <li>Multi-brand AI chat across 13 websites + WhatsApp + Telegram</li>
+        <li>Brands: BMW, MINI, Rolls-Royce, Genesis, Jaguar, Land Rover, Infiniti, Lincoln, Hyundai, Ford, MG</li>
+        <li>Voice: MSA, Najdi, Janoubia dialects, English</li>
+        <li>Keyloop DMS + inventory integration</li>
+        <li>OTP customer identification, complaints, bookings</li>
+        <li><span class="tag tag-blue">MVP Month 1</span> <span class="tag tag-green">Full Month 3</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>3.2 Outbound AI Sales</h3>
+      <ul>
+        <li>Proactive follow-ups and campaigns</li>
+        <li>Lead matching with inventory + CRM + Keyloop</li>
+        <li>Sentiment-driven triggers</li>
+        <li>Outbound via WhatsApp or email</li>
+        <li><span class="tag tag-blue">Month 5</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>3.3 Sales Enablement</h3>
+      <ul>
+        <li>Internal AI assistant for sales reps and call center</li>
+        <li>Callback request handling, trade-in management</li>
+        <li>Searchable internal knowledge base</li>
+        <li>Customer sentiment insights</li>
+        <li><span class="tag tag-blue">Month 6</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>3.4-3.6 Analytics & Dashboards</h3>
+      <ul>
+        <li>Call transcription (EN + MSA), tone analysis, sentiment</li>
+        <li>Genesys + Webex Contact Center integration</li>
+        <li>AI analytics: interactions, topics, resolution rates</li>
+        <li>Live dashboards by brand and division</li>
+        <li><span class="tag tag-blue">Month 4-5</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="month-labels">
+    <span>Month 1 (Apr)</span><span>Month 2 (May)</span><span>Month 3 (Jun)</span>
+    <span>Month 4 (Jul)</span><span>Month 5 (Aug)</span><span>Month 6 (Sep)</span>
+  </div>
+  <div class="timeline-bar">
+    <div class="timeline-segment seg-m1">MVP</div>
+    <div class="timeline-segment seg-m2">Inbound</div>
+    <div class="timeline-segment seg-m3">Full Agent</div>
+    <div class="timeline-segment seg-m4">Analytics</div>
+    <div class="timeline-segment seg-m5">Sales AI</div>
+    <div class="timeline-segment seg-m6">Enablement</div>
+  </div>
+
+  <div class="footer">
+    <span>Confidential</span>
+    <span>Slide 1 of 2</span>
+  </div>
+</div>
+
+<!-- SLIDE 2: Delivery Plan, Payments & Dependencies -->
+<div class="slide">
+  <div class="header">
+    <div class="logo">Salesteq <span>x</span> MYNM</div>
+    <div class="date">Project Kickoff / March 2026</div>
+  </div>
+
+  <h1>Delivery Plan, <strong>Payments & Dependencies</strong></h1>
+  <div class="subtitle">Fixed-price milestones. Infrastructure at $3,000/month pass-through. Support at SAR 12,000/month.</div>
+
+  <div class="grid-2">
+    <div>
+      <table class="milestone-table">
+        <thead>
+          <tr>
+            <th>Milestone</th>
+            <th>Deliverable</th>
+            <th>Timeline</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>3.1 Inbound Agent</strong></td>
+            <td>Multi-brand chat, OTP, Keyloop, voice (AR/EN)</td>
+            <td><span class="tag tag-green">MVP M1</span> <span class="tag tag-blue">Full M3</span></td>
+          </tr>
+          <tr>
+            <td><strong>3.2 Outbound Sales</strong></td>
+            <td>Proactive campaigns, lead matching, WhatsApp/email</td>
+            <td><span class="tag tag-blue">Month 5</span></td>
+          </tr>
+          <tr>
+            <td><strong>3.3 Sales Enablement</strong></td>
+            <td>Internal agent, callbacks, trade-in, knowledge base</td>
+            <td><span class="tag tag-blue">Month 6</span></td>
+          </tr>
+          <tr>
+            <td><strong>3.4 Call Analytics</strong></td>
+            <td>Transcription, sentiment, Genesys/Webex integration</td>
+            <td><span class="tag tag-blue">Month 4</span></td>
+          </tr>
+          <tr>
+            <td><strong>3.5 AI Analytics</strong></td>
+            <td>User engagement, topics, resolution rates</td>
+            <td><span class="tag tag-blue">Month 5</span></td>
+          </tr>
+          <tr>
+            <td><strong>3.6 Dashboards</strong></td>
+            <td>Live reports by brand/division, export</td>
+            <td><span class="tag tag-blue">Month 5</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top: 16px;">
+        <div class="card" style="padding: 14px 18px;">
+          <h3>Payment Schedule</h3>
+          <div class="payment-row">
+            <span>Upon Contract Signing</span>
+            <span class="amount">$74,568.40</span>
+          </div>
+          <div class="payment-row">
+            <span>R1: Advanced Sales Chat & Search</span>
+            <span class="amount">$149,136.80</span>
+          </div>
+          <div class="payment-row">
+            <span>R2: Sales AI</span>
+            <span class="amount">$74,568.40</span>
+          </div>
+          <div class="payment-row">
+            <span>Call Analytics & Dashboard Delivery</span>
+            <span class="amount">$74,568.40</span>
+          </div>
+          <div class="payment-row total-row">
+            <span style="font-weight:600; color:#fff;">Total Contract</span>
+            <span class="amount" style="color:#fff; font-size:16px;">$372,842.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom: 14px;">
+        <h3>Infrastructure (Pass-Through)</h3>
+        <ul>
+          <li>3x A100 80GB SXM4 GPU instances</li>
+          <li>$3,000/month at actual consumption, no markup</li>
+          <li>ASR, TTS, LLM inference (Qwen3, FastConformer, FastPitch)</li>
+          <li>30,000 users/month, 20 simultaneous requests</li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-bottom: 14px;">
+        <h3>Support (Exhibit B)</h3>
+        <ul>
+          <li>SAR 12,000/month (20 engineer hrs, Mon-Fri 09-19)</li>
+          <li>P1 Critical: response 20 min, fix 6 hrs</li>
+          <li>P2 High: response 45 min, fix 14 hrs</li>
+          <li>15 months warranty (extended from 12)</li>
+          <li>20 days extra engineering in first month</li>
+        </ul>
+      </div>
+
+      <div class="needs-box">
+        <h3>Needed from MYNM</h3>
+        <ul>
+          <li>Keyloop API access, credentials, and documentation</li>
+          <li>Inventory feed access for all brands</li>
+          <li>Genesys / Webex Contact Center access</li>
+          <li>WhatsApp Business API (Hootsuite) access</li>
+          <li>Car metadata: specs, options, media per brand</li>
+          <li>OTP phone verification setup</li>
+          <li>Brand guidelines (CSS, fonts, colors) per brand</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>Confidential</span>
+    <span>Slide 2 of 2</span>
+  </div>
+</div>
+
+</body>
+</html>
