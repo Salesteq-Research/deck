@@ -28,31 +28,20 @@
   }
   .page:last-child { page-break-after: auto; }
 
-  /* ── Ambient glow ── */
   .page::before {
     content: '';
     position: absolute;
-    top: -120px;
-    right: -80px;
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, rgba(30,110,220,0.10) 0%, transparent 65%);
-    pointer-events: none;
-  }
-  .page::after {
-    content: '';
-    position: absolute;
-    bottom: -100px;
-    left: -60px;
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(30,110,220,0.05) 0%, transparent 65%);
+    top: -100px;
+    right: -60px;
+    width: 450px;
+    height: 450px;
+    background: radial-gradient(circle, rgba(30,110,220,0.08) 0%, transparent 65%);
     pointer-events: none;
   }
 
   /* ── HEADER ── */
   .header {
-    padding: 32px 48px 0;
+    padding: 30px 48px 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -61,101 +50,120 @@
   }
 
   .brand {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
-    letter-spacing: 0.28em;
+    letter-spacing: 0.25em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.32);
+    color: rgba(255,255,255,0.30);
   }
 
   .badge {
     font-size: 9px;
     font-weight: 600;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.10em;
     text-transform: uppercase;
     color: #4a90e2;
-    background: rgba(74,144,226,0.08);
-    border: 1px solid rgba(74,144,226,0.18);
+    background: rgba(74,144,226,0.07);
+    border: 1px solid rgba(74,144,226,0.15);
     padding: 5px 14px;
     border-radius: 20px;
   }
 
   /* ── HERO ── */
   .hero {
-    padding: 44px 48px 0;
+    padding: 36px 48px 0;
     position: relative;
     z-index: 1;
-    flex-shrink: 0;
   }
 
   .hero h1 {
-    font-size: 52px;
+    font-size: 44px;
     font-weight: 200;
     letter-spacing: -0.03em;
-    line-height: 1.1;
+    line-height: 1.12;
     color: #fff;
   }
 
   .hero h1 em {
     font-style: normal;
-    background: linear-gradient(135deg, #4a90e2, #1c69d4);
+    background: linear-gradient(135deg, #5a9be6, #1c69d4);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  .hero-sub {
-    margin-top: 18px;
-    font-size: 18px;
-    font-weight: 300;
-    color: rgba(255,255,255,0.50);
-    line-height: 1.55;
-    max-width: 440px;
-  }
-
-  /* ── CAPABILITIES ── */
-  .caps {
-    padding: 30px 48px;
+  /* ── VALUE BLOCKS ── */
+  .values {
+    padding: 32px 48px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
     position: relative;
     z-index: 1;
   }
 
-  .caps-row {
+  .val {
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+    align-items: baseline;
+    gap: 16px;
   }
 
-  .cap-pill {
-    font-size: 13px;
-    font-weight: 400;
-    color: rgba(255,255,255,0.75);
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.07);
-    padding: 9px 18px;
-    border-radius: 24px;
-    white-space: nowrap;
+  .val-num {
+    font-size: 36px;
+    font-weight: 100;
+    color: #4a90e2;
+    line-height: 1;
+    flex-shrink: 0;
+    min-width: 80px;
+    text-align: right;
+    letter-spacing: -0.03em;
+  }
+
+  .val-text {
+    font-size: 16px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.70);
+    line-height: 1.45;
+  }
+
+  .val-text strong {
+    font-weight: 500;
+    color: rgba(255,255,255,0.92);
+  }
+
+  /* ── CHANNELS BAR ── */
+  .channels {
+    margin: 28px 48px 0;
+    padding: 16px 0;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .channel {
+    font-size: 15px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.50);
+    letter-spacing: 0.02em;
+  }
+
+  .channel-dot {
+    color: rgba(255,255,255,0.12);
+    font-size: 15px;
   }
 
   /* ── PRICE SECTION ── */
   .price-section {
-    padding: 0 48px;
+    padding: 28px 48px 0;
     position: relative;
     z-index: 1;
-    flex: 1;
     display: flex;
     align-items: center;
-  }
-
-  .price-box {
-    width: 100%;
-    background: linear-gradient(145deg, rgba(74,144,226,0.07) 0%, rgba(28,105,212,0.02) 100%);
-    border: 1px solid rgba(74,144,226,0.12);
-    border-radius: 16px;
-    padding: 32px 36px;
-    display: flex;
-    align-items: center;
-    gap: 32px;
+    gap: 28px;
   }
 
   .price-left {
@@ -163,14 +171,14 @@
   }
 
   .price-chf {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 400;
-    color: rgba(255,255,255,0.45);
-    letter-spacing: 0.15em;
+    color: rgba(255,255,255,0.40);
+    letter-spacing: 0.12em;
   }
 
   .price-num {
-    font-size: 96px;
+    font-size: 88px;
     font-weight: 100;
     color: #fff;
     line-height: 0.85;
@@ -180,122 +188,107 @@
   .price-per {
     font-size: 16px;
     font-weight: 300;
-    color: rgba(255,255,255,0.45);
+    color: rgba(255,255,255,0.40);
     margin-top: 4px;
   }
 
   .price-setup {
     font-size: 12px;
-    color: rgba(255,255,255,0.25);
-    margin-top: 10px;
+    color: rgba(255,255,255,0.22);
+    margin-top: 8px;
   }
 
-  .price-divider {
+  .price-sep {
     width: 1px;
-    height: 90px;
-    background: rgba(74,144,226,0.15);
+    height: 80px;
+    background: rgba(255,255,255,0.06);
     flex-shrink: 0;
   }
 
   .price-right {
     flex: 1;
-  }
-
-  .price-point {
     font-size: 16px;
     font-weight: 300;
-    color: rgba(255,255,255,0.55);
+    color: rgba(255,255,255,0.50);
     line-height: 1.7;
   }
 
-  .price-point strong {
+  .price-right strong {
     font-weight: 500;
-    color: rgba(255,255,255,0.88);
+    color: rgba(255,255,255,0.85);
   }
 
   /* ── LANGUAGES ── */
-  .langs-section {
-    padding: 24px 48px 0;
+  .langs {
+    padding: 20px 48px 0;
     position: relative;
     z-index: 1;
   }
 
-  .langs-bar {
+  .langs-row {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 5px;
     flex-wrap: wrap;
   }
 
   .lang {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 400;
-    color: rgba(255,255,255,0.55);
+    color: rgba(255,255,255,0.45);
   }
 
-  .lang-sep {
-    font-size: 13px;
+  .lang-s {
+    font-size: 12px;
     color: rgba(255,255,255,0.12);
   }
 
-  .langs-note {
+  .langs-sub {
     text-align: center;
-    font-size: 11px;
-    color: rgba(255,255,255,0.22);
-    margin-top: 6px;
-    letter-spacing: 0.03em;
+    font-size: 10px;
+    color: rgba(255,255,255,0.18);
+    margin-top: 4px;
   }
 
   /* ── FOOTER ── */
   .footer {
-    padding: 20px 48px 30px;
+    margin-top: auto;
+    padding: 18px 48px 28px;
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
     position: relative;
     z-index: 1;
-    margin-top: auto;
-  }
-
-  .footer-line {
-    position: absolute;
-    top: 0;
-    left: 48px;
-    right: 48px;
-    height: 1px;
-    background: rgba(255,255,255,0.06);
+    border-top: 1px solid rgba(255,255,255,0.06);
   }
 
   .cta-url {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 300;
     color: #4a90e2;
-    letter-spacing: 0.01em;
   }
 
   .cta-sub {
-    font-size: 12px;
-    color: rgba(255,255,255,0.25);
-    margin-top: 4px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.22);
+    margin-top: 3px;
   }
 
-  .footer-right {
-    text-align: right;
-  }
+  .footer-right { text-align: right; }
 
   .footer-co {
     font-size: 10px;
     font-weight: 600;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.22);
+    color: rgba(255,255,255,0.20);
   }
 
   .footer-mail {
     font-size: 10px;
-    color: rgba(255,255,255,0.22);
-    margin-top: 2px;
+    color: rgba(255,255,255,0.20);
+    margin-top: 1px;
   }
 
   @media print {
@@ -318,59 +311,76 @@
   </header>
 
   <section class="hero">
-    <h1>Ihre Website<br>verliert Kunden.<br><em>Wir ändern das.</em></h1>
-    <p class="hero-sub">Unser KI-Verkaufsberater arbeitet mit Ihrem Bestand — rund um die Uhr, auf allen Kanälen, in jeder Sprache.</p>
+    <h1>Ein Verkäufer, der<br>nie schläft.<br><em>Bereits mit Ihrem Bestand.</em></h1>
   </section>
 
-  <section class="caps">
-    <div class="caps-row">
-      <span class="cap-pill">Kundenberatung</span>
-      <span class="cap-pill">Probefahrt buchen</span>
-      <span class="cap-pill">Service-Termine</span>
-      <span class="cap-pill">Fahrzeugvergleich</span>
-      <span class="cap-pill">Inzahlungnahme</span>
-      <span class="cap-pill">Lead-Erfassung</span>
-      <span class="cap-pill">Website</span>
-      <span class="cap-pill">Telefon</span>
-      <span class="cap-pill">WhatsApp</span>
+  <section class="values">
+    <div class="val">
+      <div class="val-num">24/7</div>
+      <div class="val-text"><strong>Kein Lead geht verloren.</strong> Sonntag 22 Uhr — Ihr Agent berät, vergleicht Modelle und bucht die Probefahrt. Der Kunde kauft bei Ihnen, nicht beim Mitbewerber.</div>
     </div>
+    <div class="val">
+      <div class="val-num">3h</div>
+      <div class="val-text"><strong>Mehr Zeit für Abschlüsse.</strong> Ihr Team beantwortet täglich die gleichen 20 Fragen. Der Agent übernimmt das — Ihre Verkäufer konzentrieren sich auf das Verkaufen.</div>
+    </div>
+    <div class="val">
+      <div class="val-num">10×</div>
+      <div class="val-text"><strong>Mehr Service-Buchungen.</strong> Ölwechsel, Reifen, Inspektion — Ihr Kunde bucht in 30 Sekunden statt anzurufen. Mehr Durchlauf, mehr Umsatz.</div>
+    </div>
+    <div class="val">
+      <div class="val-num">100%</div>
+      <div class="val-text"><strong>Jeder Kunde, jede Sprache.</strong> Portugiesisch, Türkisch, Albanisch — Kunden, die heute abspringen, werden morgen bedient. Automatisch erkannt.</div>
+    </div>
+  </section>
+
+  <section class="channels">
+    <span class="channel">Website</span>
+    <span class="channel-dot">·</span>
+    <span class="channel">Telefon</span>
+    <span class="channel-dot">·</span>
+    <span class="channel">WhatsApp</span>
+    <span class="channel-dot">·</span>
+    <span class="channel">Kundenberatung</span>
+    <span class="channel-dot">·</span>
+    <span class="channel">Probefahrt</span>
+    <span class="channel-dot">·</span>
+    <span class="channel">Inzahlungnahme</span>
+    <span class="channel-dot">·</span>
+    <span class="channel">Lead-Erfassung</span>
   </section>
 
   <section class="price-section">
-    <div class="price-box">
-      <div class="price-left">
-        <div class="price-chf">CHF</div>
-        <div class="price-num">500</div>
-        <div class="price-per">pro Monat</div>
-        <div class="price-setup">Setup CHF 1'500 – 2'500</div>
-      </div>
-      <div class="price-divider"></div>
-      <div class="price-right">
-        <div class="price-point"><strong>Wir übernehmen alles.</strong><br>Einrichtung, Integration, Optimierung.</div>
-        <div class="price-point" style="margin-top:12px"><strong>Wir sind in der Schweiz.</strong><br>Wir kommen zu Ihnen.</div>
-        <div class="price-point" style="margin-top:12px"><strong>Keine Vertragsbindung.</strong><br>Monatlich kündbar.</div>
-      </div>
+    <div class="price-left">
+      <div class="price-chf">CHF</div>
+      <div class="price-num">500</div>
+      <div class="price-per">pro Monat</div>
+      <div class="price-setup">Setup CHF 1'500 – 2'500 einmalig</div>
+    </div>
+    <div class="price-sep"></div>
+    <div class="price-right">
+      <strong>Wir übernehmen alles.</strong> Einrichtung, Integration, Optimierung.<br>
+      <strong>Wir sind in der Schweiz.</strong> Wir kommen zu Ihnen.<br>
+      <strong>Keine Vertragsbindung.</strong> Monatlich kündbar.
     </div>
   </section>
 
-  <section class="langs-section">
-    <div class="langs-bar">
-      <span class="lang">Deutsch</span><span class="lang-sep">/</span>
-      <span class="lang">Français</span><span class="lang-sep">/</span>
-      <span class="lang">Italiano</span><span class="lang-sep">/</span>
-      <span class="lang">English</span><span class="lang-sep">/</span>
-      <span class="lang">Português</span><span class="lang-sep">/</span>
-      <span class="lang">Español</span><span class="lang-sep">/</span>
-      <span class="lang">Shqip</span><span class="lang-sep">/</span>
-      <span class="lang">Srpski</span><span class="lang-sep">/</span>
-      <span class="lang">Türkçe</span><span class="lang-sep">/</span>
+  <section class="langs">
+    <div class="langs-row">
+      <span class="lang">Deutsch</span><span class="lang-s">/</span>
+      <span class="lang">Français</span><span class="lang-s">/</span>
+      <span class="lang">Italiano</span><span class="lang-s">/</span>
+      <span class="lang">English</span><span class="lang-s">/</span>
+      <span class="lang">Português</span><span class="lang-s">/</span>
+      <span class="lang">Español</span><span class="lang-s">/</span>
+      <span class="lang">Shqip</span><span class="lang-s">/</span>
+      <span class="lang">Srpski</span><span class="lang-s">/</span>
+      <span class="lang">Türkçe</span><span class="lang-s">/</span>
       <span class="lang">العربية</span>
     </div>
-    <div class="langs-note">Automatische Spracherkennung — Ihr Kunde spricht, der Agent antwortet</div>
+    <div class="langs-sub">Automatische Spracherkennung</div>
   </section>
 
   <footer class="footer">
-    <div class="footer-line"></div>
     <div>
       <div class="cta-url">bmw.salesteq.com</div>
       <div class="cta-sub">Ihr Bestand ist bereits geladen. Antworten Sie auf diese E-Mail.</div>
@@ -394,59 +404,76 @@
   </header>
 
   <section class="hero">
-    <h1>Votre site perd<br>des clients.<br><em>Nous changeons cela.</em></h1>
-    <p class="hero-sub">Notre conseiller de vente IA travaille avec votre stock — 24h/24, sur tous les canaux, dans chaque langue.</p>
+    <h1>Un vendeur qui<br>ne dort jamais.<br><em>Déjà avec votre stock.</em></h1>
   </section>
 
-  <section class="caps">
-    <div class="caps-row">
-      <span class="cap-pill">Conseil client</span>
-      <span class="cap-pill">Essai routier</span>
-      <span class="cap-pill">Rendez-vous service</span>
-      <span class="cap-pill">Comparaison</span>
-      <span class="cap-pill">Reprise</span>
-      <span class="cap-pill">Capture de leads</span>
-      <span class="cap-pill">Site web</span>
-      <span class="cap-pill">Téléphone</span>
-      <span class="cap-pill">WhatsApp</span>
+  <section class="values">
+    <div class="val">
+      <div class="val-num">24/7</div>
+      <div class="val-text"><strong>Aucun prospect perdu.</strong> Dimanche 22h — votre agent conseille, compare les modèles et réserve l'essai routier. Le client achète chez vous, pas chez le concurrent.</div>
     </div>
+    <div class="val">
+      <div class="val-num">3h</div>
+      <div class="val-text"><strong>Plus de temps pour conclure.</strong> Votre équipe répond aux mêmes 20 questions chaque jour. L'agent s'en charge — vos vendeurs se concentrent sur la vente.</div>
+    </div>
+    <div class="val">
+      <div class="val-num">10×</div>
+      <div class="val-text"><strong>Plus de rendez-vous service.</strong> Vidange, pneus, inspection — votre client réserve en 30 secondes au lieu d'appeler. Plus de débit, plus de chiffre.</div>
+    </div>
+    <div class="val">
+      <div class="val-num">100%</div>
+      <div class="val-text"><strong>Chaque client, chaque langue.</strong> Portugais, turc, albanais — des clients qui partent aujourd'hui seront servis demain. Détection automatique.</div>
+    </div>
+  </section>
+
+  <section class="channels">
+    <span class="channel">Site web</span>
+    <span class="channel-dot">·</span>
+    <span class="channel">Téléphone</span>
+    <span class="channel-dot">·</span>
+    <span class="channel">WhatsApp</span>
+    <span class="channel-dot">·</span>
+    <span class="channel">Conseil client</span>
+    <span class="channel-dot">·</span>
+    <span class="channel">Essai routier</span>
+    <span class="channel-dot">·</span>
+    <span class="channel">Reprise</span>
+    <span class="channel-dot">·</span>
+    <span class="channel">Capture de leads</span>
   </section>
 
   <section class="price-section">
-    <div class="price-box">
-      <div class="price-left">
-        <div class="price-chf">CHF</div>
-        <div class="price-num">500</div>
-        <div class="price-per">par mois</div>
-        <div class="price-setup">Mise en place CHF 1'500 – 2'500</div>
-      </div>
-      <div class="price-divider"></div>
-      <div class="price-right">
-        <div class="price-point"><strong>Nous nous occupons de tout.</strong><br>Installation, intégration, optimisation.</div>
-        <div class="price-point" style="margin-top:12px"><strong>Nous sommes en Suisse.</strong><br>Nous venons chez vous.</div>
-        <div class="price-point" style="margin-top:12px"><strong>Sans engagement.</strong><br>Résiliable mensuellement.</div>
-      </div>
+    <div class="price-left">
+      <div class="price-chf">CHF</div>
+      <div class="price-num">500</div>
+      <div class="price-per">par mois</div>
+      <div class="price-setup">Mise en place CHF 1'500 – 2'500 unique</div>
+    </div>
+    <div class="price-sep"></div>
+    <div class="price-right">
+      <strong>Nous nous occupons de tout.</strong> Installation, intégration, optimisation.<br>
+      <strong>Nous sommes en Suisse.</strong> Nous venons chez vous.<br>
+      <strong>Sans engagement.</strong> Résiliable mensuellement.
     </div>
   </section>
 
-  <section class="langs-section">
-    <div class="langs-bar">
-      <span class="lang">Deutsch</span><span class="lang-sep">/</span>
-      <span class="lang">Français</span><span class="lang-sep">/</span>
-      <span class="lang">Italiano</span><span class="lang-sep">/</span>
-      <span class="lang">English</span><span class="lang-sep">/</span>
-      <span class="lang">Português</span><span class="lang-sep">/</span>
-      <span class="lang">Español</span><span class="lang-sep">/</span>
-      <span class="lang">Shqip</span><span class="lang-sep">/</span>
-      <span class="lang">Srpski</span><span class="lang-sep">/</span>
-      <span class="lang">Türkçe</span><span class="lang-sep">/</span>
+  <section class="langs">
+    <div class="langs-row">
+      <span class="lang">Deutsch</span><span class="lang-s">/</span>
+      <span class="lang">Français</span><span class="lang-s">/</span>
+      <span class="lang">Italiano</span><span class="lang-s">/</span>
+      <span class="lang">English</span><span class="lang-s">/</span>
+      <span class="lang">Português</span><span class="lang-s">/</span>
+      <span class="lang">Español</span><span class="lang-s">/</span>
+      <span class="lang">Shqip</span><span class="lang-s">/</span>
+      <span class="lang">Srpski</span><span class="lang-s">/</span>
+      <span class="lang">Türkçe</span><span class="lang-s">/</span>
       <span class="lang">العربية</span>
     </div>
-    <div class="langs-note">Détection automatique — votre client parle, l'agent répond</div>
+    <div class="langs-sub">Détection automatique de la langue</div>
   </section>
 
   <footer class="footer">
-    <div class="footer-line"></div>
     <div>
       <div class="cta-url">bmw.salesteq.com</div>
       <div class="cta-sub">Votre stock est déjà chargé. Répondez à cet e-mail.</div>
